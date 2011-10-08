@@ -1,0 +1,29 @@
+--- shadow-4.1.4.2/libmisc/chkname.c.dot	2009-04-28 21:14:04.000000000 +0200
++++ shadow-4.1.4.2/libmisc/chkname.c	2009-11-23 16:26:32.000000000 +0100
+@@ -49,18 +49,24 @@
+ static bool is_valid_name (const char *name)
+ {
+ 	/*
+-	 * User/group names must match [a-z_][a-z0-9_-]*[$]
++ 	 * User/group names must match gnu e-regex:
++ 	 * [a-zA-Z0-9_.][a-zA-Z0-9_.-]{0,30}[a-zA-Z0-9_.$-]?
+ 	 */
+ 	if (('\0' == *name) ||
+-	    !((('a' <= *name) && ('z' >= *name)) || ('_' == *name))) {
++	    !((('a' <= *name) && ('z' >= *name)) || 
++	      (('A' <= *name) && ('Z' >= *name)) || 
++	      (('0' <= *name) && ('9' >= *name)) || 
++	       ('_' == *name) || ('.' == *name))) {
+ 		return false;
+ 	}
+ 
+ 	while ('\0' != *++name) {
+ 		if (!(( ('a' <= *name) && ('z' >= *name) ) ||
++		      ( ('A' <= *name) && ('Z' >= *name) ) ||
+ 		      ( ('0' <= *name) && ('9' >= *name) ) ||
+ 		      ('_' == *name) ||
+ 		      ('-' == *name) ||
++		      ('.' == *name) ||
+ 		      ( ('$' == *name) && ('\0' == *(name + 1)) )
+ 		     )) {
+ 			return false;

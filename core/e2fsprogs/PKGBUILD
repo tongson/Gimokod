@@ -1,0 +1,54 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=e2fsprogs
+pkgver=1.41.14
+pkgrel=1
+pkgdesc="Ext2/3/4 filesystem utilities"
+arch=('i686' 'x86_64')
+license=('GPL' 'LGPL' 'MIT')
+depends=
+url="http://e2fsprogs.sourceforge.net"
+groups=('base')
+makedepends=
+source=("http://downloads.sourceforge.net/sourceforge/${pkgname}/${pkgname}-${pkgver}.tar.gz"
+        'e2fsprogs-1.41.14-no-docs-test-translations.patch'
+        'MIT-LICENSE')
+backup=('etc/mke2fs.conf')
+sha1sums=('24f9364fa3d4c0d7d00cb627b819d0e51055d6c5'
+          '1b895c34f9a251ffc23ff2173feb63b078d97edd'
+          'f4a0d5b0cdb980e3fedd6f5e7dde0b0ffb7bbdfb')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+
+  # Remove unnecessary init.d directory
+  sed -i '/init\.d/s|^|#|' misc/Makefile.in
+
+  patch -Np1 -i "${srcdir}"/e2fsprogs-1.41.14-no-docs-test-translations.patch
+
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --with-root-prefix="" \
+              --enable-elf-shlibs \
+              --disable-fsck \
+              --disable-uuidd \
+              --disable-libuuid \
+              --disable-libblkid \
+              --disable-nls
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install install-libs
+
+  sed -i -e 's/^AWK=.*/AWK=awk/' "${pkgdir}/usr/bin/compile_et"
+
+  # remove references to build directory
+  sed -i -e 's#^SS_DIR=.*#SS_DIR="/usr/share/ss"#' "${pkgdir}/usr/bin/mk_cmds"
+  sed -i -e 's#^ET_DIR=.*#ET_DIR="/usr/share/et"#' "${pkgdir}/usr/bin/compile_et"
+
+  # install MIT license
+  install -Dm644 "${srcdir}/MIT-LICENSE" \
+    "${pkgdir}/usr/share/licenses/${pkgname}/MIT-LICENSE"
+}

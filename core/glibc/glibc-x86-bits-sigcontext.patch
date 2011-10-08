@@ -1,0 +1,35 @@
+
+http://sources.redhat.com/git/gitweb.cgi?p=glibc.git;a=commitdiff;h=6e502e19455c6110dd4487d91b7b7d6d8121f9ba
+
+commit 6e502e19455c6110dd4487d91b7b7d6d8121f9ba
+Author: Ulrich Drepper <drepper@gmail.com>
+Date:   Wed Jun 22 08:32:55 2011 -0400
+
+    Clean up after kernel sigcontext header mess
+
+
+2011-06-21  Andreas Jaeger  <aj@suse.de>
+
+	* sysdeps/unix/sysv/linux/bits/sigcontext.h: Fix definition of
+	NULL after inclusion of kernel headers.
+
+
+diff --git a/sysdeps/unix/sysv/linux/bits/sigcontext.h b/sysdeps/unix/sysv/linux/bits/sigcontext.h
+index 67dcf94..0f5b607 100644
+--- a/sysdeps/unix/sysv/linux/bits/sigcontext.h
++++ b/sysdeps/unix/sysv/linux/bits/sigcontext.h
+@@ -1,4 +1,4 @@
+-/* Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
++/* Copyright (C) 1996, 1997, 1998, 2011 Free Software Foundation, Inc.
+    This file is part of the GNU C Library.
+ 
+    The GNU C Library is free software; you can redistribute it and/or
+@@ -26,4 +26,8 @@
+ # define sigcontext_struct sigcontext
+ 
+ # include <asm/sigcontext.h>
++
++/* The Linux kernel headers redefine NULL wrongly, so cleanup afterwards.  */
++# define __need_NULL
++# include <stddef.h>
+ #endif

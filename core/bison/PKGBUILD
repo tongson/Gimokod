@@ -1,0 +1,27 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=bison
+pkgver=2.5
+pkgrel=1
+pkgdesc="The GNU general-purpose parser generator"
+arch=('i686' 'x86_64')
+license=('GPL3')
+url="http://www.gnu.org/software/bison/bison.html"
+depends=('m4')
+groups=('base-devel')
+source=(ftp://ftp.gnu.org/gnu/bison/${pkgname}-${pkgver}.tar.bz2)
+md5sums=('9dba20116b13fc61a0846b0058fbe004')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --datadir=/usr/share \
+              --disable-nls
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}

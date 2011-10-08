@@ -1,0 +1,30 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=libcdio
+pkgver=0.82
+pkgrel=1
+pkgdesc="GNU Compact Disc Input and Control Library"
+arch=('i686' 'x86_64')
+license=('GPL3')
+url="http://www.gnu.org/software/libcdio/"
+depends=('libcddb' 'ncurses')
+options=('!libtool')
+source=(http://ftp.gnu.org/gnu/libcdio/${pkgname}-${pkgver}.tar.gz)
+md5sums=('1c29b18e01ab2b966162bc727bf3c360')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  ./configure --prefix=/usr \
+              --disable-vcd-info \
+              --disable-example-progs \
+              --disable-cpp-progs \
+              --with-cd-paranoia-name=libcdio-paranoia \
+              --disable-dependency-tracking \
+              --disable-maintainer-mode \
+              --enable-cddb
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make -j1 DESTDIR="${pkgdir}" install
+}

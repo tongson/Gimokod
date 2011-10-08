@@ -1,0 +1,76 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=bash
+_basever=4.2
+_patchlevel=010 #prepare for some patches
+pkgver=$_basever.$_patchlevel
+pkgrel=1
+pkgdesc="The GNU Bourne Again shell"
+arch=('i686' 'x86_64')
+license=('GPL')
+depends=('ncurses')
+url="http://www.gnu.org/software/bash/bash.html"
+groups=('base')
+backup=(etc/bash/bash{rc,_logout} etc/skel/.bash{rc,_logout})
+provides=('sh')
+source=(http://ftp.gnu.org/gnu/bash/bash-$_basever.tar.gz
+        dot.bashrc
+        dot.bash_logout
+        system.bashrc
+        system.bash_logout)
+if [ $_patchlevel -gt 000 ]; then
+  for (( p=1; p<=$((10#${_patchlevel})); p++ )); do
+      source=(${source[@]} http://ftp.gnu.org/gnu/bash/bash-$_basever-patches/bash${_basever//./}-$(printf "%03d" $p))
+  done
+fi
+
+build() {
+  cd "${srcdir}"/${pkgname}-$_basever
+  for p in ../bash${_basever//./}-*; do
+      [[ -e "$p" ]] || continue
+      msg "applying patch ${p}"
+      patch -Np0 -i ${p}
+  done
+  _bashconfig=(-DDEFAULT_PATH_VALUE=\'\"/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin\"\'
+              -DSTANDARD_UTILS_PATH=\'\"/usr/bin:/bin:/usr/sbin:/sbin\"\'
+              -DSYS_BASHRC=\'\"/etc/bash/bashrc\"\'
+              -DSYS_BASH_LOGOUT=\'\"/etc/bash/bash_logout\"\')
+  export CFLAGS="${CFLAGS} ${_bashconfig[@]}"
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --with-curses \
+              --disable-nls \
+              --without-bash-malloc \
+              --without-installed-readline \
+              --bindir=/bin \
+              --mandir=/usr/share/man
+  make
+}
+
+package() {
+  cd "${srcdir}"/${pkgname}-$_basever
+  make DESTDIR="${pkgdir}" install
+  cd "${pkgdir}"/bin
+  ln -s bash sh
+  install -d -m0755 "${pkgdir}"/etc/skel/
+  install -D -m0644 "${srcdir}"/system.bashrc "${pkgdir}"/etc/bash/bashrc
+  install -D -m0644 "${srcdir}"/system.bash_logout "${pkgdir}"/etc/bash/bash_logout
+  install -m0644 "${srcdir}"/dot.bashrc "${pkgdir}"/etc/skel/.bashrc
+  install -m0644 "${srcdir}"/dot.bash_logout "${pkgdir}"/etc/skel/.bash_logout
+}
+
+md5sums=('3fb927c7c33022f1c327f14a81c0d4b0'
+         '9419f99719ee0093c8ad82eb60b339ec'
+         '05cac50f47bd9793a1578ddc85de1393'
+         '27fe96749fcbd5a22d3eb700d09c44b6'
+         'd41d8cd98f00b204e9800998ecf8427e'
+         '1100bc1dda2cdc06ac44d7e5d17864a3'
+         '30e7948079921d3261efcc6a40722135'
+         '9ea06decec43a198f3d7cf29acc602f8'
+         'fb48f6134d7b013135929476aa0c250c'
+         'e70e45de33426b38153b390be0dbbcd4'
+         'ce4e5c484993705b27daa151eca242c2'
+         '88d1f96db29461767602e2546803bda7'
+         '24c574bf6d6a581e300823d9c1276af6'
+         '4c5835f2fbab36c4292bb334977e5b6d'
+         '0a51602b535ef661ee707be6c8bdb373')

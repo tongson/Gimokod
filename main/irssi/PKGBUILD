@@ -1,0 +1,29 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=irssi
+pkgver=0.8.15
+pkgrel=1
+pkgdesc="Modular text mode IRC client with Perl scripting"
+arch=('i686' 'x86_64')
+url="http://irssi.org/"
+license=('GPL')
+depends=('glib2' 'openssl')
+backup=(etc/irssi.conf)
+source=(http://irssi.org/files/${pkgname}-${pkgver}.tar.bz2)
+options=('!libtool')
+md5sums=('1dcb3f511b88df94b0c996f36668c7da')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+
+  ./configure --prefix=/usr \
+              --enable-ipv6 \
+              --with-proxy \
+              --sysconfdir=/etc \
+              --without-perl
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}

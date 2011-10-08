@@ -1,0 +1,1 @@
+LABEL=root  /   ext4    ro,noatime,discard,barrier=0    0   1

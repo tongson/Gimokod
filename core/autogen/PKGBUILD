@@ -1,0 +1,28 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=autogen
+pkgver=5.12
+pkgrel=1
+pkgdesc="A tool designed to simplify the creation and maintenance of programs that contain large amounts of repetitious text"
+arch=('i686' 'x86_64')
+url="http://www.gnu.org/software/autogen/"
+license=('GPL3')
+groups=('base-devel')
+depends=('guile')
+options=('!libtool')
+source=(ftp://ftp.gnu.org/gnu/${pkgname}/rel${pkgver}/${pkgname}-${pkgver}.tar.bz2)
+md5sums=('126e56be629cda747390e8ba9be71e4b')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  sed -i '1128s:$(top_srcdir)/pkg/libopts/mklibsrc.sh:-c 'true':' autoopts/Makefile.in
+  sed -i '321s:libopts-@AO_CURRENT@.@AO_REVISION@.@AO_AGE@.tar.gz::' autoopts/Makefile.in
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST}
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}

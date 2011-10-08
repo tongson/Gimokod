@@ -1,0 +1,36 @@
+_addgroup() {
+  if ! bin/grep -q "^$1:" etc/group; then
+    usr/sbin/groupadd ${@} >/dev/null
+  fi
+}
+
+_adduser() {
+  if ! bin/grep -q "^$1:" etc/passwd; then
+    usr/sbin/useradd ${@} >/dev/null
+  fi
+}
+
+_gen_key() {
+  local type=$1 key ks
+  [ $# -eq 1 ] && ks="${type}_"
+  key="/etc/ssh/ssh_host_${ks}key"
+  if [ ! -e "${key}" ] ; then
+    echo "Generating ${type} host key"
+    ssh-keygen -t ${type} -f "${key}" -N ''
+  fi
+}
+
+post_install() {
+  _addgroup sshd    -g 22
+  _adduser  sshd    -u 22 -d /var/empty -g sshd -s /sbin/nologin
+
+  _gen_key dsa >/dev/null 2>&1 || echo "gen_key failed!"
+  _gen_key rsa >/dev/null 2>&1 || echo "gen_key failed!"
+  _gen_key ecdsa >/dev/null 2>&1 || echo "gen_key failed!"
+
+  usr/sbin/grpconv >/dev/null
+
+  if LANG=C usr/bin/chage -l sshd | bin/grep -q 'password must be changed'; then
+    usr/bin/chage -d 14871 sshd
+  fi
+}

@@ -1,0 +1,26 @@
+From 9ec8d167455c7df60db1ab0126c8197ba7574ff0 Mon Sep 17 00:00:00 2001
+From: "H.J. Lu" <hjl.tools@gmail.com>
+Date: Wed, 23 Feb 2011 22:37:47 +0000
+Subject: [PATCH] Don't include <exception_defines.h>
+
+2011-02-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/new.cc: Don't include <exception_defines.h>.
+---
+ ld/testsuite/ChangeLog     |    4 ++++
+ ld/testsuite/ld-elf/new.cc |    1 -
+ 2 files changed, 4 insertions(+), 1 deletions(-)
+
+diff --git a/ld/testsuite/ld-elf/new.cc b/ld/testsuite/ld-elf/new.cc
+index b4c8882..513cf2f 100644
+--- a/ld/testsuite/ld-elf/new.cc
++++ b/ld/testsuite/ld-elf/new.cc
+@@ -1,5 +1,4 @@
+ #include <new>
+-#include <exception_defines.h>
+ 
+ using std::bad_alloc;
+ 
+-- 
+1.7.6
+

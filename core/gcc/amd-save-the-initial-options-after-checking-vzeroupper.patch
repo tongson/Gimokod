@@ -1,0 +1,78 @@
+From 0b70e1e33afa25536305f4a228409cf9b4e0eaad Mon Sep 17 00:00:00 2001
+From: hjl <hjl@138bc75d-0d04-0410-961f-82ee72b054a4>
+Date: Mon, 23 May 2011 16:51:42 +0000
+Subject: [PATCH] Save the initial options after checking vzeroupper.
+
+gcc/
+
+2011-05-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR target/47315
+	* config/i386/i386.c (ix86_option_override_internal): Save the
+	initial options after checking vzeroupper.
+
+gcc/testsuite/
+
+2011-05-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR target/47315
+	* gcc.target/i386/pr47315.c: New test.
+
+
+git-svn-id: svn+ssh://gcc.gnu.org/svn/gcc/trunk@174078 138bc75d-0d04-0410-961f-82ee72b054a4
+---
+ gcc/ChangeLog                           |    6 ++++++
+ gcc/config/i386/i386.c                  |   11 ++++++-----
+ gcc/testsuite/ChangeLog                 |    5 +++++
+ gcc/testsuite/gcc.target/i386/pr47315.c |   10 ++++++++++
+ 4 files changed, 27 insertions(+), 5 deletions(-)
+ create mode 100644 gcc/testsuite/gcc.target/i386/pr47315.c
+
+diff --git a/gcc/config/i386/i386.c b/gcc/config/i386/i386.c
+index 0709be8..854e376 100644
+--- a/gcc/config/i386/i386.c
++++ b/gcc/config/i386/i386.c
+@@ -4191,11 +4191,6 @@ ix86_option_override_internal (bool main_args_p)
+ #endif
+    }
+ 
+-  /* Save the initial options in case the user does function specific options */
+-  if (main_args_p)
+-    target_option_default_node = target_option_current_node
+-      = build_target_option_node ();
+-
+   if (TARGET_AVX)
+     {
+       /* When not optimize for size, enable vzeroupper optimization for
+@@ -4217,6 +4212,12 @@ ix86_option_override_internal (bool main_args_p)
+       /* Disable vzeroupper pass if TARGET_AVX is disabled.  */
+       target_flags &= ~MASK_VZEROUPPER;
+     }
++
++  /* Save the initial options in case the user does function specific
++     options.  */
++  if (main_args_p)
++    target_option_default_node = target_option_current_node
++      = build_target_option_node ();
+ }
+ 
+ /* Return TRUE if VAL is passed in register with 256bit AVX modes.  */
+diff --git a/gcc/testsuite/gcc.target/i386/pr47315.c b/gcc/testsuite/gcc.target/i386/pr47315.c
+new file mode 100644
+index 0000000..871d3f1
+--- /dev/null
++++ b/gcc/testsuite/gcc.target/i386/pr47315.c
+@@ -0,0 +1,10 @@
++/* { dg-do compile } */
++/* { dg-options "-O3 -mvzeroupper" } */
++
++__attribute__ ((__target__ ("avx")))
++float bar (float f) {}
++
++void foo (float f)
++{
++    bar (f);
++}
+-- 
+1.6.0.2
+

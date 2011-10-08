@@ -1,0 +1,12 @@
+--- SimplePAMApps-0.60/pamapps/su/su.c.orig	2006-05-05 16:53:11 +0000
++++ SimplePAMApps-0.60/pamapps/su/su.c	2006-05-05 16:56:30 +0000
+@@ -146,7 +146,8 @@ int main(int argc, char *argv[])
+ 	place = "pam_acct_mgmt";
+         retval = pam_acct_mgmt(pamh, 0);
+ 	if (retval != PAM_SUCCESS) {
+-	    if (getuid() == 0) {
++	    if (getuid() == 0 && (retval == PAM_ACCT_EXPIRED ||
++				  retval == PAM_NEW_AUTHTOK_REQD)) {
+ 		(void) fprintf(stderr, "Account management:- %s\n(Ignored)\n"
+                                , pam_strerror(pamh, retval));
+ 	    } else

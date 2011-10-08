@@ -1,0 +1,146 @@
+# Based upon Mandriva's shadow-utils.spec
+pkgname=shadow
+pkgver=4.1.4.3
+pkgrel=1
+pkgdesc="User and group management related utilities"
+arch=('i686' 'x86_64')
+url='http://pkg-shadow.alioth.debian.org/'
+license=('BSD')
+groups=('base')
+depends=('pam' 'acl' 'pam_userpass' 'tcb')
+makedepends=('pam' 'acl' 'tcb')
+backup=(etc/login.defs
+        etc/pam.d/chage-chfn-chsh
+        etc/pam.d/chpasswd-newusers
+        etc/pam.d/user-group-mod
+        etc/default/useradd)
+options=('!libtool')
+install=shadow.install
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+
+  patch -Np1 -i "${srcdir}/shadow-4.1.4.3-dotinname.patch"
+  patch -Np1 -i "${srcdir}/shadow-4.1.4.3-avx-owl-crypt_gensalt.patch"
+  patch -Np1 -i "${srcdir}/shadow-4.1.4.3-avx-owl-tcb.patch"
+  patch -Np1 -i "${srcdir}/shadow-4.1.4.3-shadow_perms.patch"
+  patch -Np0 -i "${srcdir}/shadow-4.1.4.3-groupmod-username.patch"
+  patch -Np1 -i "${srcdir}/shadow-4.1.4.3-no-gettext.patch"
+  patch -Np1 -i "${srcdir}/shadow-4.1.4.3-add-missing-include.patch"
+  patch -Np1 -i "${srcdir}/shadow-4.1.4.3-strncpy-usage.patch"
+  patch -Np1 -i "${srcdir}/shadow-4.1.4.3-su_no_sanitize_env.patch"
+  patch -Np1 -i "${srcdir}/shadow-4.1.4.3-xstrdup.patch"
+
+  sed -i '/^SUBDIRS/s/pam.d//' etc/Makefile.in
+  sed 's/^\(.*\SUBDIRS .*\=.*\)po\(.*\)$/\1\2/' -i $(find . -name Makefile.am -o -name Makefile.in)
+
+  libtoolize --copy --force
+  aclocal
+  autoconf
+  automake --add-missing
+
+  LDFLAGS="${LDFLAGS} -lcrypt"
+  CFLAGS="${CFLAGS} -DSHADOWTCB -DEXTRA_CHECK_HOME_DIR"
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --libdir=/lib \
+              --mandir=/usr/share/man \
+              --sysconfdir=/etc \
+              --without-libcrack \
+              --with-libpam \
+              --without-selinux
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+
+  for f in usr/bin/passwd bin/login bin/su usr/bin/expiry usr/bin/faillog usr/sbin/logoutd bin/groups; do
+    rm "${pkgdir}/${f}"
+  done
+
+  rm "${pkgdir}/usr/share/man/man1/passwd.1"
+  rm "${pkgdir}/usr/share/man/man1/login.1"
+  rm "${pkgdir}/usr/share/man/man1/su.1"
+  rm "${pkgdir}/usr/share/man/man1/expiry.1"
+  rm "${pkgdir}/usr/share/man/man8/faillog.8"
+  rm "${pkgdir}/usr/share/man/man8/logoutd.8"
+  rm "${pkgdir}/usr/share/man/man1/groups.1"
+
+  for f in grpconv.8 grpunconv.8 pwunconv.8; do
+    install -Dm644 "${srcdir}/${f}" "${pkgdir}/usr/share/man/man8/${f}"
+  done
+
+  chmod 2711 "${pkgdir}/usr/bin/chage"
+  chgrp 42 "${pkgdir}/usr/bin/chage"
+  chmod 4710 "${pkgdir}/usr/bin/newgrp"
+  chgrp 10 "${pkgdir}/usr/bin/newgrp"
+  chmod 4710 "${pkgdir}/usr/bin/gpasswd"
+  chgrp 10 "${pkgdir}/usr/bin/gpasswd"
+  chmod 0700 "${pkgdir}/usr/bin/chfn"
+  chmod 0700 "${pkgdir}/usr/bin/chsh"
+
+  install -D -m644 "${srcdir}/LICENSE" "${pkgdir}/usr/share/licenses/shadow/LICENSE"
+  install -D -m600 "${srcdir}/useradd.defaults" "${pkgdir}/etc/default/useradd"
+  install -D -m640 -o 0 -g 42 "${srcdir}/login.defs" "${pkgdir}/etc/login.defs"
+
+  rm -rf "${pkgdir}/etc/pam.d"
+  for file in chage-chfn-chsh chpasswd-newusers user-group-mod; do
+    install -D -m640 -o 0 -g 42 "${srcdir}/${file}" "${pkgdir}/etc/pam.d/${file}"
+  done
+
+  pushd "${pkgdir}/etc/pam.d"
+    for f in chpasswd newusers; do
+      ln -s chpasswd-newusers ${f}
+    done
+    for f in chage chfn chsh; do
+      ln -s chage-chfn-chsh ${f}
+    done
+    for f in groupadd groupdel groupmod useradd userdel usermod; do
+      ln -s user-group-mod ${f}
+    done
+  popd
+
+}
+source=(http://pkg-shadow.alioth.debian.org/releases/${pkgname}-${pkgver}.tar.bz2
+        LICENSE
+        chage-chfn-chsh
+        chpasswd-newusers
+        grpconv.8
+        grpunconv.8
+        login.defs
+        pwunconv.8
+        shadow-4.1.4.3-add-missing-include.patch
+        shadow-4.1.4.3-avx-owl-crypt_gensalt.patch
+        shadow-4.1.4.3-avx-owl-tcb.patch
+        shadow-4.1.4.3-dotinname.patch
+        shadow-4.1.4.3-groupmod-username.patch
+        shadow-4.1.4.3-no-gettext.patch
+        shadow-4.1.4.3-shadow_perms.patch
+        shadow-4.1.4.3-strncpy-usage.patch
+        shadow-4.1.4.3-su_no_sanitize_env.patch
+        shadow-4.1.4.3-xstrdup.patch
+        user-group-mod
+        useradd.defaults)
+
+sha256sums=('633f5bb4ea0c88c55f3642c97f9d25cbef74f82e0b4cf8d54e7ad6f9f9caa778'
+            'b085972a9378ecbe6cafee1a2e9baba1082531c77376c0aa14ad6e5c7392814c'
+            'd7bc14293ea01957cc3d7c1f764909e979d2a8fe682df09b85fc5d7821a627f0'
+            '7ee315a9988865843023c23bc9b2f46ebbe038ee6dfbe960efda7412536c21c2'
+            '0539b1de083c315e22edaaf6e11fe532da5376df7cc7bcf71ec76660be31a990'
+            '0539b1de083c315e22edaaf6e11fe532da5376df7cc7bcf71ec76660be31a990'
+            '0b1e0cbf10d3a2a818d56e9e8a58883227a8c2674aaad55da4535562ca4236a5'
+            '0539b1de083c315e22edaaf6e11fe532da5376df7cc7bcf71ec76660be31a990'
+            '10cd80f6cc0d1df63a7b945b4a2157a0b05b5e210077d9818eb1e9c5e212c3ab'
+            'fcb24f5a4f2536f90c3e6eb0f71aff1aacd391f91da1013f1918b25839232489'
+            'f7b63f7497d76686d1f96a5fa31a85283bad854b0453409f3609f2e63cfd4052'
+            'ab92ca4327928669db3bfa46677908a354a271a27d984ccedb163f4d08566dcf'
+            '9cfa6a3dca3003c81d18e3bbed73ced55de67820660b0e0e78111956c15251ea'
+            '4151a78390b3e41c1cb5b0f39e3a3db71c4c5c2a219f08b29179423b994639a3'
+            '08ddf1450119588e8463622e54de4841884f143c2d9e1f2da4c92bd4f071d313'
+            'bc45f381f8b4ea8dd4b3a8032ef25a414caf58c60de847a9124eb20e93cd72cf'
+            '675098bb3dca4d8ac78e6c1c4ae7f513cb4017583b34b6b4d67611578bff8723'
+            'b7716897579721feb9e2ccbd47639bbd72d2143cf1b9b5dabba5af1bf50bdbf9'
+            '924798e1e79784d90024991e70e9f6bed2ef813c844bc4a00c7d98c44dafcad5'
+            '31aa2cbe4a34a9f7d4d134c1fecd007c9bbf4d40e19d0dcddbcd396f1853b490')

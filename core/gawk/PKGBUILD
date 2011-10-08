@@ -1,0 +1,28 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=gawk
+pkgver=4.0.0
+pkgrel=1
+pkgdesc="GNU version of awk"
+arch=('i686' 'x86_64')
+url="http://www.gnu.org/directory/GNU/gawk.html"
+license=('GPL')
+groups=('base-devel')
+depends=
+source=(ftp://ftp.gnu.org/pub/gnu/${pkgname}/${pkgname}-${pkgver}.tar.gz)
+md5sums=('51e417b71287629940051e6f652c6492')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  ./configure --prefix=/usr \
+              --build=${CHOST} \
+              --host=${CHOST} \
+              --libexecdir=/usr/lib \
+              --disable-nls
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+  unlink "${pkgdir}"/usr/bin/awk
+}

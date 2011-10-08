@@ -1,0 +1,4 @@
+interface=eth0
+address=
+netmask=
+gateway=

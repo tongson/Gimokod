@@ -1,0 +1,27 @@
+From 039ab4445d499689061a7605aa451b61932eef9f Mon Sep 17 00:00:00 2001
+From: Ulrich Drepper <drepper@gmail.com>
+Date: Mon, 13 Jun 2011 08:31:50 -0400
+Subject: [PATCH] Fix memory leak in getaddrinfo
+ (cherry picked from commit 3154bfb8c7fb84fbf7ecdc787752b395579d2ac7)
+Upstream: yes
+
+---
+ sysdeps/posix/getaddrinfo.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/sysdeps/posix/getaddrinfo.c b/sysdeps/posix/getaddrinfo.c
+index 1e017b2..469abe2 100644
+--- a/sysdeps/posix/getaddrinfo.c
++++ b/sysdeps/posix/getaddrinfo.c
+@@ -821,7 +821,7 @@ gaih_inet (const char *name, const struct gaih_service *service,
+ 	  size_t tmpbuflen = 1024;
+ 	  malloc_tmpbuf = !__libc_use_alloca (alloca_used + tmpbuflen);
+ 	  assert (tmpbuf == NULL);
+-	  if (malloc_tmpbuf)
++	  if (!malloc_tmpbuf)
+ 	    tmpbuf = alloca_account (tmpbuflen, alloca_used);
+ 	  else
+ 	    {
+-- 
+1.7.3.4
+

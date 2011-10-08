@@ -1,0 +1,53 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=ffmpeg
+pkgver=20110923
+pkgrel=1
+pkgdesc="Complete and free Internet live audio and video broadcasting solution for Linux/Unix"
+arch=('i686' 'x86_64')
+url="http://ffmpeg.org/"
+license=('GPL')
+depends=('bzip2' 'lame' 'libvorbis' 'xvidcore' 'zlib' 'x264' 'libtheora' 'alsa-lib' 'libvdpau' 'libxfixes' 'libvpx' 'libva' 'openjpeg')
+makedepends=('yasm')
+source=(ftp://ftp.archlinux.org/other/ffmpeg/${pkgname}-${pkgver}.tar.xz)
+md5sums=('36111c640a2eea19f677924ac3193ce4')
+
+build() {
+  cd "${srcdir}/${pkgname}"
+
+  ./configure \
+    --prefix=/usr \
+    --enable-libmp3lame \
+    --enable-libvorbis \
+    --enable-libxvid \
+    --enable-libx264 \
+    --enable-libvpx \
+    --enable-libtheora \
+    --enable-postproc \
+    --enable-shared \
+    --enable-x11grab \
+    --disable-libopencore_amrnb \
+    --disable-libopencore_amrwb \
+    --disable-libschroedinger \
+    --enable-libopenjpeg \
+    --disable-librtmp \
+    --enable-gpl \
+    --enable-version3 \
+    --enable-runtime-cpudetect \
+    --disable-debug
+    --disable-doc \
+    --disable-network \
+    --disable-libfaac \
+    --disable-indev=oss \
+    --disable-outdev=oss
+
+  make
+  make tools/qt-faststart
+  make doc/ff{mpeg,play,server}.1
+}
+
+package() {
+  cd "${srcdir}/${pkgname}"
+  make DESTDIR="${pkgdir}" install install-man
+  install -D -m755 tools/qt-faststart "${pkgdir}/usr/bin/qt-faststart"
+}
+

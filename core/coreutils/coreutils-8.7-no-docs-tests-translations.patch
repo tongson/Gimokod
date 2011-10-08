@@ -1,0 +1,22 @@
+--- coreutils-8.7/Makefile.am
++++ coreutils-8.7/Makefile.am
+@@ -17,7 +17,7 @@
+ 
+ ALL_RECURSIVE_TARGETS =
+ 
+-SUBDIRS = lib src doc man po tests gnulib-tests
++SUBDIRS = lib src man
+ 
+ changelog_etc =				\
+   ChangeLog-2005			\
+--- coreutils-8.7/Makefile.in
++++ coreutils-8.7/Makefile.in
+@@ -1238,7 +1238,7 @@
+ 
+ # Some tests always need root privileges, others need them only sometimes.
+ ALL_RECURSIVE_TARGETS = install-root check-root distcheck-hook
+-SUBDIRS = lib src doc man po tests gnulib-tests
++SUBDIRS = lib src man
+ changelog_etc = \
+   ChangeLog-2005			\
+   ChangeLog-2006			\

@@ -1,0 +1,145 @@
+pkgname=filesystem
+pkgver=2011.09
+pkgrel=1
+pkgdesc='Filesystem layout'
+arch=('any')
+url='http://localhost.localdomain'
+license=('ISC')
+groups=('base')
+depends=
+backup=(etc/fstab
+        etc/group
+        etc/gshadow
+        etc/host.conf
+        etc/hosts
+        etc/inputrc
+        etc/issue
+        usr/lib/tmpfiles.d/layout.conf
+        etc/ld.so.conf
+        etc/motd
+        etc/conf.d/net
+        etc/nsswitch.conf
+        etc/passwd
+        etc/profile
+        etc/securetty
+        etc/shells)
+install=filesystem.install
+
+package() {
+    cd ${srcdir}
+
+    for d in bin boot dev etc home lib/modules mnt sbin usr var opt sys run; do
+      install -d -m755 "${pkgdir}"/${d}
+    done
+
+    install -d -m755 "${pkgdir}"/run/.root/etc
+    install -d -m1777 "${pkgdir}"/run/.root/tmp
+    install -d -m555 "${pkgdir}"/proc
+    install -d -m0750 "${pkgdir}"/root
+
+    for d in ld.so.conf.d skel profile.d; do
+      install -d -m755 "${pkgdir}"/etc/${d}
+    done
+
+    for f in fstab group host.conf hosts issue ld.so.conf locale.conf motd \
+    nsswitch.conf passwd securetty shells profile vconsole.conf; do
+      install -m0644 "${srcdir}"/${f} "${pkgdir}"/etc/
+    done
+
+    install -m0600 "${srcdir}/gshadow" "${pkgdir}/etc/gshadow"
+    install -d -m0710 -o 0 -g 42 "${pkgdir}/etc/tcb"
+    install -d -m02710 -o 0 -g 164 "${pkgdir}/etc/tcb/root"
+    install -d -m02710 -o 1 -g 164 "${pkgdir}/etc/tcb/bin"
+    install -d -m02710 -o 2 -g 164 "${pkgdir}/etc/tcb/daemon"
+    install -d -m02710 -o 8 -g 164 "${pkgdir}/etc/tcb/mail"
+    install -d -m02710 -o 14 -g 164 "${pkgdir}/etc/tcb/ftp"
+    install -d -m02710 -o 33 -g 164 "${pkgdir}/etc/tcb/http"
+    install -d -m02710 -o 99 -g 164 "${pkgdir}/etc/tcb/nobody"
+
+    for id in root bin daemon mail ftp http nobody; do
+      echo "${id}:!:-1::::::" > "${pkgdir}/etc/tcb/${id}/shadow"
+      chmod 0640 "${pkgdir}/etc/tcb/${id}/shadow"
+    done
+
+    chown 0:164 "${pkgdir}/etc/tcb/root/shadow"
+    chown 1:164 "${pkgdir}/etc/tcb/bin/shadow"
+    chown 2:164 "${pkgdir}/etc/tcb/daemon/shadow"
+    chown 8:164 "${pkgdir}/etc/tcb/mail/shadow"
+    chown 14:164 "${pkgdir}/etc/tcb/ftp/shadow"
+    chown 33:164 "${pkgdir}/etc/tcb/http/shadow"
+    chown 99:164 "${pkgdir}/etc/tcb/nobody/shadow"
+
+    for d in spool local opt lib/misc empty; do
+      install -d -m755 "${pkgdir}"/var/${d}
+    done
+
+    touch "${pkgdir}"/var/empty/.keep
+
+    for d in bin include lib sbin share/misc src; do
+      install -d -m755 "${pkgdir}"/usr/${d}
+    done
+
+    for d in $(seq 8); do
+      install -d -m755 "${pkgdir}"/usr/share/man/man${d}
+    done
+
+    for d in bin etc games include lib man sbin share src; do
+      install -d -m755 "${pkgdir}"/usr/local/${d}
+    done
+
+    ln -s ../man "${pkgdir}"/usr/local/share/man
+    ln -s /proc/self/mounts "${pkgdir}"/etc/mtab
+    ln -s /run/.root/var/lock "${pkgdir}"/var/lock
+    ln -s /run/.root/var/db "${pkgdir}"/var/db
+    ln -s /run/.root/var/state "${pkgdir}"/var/state
+    ln -s /run/.root/var/log "${pkgdir}"/var/log
+    ln -s /run/.root/var/spool/mail "${pkgdir}"/var/spool/mail
+    ln -s /run/.root/var/spool/mail "${pkgdir}"/var/mail
+    ln -s /run/.root/etc/resolv.conf "${pkgdir}"/etc/resolv.conf
+
+    install -D -m0644 layout.conf "${pkgdir}"/usr/lib/tmpfiles.d/layout.conf
+    install -D -m0644 inputrc "${pkgdir}"/etc/inputrc
+    install -D -m0644 net "${pkgdir}"/etc/conf.d/net
+}
+
+source=(fstab
+        group
+        gshadow
+        host.conf
+        hosts
+        inputrc
+        issue
+        layout.conf
+        ld.so.conf
+        locale.conf
+        motd
+        net
+        nsswitch.conf
+        passwd
+        profile
+        protocols
+        securetty
+        services
+        shells
+        vconsole.conf)
+
+sha256sums=('797dbd2f4f22ea9a8f8d1bb4142b66f64dd220888ebd89829adf8e1a456a0432'
+            '9493111a34663dd621c1986483d762e354ed36b8cf5b76c5ec860478cdf17862'
+            'f0ccf9d4b9e59ab2f58e76197fd02cc79b7d53ca212f1b2e5ad2e7667f81894e'
+            'f0709706ce9bf46c58358e040d7eaa96994767438bab274ee5239ac19b0b814b'
+            'e3414c188757954ee34da03cf324fc9864b1758dc472cfe36884ce6415bbdbd3'
+            '2644a0457e61bff454c317938878d827a6e1d0a403a2cea5891e373b2d9a4b35'
+            '48f87137ef8a1ac53226de7c7aed394122a1ff4fd83c43c0ed8446fd5548b2dd'
+            '9f63189ee40690b8b7e675a520f433057282d371808e55933f0b75c23adf8ca6'
+            '27d7ebd402e1b9a20fd3a0663ccc10e1b1feff2d9dfb1ad7dd12bb76cfe0880a'
+            '586ae0a486992c367e38ee8e103a92ad2b0baeb3a8b9898f2e4e7e0c63e5c112'
+            'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+            '71683f98fe31be60b5164e0adacd671b7d5535bfcc17130860bcca6be08158e6'
+            'a1e248357083b55d83659ab50f32c94bf1bcf0825470ccb41702dad3cff712c7'
+            '61f3203e6b7d666e22d6d4d75f3c688640c2905186641aaa285d332db0e1456a'
+            '7f44161b93c5fd74211d7b3be2900568631127110df029ad32ec12ea2d897ac1'
+            '9b0d54d258b62c437aefe09e9c3e4e9307051b749e680024bc353f0eb92eb486'
+            '845fec1cf9b279b2d94eb7d49f1c117d3c58c3cafa6ae4dec20ed62b91c9fb67'
+            'e96af627f7774e8c87b0de843556a355fea6150c4d64fa4e2ff2c5fd610e7a79'
+            '0055e949a87c8f80bbd9aaf2acebef7926688981c90626effaac8095fa250826'
+            'e25196fd051a1ce3e2597d20d8d3d5cd77297d03eebd1d68da02e1ae44c3986d')

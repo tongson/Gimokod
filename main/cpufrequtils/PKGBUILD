@@ -1,0 +1,51 @@
+pkgname=cpufrequtils
+pkgver=008
+pkgrel=1
+pkgdesc='Userspace tools for the kernel cpufreq subsystem'
+arch=('i686' 'x86_64')
+url='http://www.kernel.org/pub/linux/utils/kernel/cpufreq/cpufrequtils.html'
+license=('GPL')
+depends=
+options=(!libtool)
+
+build()
+{
+  cd "${srcdir}/${pkgname}-${pkgver}"/
+
+  #from Gentoo
+  patch -Np0 -i "${srcdir}"/${pkgname}-007-build.patch
+  patch -Np1 -i "${srcdir}"/${pkgname}-007-nls.patch
+  patch -Np0 -i "${srcdir}"/${pkgname}-008-remove-pipe-from-CFLAGS.patch
+  patch -Np1 -i "${srcdir}"/${pkgname}-008-cpuid.patch
+  patch -Np1 -i "${srcdir}"/${pkgname}-008-fix-msr-read.patch
+  patch -Np1 -i "${srcdir}"/${pkgname}-008-increase-MAX_LINE_LEN.patch
+  patch -Np1 -i "${srcdir}"/${pkgname}-008-fix-compilation-on-x86-32-with-fPIC.patch
+
+  export V=true NLS=false
+  make -j1
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"/
+  make INSTALL="/bin/install -c" mandir=/usr/share/man DESTDIR="${pkgdir}" install
+}
+
+source=(http://www.kernel.org/pub/linux/utils/kernel/cpufreq/${pkgname}-${pkgver}.tar.bz2
+        cpufrequtils-007-build.patch
+        cpufrequtils-007-nls.patch
+        cpufrequtils-008-cpuid.patch
+        cpufrequtils-008-fix-compilation-on-x86-32-with-fPIC.patch
+        cpufrequtils-008-fix-msr-read.patch
+        cpufrequtils-008-increase-MAX_LINE_LEN.patch
+        cpufrequtils-008-remove-pipe-from-CFLAGS.patch)
+
+sha256sums=('1b9daa591d977679fb09ffb9b4d58afa94b9387f3c0be92ec077080e328130f1'
+            '2cfafb56502441c06485b38e3e900e354310f252ae47e23134fc63488aeb8ec0'
+            'c3b0c45505acf0e7548b6aa3141703fbfe1860c36a3108485fc3e90ef5da44c1'
+            'a0eb486b7d173706294fe70bb76e1215e98ac8da3b6b6f48c65db61dbba13cfd'
+            '2b4c3904c0d695ea629bad4428e41ac9f83b4a942cf4c8aba4d0ea11112885ec'
+            '55e6d5e4999c8125265331bd7b4953107618e3c6f324996a065bbd3f907e9245'
+            '58190c9f785aae0a2a4617544c3896382cfd23e7256aab98255f11173b01efda'
+            '3b5ca8ecfb128644d31bbcbb988667d0662dbb95a32f104c572499f1cc5f7b0e')
+
+

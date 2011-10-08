@@ -1,0 +1,11 @@
+[Unit]
+Description=BusyBox udhcpc
+
+[Service]
+Restart=always
+StandardOutput=syslog
+EnvironmentFile=/etc/conf.d/net
+ExecStart=-/bin/busybox udhcpc -v -f -S -i $interface
+
+[Install]
+WantedBy=network.target

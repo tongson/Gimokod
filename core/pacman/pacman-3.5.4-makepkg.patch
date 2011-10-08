@@ -1,0 +1,47 @@
+--- pacman-3.5.4/scripts/makepkg.sh.in
++++ pacman-3.5.4/scripts/makepkg.sh.in
+@@ -728,6 +728,13 @@
+ 		fi
+ 	done
+ 
++	find "${srcdir}" -mindepth 1 -maxdepth 1 -type d -print0 | while read -r -d $'\0' workdir ; do
++  		find "${workdir}" -type f '(' -name config.guess -o -name config.sub ')' -print0 | while read -r -d $'\0' x ; do
++    			msg "Updating ${x/${workdir}\/} with /usr/share/gnuconfig/${x##*/}"
++  			cp -f /usr/share/gnuconfig/"${x##*/}" "${x}"
++  		done
++	done
++
+ 	if (( EUID == 0 )); then
+ 		# change perms of all source files to root user & root group
+ 		chown -R 0:0 "$srcdir"
+@@ -928,7 +928,7 @@
+ 
+ 	if [[ $(check_option emptydirs) = "n" ]]; then
+ 		msg2 "$(gettext "Removing empty directories...")"
+-		find . -depth -type d -empty -delete
++   find . -depth -type d -delete 2>/dev/null
+ 	fi
+ }
+ 
+@@ -999,10 +999,10 @@
+ 	done
+ 
+ 	# check for references to the build and package directory
+-	if find "${pkgdir}" -type f -print0 | xargs -0  grep -q -I "${srcdir}" ; then
++	if find "${pkgdir}" -type f -print0 | xargs -0 | grep -q -s "${srcdir}" ; then
+ 		warning "$(gettext "Package contains reference to %s")" "\$srcdir"
+ 	fi
+-	if find "${pkgdir}" -type f -print0 | xargs -0  grep -q -I "${pkgdir}" ; then
++	if find "${pkgdir}" -type f -print0 | xargs -0 | grep -q -s "${pkgdir}" ; then
+ 		warning "$(gettext "Package contains reference to %s")" "\$pkgdir"
+ 	fi
+ 
+@@ -1071,7 +1071,7 @@
+ 	shopt -s nullglob
+ 	# TODO: Maybe this can be set globally for robustness
+ 	shopt -s -o pipefail
+-	bsdtar -cf - $comp_files * |
++	LANG="en_US.UTF-8" bsdtar -cf - $comp_files * |
+ 	case "$PKGEXT" in
+ 	    *tar.gz)  gzip -c -f -n ;;
+ 	    *tar.bz2) bzip2 -c -f ;;

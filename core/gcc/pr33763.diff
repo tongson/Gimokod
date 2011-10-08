@@ -1,0 +1,17 @@
+Index: gcc/tree-inline.c
+===================================================================
+--- gcc/tree-inline.c.orig	2010-07-01 15:54:11.000000000 +0200
++++ gcc/tree-inline.c	2010-07-01 16:26:41.000000000 +0200
+@@ -3827,6 +3827,12 @@ expand_call_inline (basic_block bb, gimp
+ 	goto egress;
+ 
+       if (lookup_attribute ("always_inline", DECL_ATTRIBUTES (fn))
++	  /* For extern inline functions that get redefined we always
++	     silently ignored alway_inline flag.  Better behaviour would
++	     be to be able to keep both bodies and use extern inline body
++	     for inlining, but we can't do that because frontends overwrite
++	     the body.  */
++	  && !cg_edge->callee->local.redefined_extern_inline
+ 	  /* Avoid warnings during early inline pass. */
+ 	  && cgraph_global_info_ready)
+ 	{

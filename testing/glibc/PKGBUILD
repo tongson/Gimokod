@@ -1,0 +1,314 @@
+# Based upon the PKGBUILD from Arch Linux.
+# Patches from Gentoo, Exherbo, Openwall, Mandriva and openSUSE
+pkgname=glibc
+pkgver=2.14
+pkgrel=0
+pkgdesc="GNU C Library"
+arch=('i686' 'x86_64')
+url="http://www.gnu.org/software/libc"
+license=('GPL' 'LGPL')
+depends=
+groups=('base')
+makedepends=('gcc' 'gawk' 'tzdata' 'linux-api-headers')
+options=('!makeflags')
+backup=(etc/gai.conf
+        etc/locale.gen
+        etc/nscd.conf)
+options=('!strip')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+
+  sed -i '11s:de_DE.UTF-8:en_US.UTF-8:' posix/bug-regex32.c # no .de here
+  sed -i '234s:$(objpfx)annexc.out::' posix/Makefile # bogus
+  sed -i '2s:tests += tst-writev::' sysdeps/wordsize-64/Makefile # Debian:629862
+  sed -i '48s:tst-mqueue5::' rt/Makefile # http://sourceware.org/ml/libc-alpha/2010-09/msg00030.html
+  sed -i '50s:tst-cpuclock2::' rt/Makefile # bogus
+  patch -Np1 -i ../glibc-2.14-no-tzdata-info-translation.patch
+
+  # Gentoo
+  patch -Np1 -i ../0020_all_glibc-tweak-rfc1918-lookup.patch
+  patch -Np1 -i ../0030_all_glibc-respect-env-CPPFLAGS.patch
+  patch -Np1 -i ../0040_all_glibc-2.14-ssp-typo.patch
+  patch -Np1 -i ../0051_all_glibc-2.14-resolver-crash.patch
+  patch -Np1 -i ../0061_all_glibc-2.13-static-memset.patch
+  patch -Np1 -i ../1005_all_glibc-sigaction.patch
+  patch -Np1 -i ../1010_all_glibc-queue-header-updates.patch
+  patch -Np1 -i ../1060_all_glibc-localedef-mmap.patch
+  patch -Np1 -i ../1070_all_glibc-fadvise64_64.patch
+  patch -Np1 -i ../1085_all_glibc-2.9-check_native-headers.patch
+  patch -Np1 -i ../1095_all_glibc-2.14-assume-pipe2-dup3.patch
+  patch -Np0 -i ../1130_all_glibc-2.4-undefine-__i686.patch
+
+  # Exherbo
+  patch -Np1 -i ../glibc-2.14-memory-leak-getaddrinfo.patch
+  patch -Np1 -i ../glibc-2.14-fix-IPv6-only-lookups.patch
+  patch -Np1 -i ../glibc-2.14-fix-Ipv4-IPv6-lookup.patch
+
+  # http://sources.redhat.com/bugzilla/show_bug.cgi?id=4781
+  patch -Np1 -i "${srcdir}"/glibc-2.10-bz4781.patch
+
+  # http://sources.redhat.com/bugzilla/show_bug.cgi?id=411
+  # http://sourceware.org/ml/libc-alpha/2009-07/msg00072.html
+  # patch -Np1 -i "${srcdir}"/glibc-__i686.patch
+
+  # http://sourceware.org/bugzilla/show_bug.cgi?id=11929
+  # using Fedora "fix" as patch in that bug report causes breakages...
+  patch -Np1 -i "${srcdir}"/glibc-2.12.1-static-shared-getpagesize.patch
+
+  # http://www.exploit-db.com/exploits/15274/
+  # http://sourceware.org/git/?p=glibc.git;a=patch;h=d14e6b09 (only fedora branch...)
+  patch -Np1 -i "${srcdir}"/glibc-2.12.2-ignore-origin-of-privileged-program.patch
+
+  # http://sourceware.org/bugzilla/show_bug.cgi?id=12403
+  patch -Np1 -i "${srcdir}"/glibc-2.13-futex.patch
+
+  # https://bugzilla.redhat.com/show_bug.cgi?id=593675
+  # http://sourceware.org/git/?p=glibc.git;a=commitdiff;h=2f811bf8 (only fedora branch...)
+  patch -Np1 -i "${srcdir}"/glibc-2.13-dlclose-search-reset.patch
+
+  # http://sourceware.org/git/?p=glibc.git;a=commitdiff;h=675155e9 (only fedora branch...)
+  # http://sourceware.org/ml/libc-alpha/2011-06/msg00006.html
+  patch -Np1 -i "${srcdir}"/glibc-2.14-libdl-crash.patch
+
+  # http://sourceware.org/bugzilla/show_bug.cgi?id=13013
+  # http://sourceware.org/git/?p=glibc.git;a=commitdiff;h=032c0ee3 (only fedora branch...)
+  patch -Np1 -i "${srcdir}"/glibc-2.14-avoid-assertion-on-empty-dns-answer.patch
+
+  # re-export RPC interface until libtirpc is ready as a replacement
+  # http://sourceware.org/git/?p=glibc.git;a=commitdiff;h=acee4873 (only fedora branch...)
+  patch -Np1 -i "${srcdir}"/glibc-2.14-reexport-rpc-interface.patch
+
+  # http://sourceware.org/git/?p=glibc.git;a=commitdiff;h=bdd816a3 (only fedora branch...)
+  patch -Np1 -i "${srcdir}"/glibc-2.14-reinstall-nis-rpc-headers.patch
+
+  # Openwall patches http://www.openwall.com/crypt/
+  install -pm644 ../crypt_freesec.{c,h} crypt/
+  patch -Np1 -i ../glibc-2.14-owl-crypt.patch
+  tar -xf ../crypt_blowfish-1.2.tar.gz
+  mv crypt/{crypt.h,gnu-crypt.h}
+  cp -p crypt_blowfish-1.2/*.{c,h,S} crypt/
+  patch -Np1 -i ../glibc-2.14-owl-crypt_freesec.patch
+
+  # Mandriva
+  patch -Np1 -i ../glibc-2.14-owl-crypt-increase_BF_FRAME.patch
+  patch -Np1 -i ../glibc-2.14-owl-wrapper-sha.patch
+
+  # openSUSE
+  patch -Np0 -i ../glibc-resolv-reload.diff
+  touch -r nscd/nscd_stat.c nscd/s-stamp
+  patch -Np0 -i ../glibc-2.4.90-nscd.diff
+  patch -Np0 -i ../glibc-2.3.3-nscd-db-path.diff
+  patch -Np0 -i ../glibc-2.3.5-nscd-zeronegtimeout.diff
+  touch -r nscd/s-stamp nscd/nscd_stat.c
+  rm nscd/s-stamp
+  patch -Np0 -i ../glibc-2.2-sunrpc.diff
+  patch -Np0 -i ../glibc-cpusetsize.diff
+  patch -Np1 -i ../glibc-resolv-mdnshint.diff
+  patch -Np1 -i ../glibc-nscd-hconf.diff
+  patch -Np0 -i ../glibc-strict-aliasing.diff
+  patch -Np1 -i ../glibc-x86-bits-sigcontext.patch
+  patch -Np1 -i ../glibc-2.15-getsysstats-speedup.patch
+  patch -Np1 -i ../glibc-fix-double-loopback.diff
+  patch -Np1 -i ../glibc-revert-fseek-on-fclose.diff
+  patch -Np1 -i ../x86-cpuid-level2.patch
+  patch -Np1 -i ../glibc-2.14-fix-ctors.patch
+
+  install -dm755 "${pkgdir}"/etc
+  touch "${pkgdir}"/etc/ld.so.conf
+
+  cd ${srcdir}
+  mkdir glibc-build && cd glibc-build
+
+  if [[ ${CARCH} = "i686" ]]; then
+    # Hack to fix NPTL issues with Xen, only required on 32bit platforms
+    export CFLAGS="${CFLAGS} -mno-tls-direct-seg-refs"
+  fi
+
+  echo "slibdir=/lib" >> configparms
+
+  CFLAGS=${CFLAGS/-Os/-O2}
+  LDFLAGS=${LDFLAGS/--as-needed,/}
+  CFLAGS="${CFLAGS} -DNDEBUG=1"
+
+  "${srcdir}/${pkgname}-${pkgver}/configure" --prefix=/usr \
+      --build=${CBUILD} --host=${CHOST} \
+      --libdir=/usr/lib --libexecdir=/usr/lib \
+      --with-headers=/usr/include \
+      --enable-add-ons=nptl,libidn \
+      --enable-kernel=3.0.1 \
+      --enable-oldest-abi=2.12 \
+      --with-tls --with-__thread \
+      --enable-bind-now --without-gd \
+      --without-cvs --disable-profile \
+      --disable-multi-arch
+
+  # build libraries with hardening disabled
+  echo "build-programs=no" >> configparms
+  make
+
+  sed -i "s#=no#=yes#" configparms
+  make
+}
+
+check() {
+  cd ${srcdir}/glibc-build
+  export TIMEOUTFACTOR=16
+  make -k check || return 0
+  make -k check-abi || return 0
+}
+
+package() {
+  cd "${srcdir}"/glibc-build
+  make install_root="${pkgdir}" install
+
+  rm -f "${pkgdir}"/etc/ld.so.{cache,conf}
+
+  install -dm755 "${pkgdir}"/usr/sbin
+  install -dm755 "${pkgdir}"/usr/lib/locale
+  install -m644 "${srcdir}"/${pkgname}-${pkgver}/nscd/nscd.conf "${pkgdir}"/etc/nscd.conf
+  install -m755 "${srcdir}"/locale-gen "${pkgdir}"/usr/sbin
+  install -m644 "${srcdir}"/${pkgname}-${pkgver}/posix/gai.conf "${pkgdir}"/etc/gai.conf
+  echo "precedence ::ffff:0:0/96 100" >> "${pkgdir}"/etc/gai.conf
+
+  sed -i -e 's/^\tserver-user/#\tserver-user/' "${pkgdir}"/etc/nscd.conf
+
+  # create /etc/locale.gen
+  install -m644 "${srcdir}"/locale.gen.txt "${pkgdir}"/etc/locale.gen
+  sed -i "s|/| |g" "${srcdir}"/${pkgname}-${pkgver}/localedata/SUPPORTED
+  sed -i 's|\\| |g' "${srcdir}"/${pkgname}-${pkgver}/localedata/SUPPORTED
+  sed -i "s|SUPPORTED-LOCALES=||" "${srcdir}"/${pkgname}-${pkgver}/localedata/SUPPORTED
+  cat "${srcdir}"/${pkgname}-${pkgver}/localedata/SUPPORTED >> "${pkgdir}"/etc/locale.gen
+  sed -i "s|^|#|g" "${pkgdir}"/etc/locale.gen
+
+  if [[ ${CARCH} = "x86_64" ]]; then
+    # fix for the linker
+    sed -i '/RTLDLIST/s%lib64%lib%' "${pkgdir}"/usr/bin/ldd
+  fi
+
+  # manually strip files as stripping libpthread-*.so and libthread_db.so
+  # with the default $STRIP_SHARED breaks gdb and stripping ld-*.so breaks
+  # valgrind on x86_64
+
+  cd "${pkgdir}"
+  strip $STRIP_BINARIES sbin/{ldconfig,sln} \
+                        usr/bin/{gencat,getconf,getent,iconv,locale} \
+                        usr/bin/{localedef,pcprofiledump,rpcgen,sprof} \
+                        usr/lib/getconf/* \
+                        usr/sbin/{iconvconfig,nscd}
+  [[ $CARCH = "i686" ]] && strip $STRIP_BINARIES usr/bin/lddlibc4
+
+  strip ${STRIP_STATIC} usr/lib/*.a \
+                      lib/{{ld,libpthread}-"${pkgver}",libthread_db-1.0}.so
+
+  strip ${STRIP_SHARED} lib/{libanl,libBrokenLocale,libc,libcidn,libcrypt}-"${pkgver}".so \
+                      lib/libnss_{compat,dns,files,hesiod,nis,nisplus}-"${pkgver}".so \
+                      lib/{libdl,libm,libnsl,libresolv,librt,libutil}-"${pkgver}".so \
+                      lib/{libmemusage,libpcprofile,libSegFault}.so \
+                      usr/lib/{pt_chown,{audit,gconv}/*.so}
+}
+source=(http://ftp.gnu.org/gnu/glibc/glibc-2.14.tar.xz)
+sha256sums=('4b20592dd4c841e54fde4c0f1d28cc75f91fb61fb3e91a906d5025dd187bfb08')
+source=(${source[@]-}
+        0020_all_glibc-tweak-rfc1918-lookup.patch
+        0030_all_glibc-respect-env-CPPFLAGS.patch
+        0040_all_glibc-2.14-ssp-typo.patch
+        0051_all_glibc-2.14-resolver-crash.patch
+        0061_all_glibc-2.13-static-memset.patch
+        1005_all_glibc-sigaction.patch
+        1010_all_glibc-queue-header-updates.patch
+        1060_all_glibc-localedef-mmap.patch
+        1070_all_glibc-fadvise64_64.patch
+        1085_all_glibc-2.9-check_native-headers.patch
+        1095_all_glibc-2.14-assume-pipe2-dup3.patch
+        1130_all_glibc-2.4-undefine-__i686.patch
+        crypt_blowfish-1.2.tar.gz
+        crypt_freesec.c
+        crypt_freesec.h
+        glibc-2.10-bz4781.patch
+        glibc-2.12.1-static-shared-getpagesize.patch
+        glibc-2.12.2-ignore-origin-of-privileged-program.patch
+        glibc-2.13-dlclose-search-reset.patch
+        glibc-2.13-futex.patch
+        glibc-2.14-avoid-assertion-on-empty-dns-answer.patch
+        glibc-2.14-fix-IPv6-only-lookups.patch
+        glibc-2.14-fix-Ipv4-IPv6-lookup.patch
+        glibc-2.14-fix-ctors.patch
+        glibc-2.14-libdl-crash.patch
+        glibc-2.14-memory-leak-getaddrinfo.patch
+        glibc-2.14-no-tzdata-info-translation.patch
+        glibc-2.14-owl-crypt-increase_BF_FRAME.patch
+        glibc-2.14-owl-crypt.patch
+        glibc-2.14-owl-crypt_freesec.patch
+        glibc-2.14-owl-wrapper-sha.patch
+        glibc-2.14-reexport-rpc-interface.patch
+        glibc-2.14-reinstall-nis-rpc-headers.patch
+        glibc-2.15-getsysstats-speedup.patch
+        glibc-2.2-sunrpc.diff
+        glibc-2.3.3-nscd-db-path.diff
+        glibc-2.3.5-nscd-zeronegtimeout.diff
+        glibc-2.4.90-nscd.diff
+        glibc-__i686.patch
+        glibc-cpusetsize.diff
+        glibc-fix-double-loopback.diff
+        glibc-nscd-hconf.diff
+        glibc-resolv-mdnshint.diff
+        glibc-resolv-reload.diff
+        glibc-revert-fseek-on-fclose.diff
+        glibc-strict-aliasing.diff
+        glibc-x86-bits-sigcontext.patch
+        locale-gen
+        locale.gen.txt
+        x86-cpuid-level2.patch)
+
+sha256sums=(${sha256sums[@]-}
+            'b14477c710b7d25db20bc907052fce840a2abfae41e7d5abfeb9429115f33bf6'
+            '0f8ecb7697a8e004b78da2b81657ff4a88e1a64fd2633750198f07c9679dcc74'
+            'a12403336f294aa71ec638601a3f90897af63e13602dc7ad695a2f4d8063fdb5'
+            '85a2e3916f76c3c730e761bce34d0507c4f836e418d362481814f0ccbcd9535c'
+            'a791015f1801e60e9095eed0ee784ed90d6a7ecec59ff410c240fbcea4435383'
+            'a53d562750b72cb00f4cd859fe9ef2a7e2574e19b0c69c7b416673184c450161'
+            '598b08b96f68173995725f7868cdb2c9f5b94d85fd0c0ff49475f7f3af7d876d'
+            'c859c254759aa032f4e18c1bbf95ee8b994f57d48ee45474b31b1b5b570389a5'
+            'd11926e76fb8828aa00d1d8a0b2cad80fc8ffd0c9a473efa0ac7153cee8aafc0'
+            'fe744192dd50618d876a9daaced38e20d531412865e052f49a72d2e10a6d3a79'
+            '841f254f2a05d40de75e35110720ea81b4947bc0d5803d79a7807305baf626e3'
+            '1db7d3b3211733c6503b1886bb919f51070676327540900cb68e0e529454ddca'
+            '12a3455700d4795f5a99e6fca54c782688d3785e6525cbfe5129dcc363858e27'
+            'e6325d65eb186203af9040513a169a09f5cb049713739a2f58d823380584b6a5'
+            '2cfa0c58b6666b26467b001b939f1ed74a5acc10204968c99adb7c597a93dce0'
+            '866a4a57e50ebd2e61af7851a9a3f8d9240c3a3ea0da5d95eb6dc69ac3887dfe'
+            'dcb33190d1710bb64ab49506c48398c61409ae41c89eed7e9dd23215b9dc239b'
+            '977f8e6a82a1634e54e765aefe62c8bbf1bb3a7f43ad449d583e29dec36b92bd'
+            '7f31c1ee6262db1cda0e443475714e84280a8383a65929baa75e493e3c7fbb39'
+            '56605e8bfe7b8c08dd9b588e4f10cc2f3e9bb3312bff8901d3809cf233faeff9'
+            '757c93c6d078029f0feabdb4cb1d294cf8874a9635552a813840f0af03dc61ab'
+            '3b508b4d37d982867dc3ba286efccfb72c5b8eec4792e4b6e3596228b794428f'
+            '12dc31e17c7becc6830ae1b2daf8d8acb689ff273b3b928d39702d6e689e588c'
+            '658a4bb1d22aef4ca5adbaa4a849bec78b171c09066b22daea140c6e91ea8e25'
+            'da99dfb680c28d6670e92b9328b9a784ce51d8c6af9c5318fc19da30ae90ab67'
+            '9f53c73720854192f9299c212c78f1124bb91ef6a8bd8bf02446168e7c28e534'
+            'bce1eab8c45a019c57e6b0c2e914e88c005d575a9aa239a0ff4d6b41a5d13509'
+            'c37e6fd20cd0dfb9383724c6c5093c630fbb85af44324e75589fe6c6b594d7f5'
+            '8dc5cd915863d947655bfc5a8627f0a61402580124acb5dc914084b7dd3ccfc3'
+            '74ceb0d7b1824a0319c5ba130ab933820f9ad90fec4f50030649c615184679a7'
+            'a531bd2ce1f63d6e74fdcb6cdfc4eeceaaf0e947855f1dc8371348f139713518'
+            '9fdc1600ebaf917e68baf2507788d9f17f69c3d95cb6d479076eba48c14a24a5'
+            'f1e6e8fef5545f84905c4acd73307490726bf8d627d7e4be24dd8a3edbac0a9e'
+            '251d57a4f41fa037076ae849dba4c85e69b54dd1673d3e7e838eedd2715079b5'
+            '9188e23d9097ba357b5cd65c826de1f52c08afbbbe830be9c9f0c4e97c2d8912'
+            '0e16b9c4bb468a9076f2549f0f1709ba89335c1479b76e8ec68035423297a202'
+            '987319521044367902f98d41fabc2fb9a6d2ca7b281625552b640386ce245ee4'
+            '9aa82ee4a11df7a8cd6c7d09c1cfe21b08232447dcf5902491e67766205f51d6'
+            '2f64af4bd6ffba3d119bd2189772ab6998024de896987c52d4d975b56c0f56fc'
+            'd833bb11d32bbb959dbf98bb288098d2a461a72d95401c3b88b496705e612423'
+            '627aeb3e9cec5b66e066fc704725c22fc7cfce4b59eb60e2c79c51401451b434'
+            'ed4dce08c5f035cd2cdbd3216fb8d17ca53b8a1498cb75eac8b9b1161cfca3ed'
+            '46818d7b6e3de6567e5006981ca45d211fff78ec80d359a754738352e0a0c42a'
+            '7f5cc2ef18091abc7c511a1b17387e2b80eb60c09f230e1ce532b30193fec8fb'
+            '24559cfe9c8793bab205ada9fa84a7b64bed400c261a21132c273e4bdd98a758'
+            '29488759758c391261ebe49cd9473940c7badf72ebc04ff76508608535ad4746'
+            'd57fd882aedcb836c71b5c2688f077e21f638df052bfc5cc4a97f08ee9304b36'
+            '83f108f915863c7ed0338e2d3e8f2e071a531a090ef8f8b2eb3a956a3c4f04d7'
+            'd42648cea552ba5353a32e264686e992263289d5cc86207314dffc54ab514981'
+            'e75421ca71a178d2487c141a88197d747bce1020e1c0d4c4b4cfc1b79e9b8f23')

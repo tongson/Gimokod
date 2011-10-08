@@ -1,0 +1,42 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=mpc
+pkgver=0.9
+pkgrel=1
+pkgdesc="Library for the arithmetic of complex numbers with arbitrarily high precision"
+arch=('i686' 'x86_64')
+url="http://www.multiprecision.org/"
+license=('LGPL')
+depends=('mpfr')
+replaces=('libmpc')
+conflicts=('libmpc')
+provides=('libmpc')
+groups=('base-devel')
+options=('!libtool' '!makeflags')
+source=(http://www.multiprecision.org/mpc/download/mpc-${pkgver/_/-}.tar.gz
+        mpc-0.9-configure_cflags_egrep_issue.patch)
+md5sums=('0d6acab8d214bd7d1fbbc593e83dd00d'
+         '35d5bb02dc6c1153e581b7c34a738a08')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+
+  # http://lists.gforge.inria.fr/pipermail/mpc-discuss/2011-February/000805.html
+  patch -Np1 -i "${srcdir}"/mpc-0.9-configure_cflags_egrep_issue.patch
+  autoreconf
+
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST}
+  make
+}
+
+check() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make check
+  msg "${pkgname} TESTS SUCCESSFUL"
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}

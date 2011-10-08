@@ -1,0 +1,19 @@
+diff --git a/resolv/res_hconf.c b/resolv/res_hconf.c
+index ed55bec..f06db75 100644
+--- a/resolv/res_hconf.c
++++ b/resolv/res_hconf.c
+@@ -243,9 +243,12 @@ parse_line (const char *fname, int line_num, const char *str)
+   if (c == NULL)
+     {
+       char *buf;
++      char *hint = "";
+ 
+-      if (__asprintf (&buf, _("%s: line %d: bad command `%s'\n"),
+-		      fname, line_num, start) < 0)
++      if (__strncasecmp (start, "mdns", len) == 0 && len == 4)
++        hint = "Multicast DNS is now configured in /etc/nsswitch.conf instead.\nSee also the package and manpage of nss-mdns.\n";
++      if (__asprintf (&buf, _("%s: line %d: bad command `%s'\n%s"),
++		      fname, line_num, start, hint) < 0)
+ 	return;
+ 
+       __fxprintf (NULL, "%s", buf);

@@ -1,0 +1,40 @@
+From 343f07cbec2d66bebe71e4f48b0403f52ebfe8f9 Mon Sep 17 00:00:00 2001
+From: uros <uros@138bc75d-0d04-0410-961f-82ee72b054a4>
+Date: Wed, 4 May 2011 17:07:03 +0000
+Subject: [PATCH] 	* config/i386/i386.c (ix86_reorg): Run move_or_delete_vzeroupper first.
+
+git-svn-id: svn+ssh://gcc.gnu.org/svn/gcc/trunk@173383 138bc75d-0d04-0410-961f-82ee72b054a4
+---
+ gcc/ChangeLog          |   16 ++++++++++------
+ gcc/config/i386/i386.c |    8 ++++----
+ 2 files changed, 14 insertions(+), 10 deletions(-)
+
+diff --git a/gcc/config/i386/i386.c b/gcc/config/i386/i386.c
+index 79dd5da..786bc6d 100644
+--- a/gcc/config/i386/i386.c
++++ b/gcc/config/i386/i386.c
+@@ -30444,6 +30444,10 @@ ix86_reorg (void)
+      with old MDEP_REORGS that are not CFG based.  Recompute it now.  */
+   compute_bb_for_insn ();
+ 
++  /* Run the vzeroupper optimization if needed.  */
++  if (TARGET_VZEROUPPER)
++    move_or_delete_vzeroupper ();
++
+   if (optimize && optimize_function_for_speed_p (cfun))
+     {
+       if (TARGET_PAD_SHORT_FUNCTION)
+@@ -30455,10 +30459,6 @@ ix86_reorg (void)
+ 	ix86_avoid_jump_mispredicts ();
+ #endif
+     }
+-
+-  /* Run the vzeroupper optimization if needed.  */
+-  if (TARGET_VZEROUPPER)
+-    move_or_delete_vzeroupper ();
+ }
+ 
+ /* Return nonzero when QImode register that must be represented via REX prefix
+-- 
+1.6.0.2
+

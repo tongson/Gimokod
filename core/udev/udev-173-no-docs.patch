@@ -1,0 +1,20 @@
+--- udev-173/Makefile.in
++++ udev-173/Makefile.in
+@@ -554,7 +554,7 @@
+ CTAGS = ctags
+ am__tty_colors = \
+ red=; grn=; lgn=; blu=; std=
+-DIST_SUBDIRS = . libudev/docs extras/gudev/docs
++DIST_SUBDIRS = .
+ DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+ distdir = $(PACKAGE)-$(VERSION)
+ top_distdir = $(distdir)
+@@ -732,7 +732,7 @@
+ top_build_prefix = @top_build_prefix@
+ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@
+-SUBDIRS = . libudev/docs $(am__append_4)
++SUBDIRS = .
+ EXTRA_DIST = autogen.sh libudev/COPYING rules/arch rules/misc \
+ 	$(am__append_2) udev/udev.xml udev/udevadm.xml udev/udevd.xml \
+ 	extras/scsi_id/README $(am__append_8) $(am__append_15) \

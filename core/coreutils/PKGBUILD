@@ -1,0 +1,60 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=coreutils
+pkgver=8.13
+pkgrel=1
+pkgdesc="The basic file, shell and text manipulation utilities of the GNU operating system"
+arch=('i686' 'x86_64')
+license=('GPL3')
+url="http://www.gnu.org/software/coreutils"
+groups=('base')
+depends=('shadow' 'acl' 'libcap' 'attr')
+options=('!emptydirs')
+source=(ftp://ftp.gnu.org/gnu/$pkgname/$pkgname-$pkgver.tar.xz
+        coreutils-8.7-no-docs-tests-translations.patch
+        coreutils-uname.patch)
+md5sums=('8e1675c6c336ff55557c698706a63d6c'
+         'c77658ccbce6135fd6b9d5cad6736cce'
+         'c4fcca138b6abf6d443d48a6f0cd8833')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+
+  patch -Np1 -i "${srcdir}"/coreutils-8.7-no-docs-tests-translations.patch
+
+  # linux specific uname improvement (from gentoo portage)
+  patch -Np1 -i "${srcdir}"/coreutils-uname.patch
+
+  autoreconf -v
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --libexecdir=/usr/lib/coreutils \
+              --enable-no-install-program=groups,hostname,kill,su,uptime \
+              --disable-pam \
+              --enable-acl \
+              --enable-xattr \
+              --disable-nls \
+              --without-gmp
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+  install -dm755 "${pkgdir}"/{bin,usr/sbin}
+  cd "${pkgdir}"/usr/bin
+
+  # binaries required by FHS
+  for _fhs in cat chgrp chmod chown cp date dd df echo false ln ls mkdir mknod mv pwd rm rmdir stty sync true uname; do
+    mv "${_fhs}" ../../bin
+  done
+  # binaries required by various Arch scripts
+  for _bin in cut dir dircolors du install mkfifo readlink shred sleep touch tr vdir; do
+    mv "${_bin}" ../../bin
+  done
+
+  ln -sf /bin/sleep sleep
+  ln -sf /bin/du du
+
+  mv chroot ../sbin
+}

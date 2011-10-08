@@ -1,0 +1,32 @@
+pkgname=bc
+pkgver=1.06.95
+pkgrel=1
+pkgdesc="An arbitrary precision calculator language"
+arch=('i686' 'x86_64')
+url="http://www.gnu.org/software/bc/"
+license=('GPL')
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  patch -Np0 -i "${srcdir}"/bc-1.06.95-void_uninitialized.patch
+  ./configure --prefix=/usr \
+              --build=${CHOST} \
+              --host=${CHOST} \
+              --mandir=/usr/share/man \
+              --infodir=/usr/share/info \
+              --without-readline \
+              --without-libedit
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}
+
+source=("ftp://ftp.gnu.org/gnu/${pkgname}/${pkgname}-${pkgver}.tar.bz2"
+        bc-1.06.95-void_uninitialized.patch)
+
+sha256sums=('7ee4abbcfac03d8a6e1a8a3440558a3d239d6b858585063e745c760957725ecc'
+         '440a9a20633317204a0205962f573a932ef4493b1dc9ff3253bfed22c8caf5cd') 
+
+

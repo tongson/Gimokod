@@ -1,0 +1,155 @@
+pkgname=busybox
+pkgver=1.19.2
+pkgrel=1
+pkgdesc='Utilities for rescue, embedded and minimal systems'
+arch=('i686' 'x86_64')
+url='http://busybox.net'
+license=('GPL')
+depends=
+options=('emptydirs')
+provides=('wget' 'sed' 'diffutils' 'findutils' 'awk' 'gzip' 'unzip' 'tar' 'which'
+          'run-parts' 'vi' 'procps' 'cpio' 'cron' 'eject' 'runit' 'psmisc' 'bridge-utils'
+          'iputils' 'net-tools' 'inetutils' 'man-db' 'logger' 'ntp' 'dhcpcd' 'grep' 'ifenslave')
+groups=('base')
+
+symlinks=(/bin/inotifyd
+          /bin/cpio
+          /usr/bin/run-parts
+          /usr/bin/crontab
+          /usr/sbin/crond
+          /usr/bin/eject
+          /usr/bin/volname
+          /usr/bin/chpst
+          /usr/bin/runsv
+          /usr/bin/runsvdir
+          /usr/bin/sv
+          /usr/bin/svlogd
+          /usr/bin/setuidgid
+          /usr/bin/envuidgid
+          /usr/bin/envdir
+          /usr/bin/softlimit
+          /usr/bin/wget
+          /bin/sed
+          /usr/bin/diff
+          /usr/bin/cmp
+          /usr/bin/find
+          /usr/bin/xargs
+          /bin/awk
+          /usr/bin/awk
+          /bin/gunzip
+          /bin/uncompress
+          /bin/gzip
+          /usr/bin/unzip
+          /bin/tar
+          /usr/bin/which
+          /bin/vi
+          /bin/kill
+          /bin/ps
+          /sbin/sysctl
+          /usr/bin/free
+          /usr/bin/pgrep
+          /usr/bin/pkill
+          /usr/bin/pmap
+          /usr/bin/pwdx
+          /usr/bin/top
+          /usr/bin/uptime
+          /usr/bin/watch
+          /usr/bin/fuser
+          /usr/bin/killall
+          /usr/bin/pstree
+          /usr/sbin/brctl
+          /bin/ping
+          /bin/ping6
+          /bin/traceroute
+          /bin/traceroute6
+          /usr/sbin/arping
+          /usr/sbin/tftpd
+          /bin/hostname
+          /bin/netstat
+          /sbin/arp
+          /sbin/ifconfig
+          /sbin/iptunnel
+          /sbin/nameif
+          /sbin/route
+          /usr/bin/telnet
+          /usr/sbin/ftpd
+          /usr/sbin/telnetd
+          /usr/bin/man
+          /sbin/syslogd
+          /sbin/klogd
+          /bin/logread
+          /usr/bin/ntp
+          /sbin/udhcpc
+          /bin/grep
+          /bin/egrep
+          /bin/fgrep
+          /sbin/ifenslave)
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"/
+
+  cp "${srcdir}"/config .config
+
+  patch -Np1 -i "${srcdir}"/"${pkgname}"-"${pkgver}"-bb.patch
+  patch -Np1 -i "${srcdir}"/"${pkgname}"-"${pkgver}"-mandoc.patch
+
+  sed -i -r \
+    -e 's:[[:space:]]?-(Werror|Os|falign-(functions|jumps|loops|labels)=1|fomit-frame-pointer)\>::g' \
+    Makefile.flags
+  sed -i '/^#error Aborting compilation./d' applets/applets.c
+  sed -i 's:-Wl,--gc-sections::' Makefile
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"/
+  install -D -m0755 busybox "${pkgdir}"/bin/busybox
+
+  install -m0755 -d "${pkgdir}"/usr/bin "${pkgdir}"/usr/sbin "${pkgdir}"/sbin
+
+  for x in $(seq 0 $((${#symlinks[@]} - 1))); do
+    ln -sf /bin/busybox "${pkgdir}"/${symlinks[$x]}
+  done
+
+  install -o 0 -g 16 -m0750 -d "${pkgdir}"/var/spool/cron
+  install -o 0 -g 409 -m1730 -d "${pkgdir}"/var/spool/cron/crontabs
+
+  install -D -m0644 "${srcdir}"/man_db.conf "${pkgdir}"/etc/man_db.conf
+  install -D -m0755 "${srcdir}"/runsvdir-start "${pkgdir}"/sbin/runsvdir-start
+  install -D -m0755 "${srcdir}"/script "${pkgdir}"/usr/share/udhcpc/script
+  install -D -m0644 "${srcdir}"/sysctl.conf "${pkgdir}"/etc/sysctl.conf
+  install -D -m0644 "${srcdir}"/bbcrond.service "${pkgdir}"/lib/systemd/system/bbcrond.service
+  install -D -m0644 "${srcdir}"/bbklogd.service "${pkgdir}"/lib/systemd/system/bbklogd.service
+  install -D -m0644 "${srcdir}"/bbntpd.service "${pkgdir}"/lib/systemd/system/bbntpd.service
+  install -D -m0644 "${srcdir}"/bbsyslogd.service "${pkgdir}"/lib/systemd/system/bbsyslogd.service
+  install -D -m0644 "${srcdir}"/bbudhcpc.service "${pkgdir}"/lib/systemd/system/bbudhcpc.service
+  install -D -m0644 LICENSE "${pkgdir}"/usr/share/licenses/${pkgname}/LICENSE
+}
+
+source=(${url}/downloads/${pkgname}-${pkgver}.tar.bz2
+        bbcrond.service
+        bbklogd.service
+        bbntpd.service
+        bbsyslogd.service
+        bbudhcpc.service
+        busybox-1.19.2-bb.patch
+        busybox-1.19.2-mandoc.patch
+        config
+        man_db.conf
+        runsvdir-start
+        script
+        sysctl.conf)
+
+sha256sums=('ea7ec9b6df70b8c528f4a2b6300e9913431c7223308fb08dfafa7508d75a0cb9'
+            'bb2a3f3aa128195803b87123824a3e0c3123c51ec7bdf29fe2739d0973c7713e'
+            '17d4feec48263bb36363cfa78d5e987364d64d91e5c4c1da4829dae1ce9efec9'
+            'beb1bb6bce591c494a6e298dea05a77afa8740598d6992491c380ae62a55634d'
+            '2b8ecc7658d6c4ec512116933cf57e3d7875e50fd5ec231215ea145cf4b34ad9'
+            'ec23c12f410dbc50174cdd94dc2c474b7a3e5d048e653220ba8ffbe0032c8a70'
+            '98f92c2edbcf61d1bacef783ea8b08cce07051b0a4489ed3f4579296846f89f1'
+            '733e23d851e68ecd27ed8bb8f4c4b8ea27b0d143069ec49aadb04deeb65dd9f5'
+            '3e2916db816a76880cc86a7aba4cfaa918ccaf90278b9d19f4e0ed5814788dae'
+            'bf0092798438c18fd3e7f6d9a8a281d6575cf4258d2457b6320d9c6bc8443eae'
+            'a70d24036a7ae14f213147fe6727fee4320b2090bc59d8a4ffa609d8fdd14cef'
+            '0bd8f7430da15355026891046af390d6311303630cb15407ab6133978c32c3fe'
+            'c0fe1acecbe92678bdf10245fdf30a4b04012c27b58ec4deedc70c57d2fa9501')

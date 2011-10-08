@@ -1,0 +1,113 @@
+--- glibc-2.14/crypt/wrapper.c
++++ glibc-2.14/crypt/wrapper.c
+@@ -105,32 +105,72 @@ static char *_crypt_retval_magic(char *r
+  * its initialization code.  Thus, it is important that our multiple hashing
+  * algorithms either don't conflict with each other in their use of the
+  * data area or reset the initialized field themselves whenever required.
+- * Currently, the hashing algorithms simply have no conflicts: the first
+- * field of struct crypt_data is the 128-byte large DES key schedule which
+- * __des_crypt_r() calculates each time it is called while the two other
+- * hashing algorithms use less than 128 bytes of the data area.
++ * Currently, three of the four supported hashing algorithms simply have no
++ * conflicts: the first field of struct crypt_data is the 128-byte large
++ * DES key schedule which __des_crypt_r() calculates each time it is called
++ * while two other hashing algorithms use less than 128 bytes of the data
++ * area.
+  */
+ 
++#include "crypt_freesec.h"
++
++#include <signal.h>
++#include <bits/libc-lock.h>
++
++__libc_lock_define_initialized (static, _crypt_extended_init_lock)
++
++static void _crypt_extended_init_r(void)
++{
++	static volatile sig_atomic_t initialized = 0;
++
++	if (initialized) return;
++
++	__libc_lock_lock(_crypt_extended_init_lock);
++	if (!initialized) {
++		_crypt_extended_init();
++		initialized = 1;
++	}
++	__libc_lock_unlock(_crypt_extended_init_lock);
++}
++
+ char *__crypt_rn(__const char *key, __const char *setting,
+ 	void *data, int size)
+ {
++	char *retval;
++
+ 	if (setting[0] == '$' && setting[1] == '2')
+ 		return _crypt_blowfish_rn(key, setting, (char *)data, size);
+ 	if (setting[0] == '$' && setting[1] == '1')
+ 		return __md5_crypt_r(key, setting, (char *)data, size);
+-	if (setting[0] == '$' || setting[0] == '_') {
+-		__set_errno(EINVAL);
+-		return NULL;
++	if (setting[0] == '$') goto out_einval;
++	if (setting[0] == '_') {
++		if (size < sizeof(struct _crypt_extended_data)) goto out_erange;
++		_crypt_extended_init_r();
++		((struct _crypt_extended_data *)data)->initialized = 0;
++		if (size >= sizeof(struct crypt_data))
++			((struct crypt_data *)data)->initialized = 0;
++		retval = _crypt_extended_r(key, setting,
++		    (struct _crypt_extended_data *)data);
++		if (!retval) goto out_einval;
++		return retval;
+ 	}
+ 	if (size >= sizeof(struct crypt_data))
+ 		return __des_crypt_r(key, setting, (struct crypt_data *)data);
++
++out_erange:
+ 	__set_errno(ERANGE);
+ 	return NULL;
++
++out_einval:
++	__set_errno(EINVAL);
++	return NULL;
+ }
+ 
+ char *__crypt_ra(__const char *key, __const char *setting,
+ 	void **data, int *size)
+ {
++	char *retval;
++
+ 	if (setting[0] == '$' && setting[1] == '2') {
+ 		if (_crypt_data_alloc(data, size, CRYPT_OUTPUT_SIZE))
+ 			return NULL;
+@@ -141,13 +181,27 @@ char *__crypt_ra(__const char *key, __co
+ 			return NULL;
+ 		return __md5_crypt_r(key, setting, (char *)*data, *size);
+ 	}
+-	if (setting[0] == '$' || setting[0] == '_') {
+-		__set_errno(EINVAL);
+-		return NULL;
++	if (setting[0] == '$') goto out_einval;
++	if (setting[0] == '_') {
++		if (_crypt_data_alloc(data, size,
++		    sizeof(struct _crypt_extended_data)))
++			return NULL;
++		_crypt_extended_init_r();
++		((struct _crypt_extended_data *)*data)->initialized = 0;
++		if (*size >= sizeof(struct crypt_data))
++			((struct crypt_data *)*data)->initialized = 0;
++		retval = _crypt_extended_r(key, setting,
++			(struct _crypt_extended_data *)*data);
++		if (!retval) goto out_einval;
++		return retval;
+ 	}
+ 	if (_crypt_data_alloc(data, size, sizeof(struct crypt_data)))
+ 		return NULL;
+ 	return __des_crypt_r(key, setting, (struct crypt_data *)*data);
++
++out_einval:
++	__set_errno(EINVAL);
++	return NULL;
+ }
+ 
+ char *__crypt_r(__const char *key, __const char *setting,

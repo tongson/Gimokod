@@ -1,0 +1,9 @@
+[Unit]
+Description=nscd
+
+[Service]
+Type=forking
+ExecStart=/usr/sbin/nscd
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,6 @@
+#%PAM-1.0
+auth       required	pam_rootok.so
+account    required	pam_permit.so
+password   required	pam_userpass.so
+password   required	pam_tcb.so use_authtok shadow write_to=tcb prefix=$2y$ count=8
+session    required	pam_deny.so

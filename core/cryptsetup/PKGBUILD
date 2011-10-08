@@ -1,0 +1,39 @@
+pkgname=cryptsetup
+pkgver=1.3.1
+pkgrel=1
+pkgdesc='Userspace setup tool for transparent encryption of block devices'
+arch=(i686 x86_64)
+url='http://code.google.com/p/cryptsetup/'
+license=('GPL')
+groups=('base')
+depends=('device-mapper' 'popt' 'openssl' 'udev')
+makedepends=('device-mapper' 'popt' 'openssl' 'udev' 'pkg-config')
+options=('!libtool' '!emptydirs')
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --enable-static-cryptsetup \
+              --sbindir=/sbin \
+              --libdir=/lib \
+              --disable-nls \
+              --enable-udev \
+              --enable-dev-random \
+              --with-crypto_backend=openssl \
+              --disable-selinux
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+  install -d -m755 "${pkgdir}"/usr/lib
+  mv "${pkgdir}"/lib/pkgconfig "${pkgdir}"/usr/lib/
+}
+
+source=(http://cryptsetup.googlecode.com/files/${pkgname}-${pkgver}.tar.bz2)
+
+sha256sums=('7ceb18a0c91fa1546077b41b93463dd2ec9d7f83e6fd93757fb84cc608206a6a')
+
+

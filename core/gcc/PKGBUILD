@@ -1,0 +1,176 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=('gcc' 'gcc-libs')
+pkgver=4.6.1
+pkgrel=1
+pkgdesc="The GNU Compiler Collection"
+arch=('i686' 'x86_64')
+license=('GPL' 'LGPL' 'FDL' 'custom')
+url="http://gcc.gnu.org"
+makedepends=('binutils' 'mpc' 'gmp' 'mpfr' 'zlib' 'gawk' 'autogen' 'dejagnu')
+options=('!libtool')
+source=(ftp://gcc.gnu.org/pub/gcc/releases/gcc-${pkgver}/gcc-${pkgver}.tar.bz2)
+sha256sums=('8eebf51c908151d1f1a3756c8899c5e71572e8469a547ad72a1ef16a08a31b59')
+
+if [ -n "${_snapshot}" ]; then
+  _basedir="${srcdir}/gcc-${_snapshot}"
+else
+  _basedir="${srcdir}/gcc-${pkgver}"
+fi
+
+build() {
+  cd ${_basedir}
+
+  # Do not install libiberty
+  sed -i 's/install_to_$(INSTALL_DEST) //' libiberty/Makefile.in
+
+  # Do not run fixincludes
+  sed -i 's@\./fixinc\.sh@-c true@' gcc/Makefile.in
+
+  if [ "${CARCH}" = "x86_64" ]; then
+    patch -Np1 -i "${srcdir}"/gcc_pure64.patch
+  fi
+  patch -Np0 -i ../gcc-4.6.1-test-stack-limit.patch
+  patch -Np1 -i ../gcc-4.6.1-pr48195-lto.patch
+  patch -Np0 -i ../gcc-hash-style-both.patch
+  patch -Np0 -i ../pr33763.diff
+  patch -Np1 -i ../amd-save-the-initial-options-after-checking-vzeroupper.patch
+  patch -Np1 -i ../amd-ix86_reorg-run-move_or_dele.patch
+
+  echo ${pkgver} > gcc/BASE-VER
+
+  cd ${srcdir}
+  mkdir gcc-build && cd gcc-build
+  CFLAGS=${CFLAGS/-Os/-O2}
+  CXXFLAGS=${CXXFLAGS/-pipe/}
+  CXXFLAGS=${CXXFLAGS/-Os/-O2}
+
+  ${_basedir}/configure --prefix=/usr \
+      --build=${CBUILD} --host=${CHOST} \
+      --libdir=/usr/lib --libexecdir=/usr/lib \
+      --mandir=/usr/share/man --infodir=/usr/share/info \
+      --with-bugurl=http://localhost.localdomain \
+      --enable-languages=c,c++ \
+      --enable-shared --enable-threads=posix \
+      --with-system-zlib --enable-__cxa_atexit \
+      --disable-libunwind-exceptions --enable-clocale=gnu \
+      --enable-gnu-unique-object --enable-linker-build-id \
+      --without-ppl --without-cloog \
+      --disable-lto --disable-gold \
+      --disable-plugin \
+      --disable-multilib --disable-libssp --disable-libstdcxx-pch \
+      --enable-checking=release --disable-libmudflap
+  make
+}
+
+check() {
+  cd gcc-build
+  make -j1 -k check
+  ${_basedir}/contrib/test_summary
+}
+
+package_gcc-libs()
+{
+  pkgdesc="Runtime libraries shipped by GCC"
+  groups=('base-devel')
+
+  cd gcc-build
+  make -j1 -C $CHOST/libgcc DESTDIR="${pkgdir}" install-shared
+  for lib in libgomp libstdc++-v3/src; do
+    make -j1 -C $CHOST/$lib DESTDIR="${pkgdir}" install-toolexeclibLTLIBRARIES
+  done
+  make -j1 -C $CHOST/libstdc++-v3/po DESTDIR="${pkgdir}" install
+  make -j1 -C $CHOST/libgomp DESTDIR="${pkgdir}" install-info
+
+  # remove unnecessary files installed by install-target-{libquadmath,libgfortran,libobjc}
+  rm -rf "${pkgdir}"/usr/lib/{gcc/,libgfortran.spec}
+
+  # remove static libraries
+  find ${pkgdir} -name *.a -delete
+
+  # Install Runtime Library Exception
+  install -Dm644 ${_basedir}/COPYING.RUNTIME \
+    "${pkgdir}"/usr/share/licenses/gcc-libs/RUNTIME.LIBRARY.EXCEPTION
+}
+
+package_gcc()
+{
+  pkgdesc="The GNU Compiler Collection - C and C++ frontends"
+  depends=("gcc-libs=${pkgver}-$pkgrel" 'binutils' 'mpc' 'gmp' 'mpfr' 'zlib')
+  groups=('base-devel')
+
+  cd gcc-build
+
+  # unfortunately it is much, much easier to install the lot and clean-up the mess...
+  make -j1 DESTDIR="${pkgdir}" install
+  rm -f "${pkgdir}"/usr/bin/{{$CHOST-,}gfortran,{$CHOST-,}gccgo,gnat*}
+  rm -f "${pkgdir}"/usr/lib/*.so*
+  rm -f "${pkgdir}"/usr/lib/lib{ffi,gfortran,go{,begin},objc,quadmath}.a
+  rm -f "${pkgdir}"/usr/lib/libgfortran.spec
+  rm -rf "${pkgdir}"/usr/lib/gcc/$CHOST/${pkgver}/{ada{include,lib},finclude,include/objc}
+  rm -f "${pkgdir}"/usr/lib/gcc/$CHOST/${pkgver}/include/{ffi{,target}.h,quadmath{,_weak}.h}
+  rm -f "${pkgdir}"/usr/lib/gcc/$CHOST/${pkgver}/{cc1obj{,plus},f951,gnat1,go1,libgfortranbegin.a}
+  rm -rf "${pkgdir}"/usr/lib/go
+  rm -f "${pkgdir}"/usr/share/info/{gccgo,gfortran,gnat*,libgomp,libquadmath}.info
+  rm -f "${pkgdir}"/usr/share/locale/{de,fr}/LC_MESSAGES/libstdc++.mo
+  rm -f "${pkgdir}"/usr/share/man/man1/{gccgo,gfortran}.1
+  rm -f "${pkgdir}"/usr/share/man/man3/ffi*
+
+  # many packages require these symlinks
+  install -dm755 "${pkgdir}"/lib
+  ln -sf /usr/bin/cpp "${pkgdir}"/lib/cpp
+  ln -sf gcc "${pkgdir}"/usr/bin/cc
+  ln -sf g++ "${pkgdir}"/usr/bin/c++
+
+  # install gengtype for plugin support
+  install -m755 gcc/build/gengtype "${pkgdir}"/usr/lib/gcc/"${CHOST}"/"${pkgver}"/
+  install -m644 gcc/gtype.state "${pkgdir}"/usr/lib/gcc/"${CHOST}"/"${pkgver}"/
+
+  # POSIX conformance launcher scripts for c89 and c99
+  cat > "${pkgdir}"/usr/bin/c89 <<"EOF"
+fl="-std=c89"
+for opt; do
+  case "$opt" in
+    -ansi|-std=c89|-std=iso9899:1990) fl="";;
+    -std=*) echo "`basename $0` called with non ANSI/ISO C option $opt" >&2
+      exit 1;;
+  esac
+done
+exec gcc $fl ${1+"$@"}
+EOF
+
+  cat > "${pkgdir}"/usr/bin/c99 <<"EOF"
+fl="-std=c99"
+for opt; do
+  case "$opt" in
+    -std=c99|-std=iso9899:1999) fl="";;
+    -std=*) echo "`basename $0` called with non ISO C99 option $opt" >&2
+      exit 1;;
+  esac
+done
+exec gcc $fl ${1+"$@"}
+EOF
+
+  chmod 755 "${pkgdir}"/usr/bin/c{8,9}9
+
+  # Install Runtime Library Exception
+  install -Dm644 "${_basedir}"/COPYING.RUNTIME \
+    "${pkgdir}"/usr/share/licenses/gcc/RUNTIME.LIBRARY.EXCEPTION
+}
+
+source=(${source[@]-}
+        amd-ix86_reorg-run-move_or_dele.patch
+        amd-save-the-initial-options-after-checking-vzeroupper.patch
+        gcc-4.6.1-pr48195-lto.patch
+        gcc-4.6.1-test-stack-limit.patch
+        gcc-hash-style-both.patch
+        gcc_pure64.patch
+        pr33763.diff)
+
+sha256sums=(${sha256sums[@]-}
+            'e2f9d6b971e0e7d44a3d1ca2cab60948789b2d74dcfbe2ce5c6b275f2904fdea'
+            'ab4479c3a3cca2cfc1cbafb16574f2a0b0fae93eb62f18413c89420f8be5f181'
+            '60f37ce439053a5c5d4f7659edc380a32f993f462c622bba272d99b9309fd754'
+            'd8ccc639f5c2472b4ab53beada7c8552343ae960565f685c5cc8979fb28a74d1'
+            '3492332fa78b545ff46c2b5293d17c63c122be6f8f6fa4798864b7d4572b0024'
+            '2d369cf93c6e15c3559c3560bce581e0ae5f1f34dc86bca013ac67ef1c1a9ff9'
+            'd7a0a02d59e1403261bffd04579638de0c2f7faf830ff76ee5b85ce6f3c60c08')

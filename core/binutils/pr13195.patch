@@ -1,0 +1,111 @@
+diff --git a/bfd/elflink.c b/bfd/elflink.c
+index 9ccf37d..a15ad27 100644
+--- a/bfd/elflink.c
++++ b/bfd/elflink.c
+@@ -1238,7 +1238,6 @@ _bfd_elf_merge_symbol (bfd *abfd,
+ 	{
+ 	  h->def_dynamic = 0;
+ 	  h->ref_dynamic = 1;
+-	  h->dynamic_def = 1;
+ 	}
+       /* FIXME: Should we check type and size for protected symbol?  */
+       h->size = 0;
+@@ -4353,7 +4352,6 @@ error_free_dyn:
+ 		    {
+ 		      h->def_dynamic = 0;
+ 		      h->ref_dynamic = 1;
+-		      h->dynamic_def = 1;
+ 		    }
+ 		}
+ 	      if (! info->executable
+@@ -4366,7 +4364,10 @@ error_free_dyn:
+ 	      if (! definition)
+ 		h->ref_dynamic = 1;
+ 	      else
+-		h->def_dynamic = 1;
++		{
++		  h->def_dynamic = 1;
++		  h->dynamic_def = 1;
++		}
+ 	      if (h->def_regular
+ 		  || h->ref_regular
+ 		  || (h->u.weakdef != NULL
+@@ -11914,8 +11915,9 @@ bfd_elf_gc_mark_dynamic_ref_symbol (struct elf_link_hash_entry *h, void *inf)
+ 	      && h->def_regular
+ 	      && ELF_ST_VISIBILITY (h->other) != STV_INTERNAL
+ 	      && ELF_ST_VISIBILITY (h->other) != STV_HIDDEN
+-	      && !bfd_hide_sym_by_version (info->version_info,
+-					   h->root.root.string))))
++	      && (strchr (h->root.root.string, ELF_VER_CHR) != NULL
++		  || !bfd_hide_sym_by_version (info->version_info,
++					       h->root.root.string)))))
+     h->root.u.def.section->flags |= SEC_KEEP;
+ 
+   return TRUE;
+diff --git a/ld/testsuite/ld-elf/elf.exp b/ld/testsuite/ld-elf/elf.exp
+index 4a00b81..866c866 100644
+--- a/ld/testsuite/ld-elf/elf.exp
++++ b/ld/testsuite/ld-elf/elf.exp
+@@ -138,6 +138,11 @@ if ![isnative] {
+     return
+ }
+ 
++run_cc_link_tests {
++    {"PR ld/13195" "-Wl,--gc-sections" ""
++     {pr13195.c} {} "pr13195"}
++}
++
+ set array_tests {
+     {"preinit array" "" "" {preinit.c} "preinit" "preinit.out"}
+     {"init array" "" "" {init.c} "init" "init.out"}
+diff --git a/ld/testsuite/ld-elf/pr13195.c b/ld/testsuite/ld-elf/pr13195.c
+new file mode 100644
+index 0000000..a9bce4a
+--- /dev/null
++++ b/ld/testsuite/ld-elf/pr13195.c
+@@ -0,0 +1,5 @@
++int
++main ()
++{
++  return 0;
++}
+diff --git a/ld/testsuite/ld-elf/pr13195.d b/ld/testsuite/ld-elf/pr13195.d
+new file mode 100644
+index 0000000..796102b
+--- /dev/null
++++ b/ld/testsuite/ld-elf/pr13195.d
+@@ -0,0 +1,10 @@
++#ld: --gc-sections -shared -version-script pr13195.t
++#readelf: -s --wide -D
++#target: *-*-linux* *-*-gnu*
++#notarget: arc-*-* d30v-*-* dlx-*-* i960-*-* or32-*-* pj*-*-*
++#notarget: hppa64-*-* i370-*-* i860-*-* ia64-*-* mep-*-* mn10200-*-*
++# generic linker targets don't support --gc-sections, nor do a bunch of others
++
++#...
++ +[0-9]+ +[0-9]+: +[0-9a-f]+ +[0-9]+ +FUNC +GLOBAL +DEFAULT +[1-9]+ foo
++#pass
+diff --git a/ld/testsuite/ld-elf/pr13195.s b/ld/testsuite/ld-elf/pr13195.s
+new file mode 100644
+index 0000000..409b5af
+--- /dev/null
++++ b/ld/testsuite/ld-elf/pr13195.s
+@@ -0,0 +1,6 @@
++	.section .text.new_foo,"ax",%progbits
++	.globl	new_foo
++	.type	new_foo, %function
++new_foo:
++	.byte 0
++	.symver new_foo,foo@@VERS_2.0
+diff --git a/ld/testsuite/ld-elf/pr13195.t b/ld/testsuite/ld-elf/pr13195.t
+new file mode 100644
+index 0000000..2b82842
+--- /dev/null
++++ b/ld/testsuite/ld-elf/pr13195.t
+@@ -0,0 +1,6 @@
++VERS_2.0 {
++global:
++  foo;
++local:
++  *;
++};

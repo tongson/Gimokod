@@ -1,0 +1,61 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=bzip2
+pkgver=1.0.6
+pkgrel=1
+pkgdesc="A high-quality data compression program"
+arch=('i686' 'x86_64')
+license=('custom')
+depends=
+url="http://sources.redhat.com/bzip2"
+groups=('base')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+
+  for f in "${srcdir}"/*.patch; do
+    msg "Applying patch ${f}"
+    patch -Np1 -i "${f}"
+  done
+
+  make -f Makefile-libbz2_so
+  make bzip2 bzip2recover libbz2.a
+
+  install -dm755 "${pkgdir}"/bin
+  install -m755 bzip2-shared "${pkgdir}"/bin/bzip2
+  install -m755 bzip2recover "${pkgdir}"/bin
+  ln -sf bzip2 "${pkgdir}"/bin/bunzip2
+  ln -sf bzip2 "${pkgdir}"/bin/bzcat
+
+  install -dm755 "${pkgdir}"/usr/bin
+  install -m755 bzdiff bzgrep bzmore "${pkgdir}"/usr/bin
+
+  install -Dm755 libbz2.so.1.0.6 "${pkgdir}"/lib/libbz2.so.1.0.6
+  ln -s libbz2.so.1.0.6 "${pkgdir}"/lib/libbz2.so
+  ln -s libbz2.so.1.0.6 "${pkgdir}"/lib/libbz2.so.1
+  ln -s libbz2.so.1.0.6 "${pkgdir}"/lib/libbz2.so.1.0
+
+  install -Dm644 libbz2.a "${pkgdir}"/usr/lib/libbz2.a
+  ln -sf ../../lib/libbz2.so "${pkgdir}"/usr/lib/libbz2.so
+
+  install -Dm644 bzlib.h "${pkgdir}"/usr/include/bzlib.h
+
+  install -Dm644 bzip2.1 "${pkgdir}"/usr/share/man/man1/bzip2.1
+  ln -sf bzip2.1 "${pkgdir}"/usr/share/man/man1/bunzip2.1
+  ln -sf bzip2.1 "${pkgdir}"/usr/share/man/man1/bzcat.1
+  ln -sf bzip2.1 "${pkgdir}"/usr/share/man/man1/bzip2recover.1
+
+  install -Dm644 "${srcdir}"/"${pkgname}"-"${pkgver}"/LICENSE \
+                 "${pkgdir}"/usr/share/licenses/"${pkgname}"/LICENSE
+}
+
+source=(http://www.bzip.org/${pkgver}/bzip2-${pkgver}.tar.gz
+        bzip2-1.0.4-bzip2recover.patch
+        bzip2-1.0.3-no-test.patch
+        bzip2-1.0.4-POSIX-shell.patch
+        bzip2-1.0.6-saneso.patch)
+
+sha256sums=('a2848f34fcd5d6cf47def00461fcb528a0484d8edef8208d6d2e2909dc61d9cd'
+            '0585fb92a4b409404147a3f940ed2ca03b3eaed1ec4fb68ae6ad74db668bea83'
+            '3478e797662d85996c03d3b7612d548d2d377fe7efc3dc190332741a11082ef6'
+            'a810bda8ff824a3da6c5eb2659e388c6f6d8b7f09d08ca5b3ace18f96d5299fe'
+            '5591ef4d3ccc1ea08750ce5650efadb0e8e2255b50e506cc8d66b131f8d891f2')

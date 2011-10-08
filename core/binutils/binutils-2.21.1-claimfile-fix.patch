@@ -1,0 +1,15 @@
+===================================================================
+RCS file: /cvs/src/src/ld/testsuite/ld-plugin/plugin-6.d,v
+retrieving revision 1.1
+retrieving revision 1.2
+diff -u -r1.1 -r1.2
+--- src/ld/testsuite/ld-plugin/plugin-6.d	2010/10/14 01:31:33	1.1
++++ src/ld/testsuite/ld-plugin/plugin-6.d	2010/11/06 10:47:32	1.2
+@@ -26,6 +26,6 @@
+ #...
+ hook called: all symbols read.
+ tmpdir/main.o: In function `main':
+-.*ld/testsuite/ld-plugin/main.c:12: undefined reference to `func'
++.*main.c.*: undefined reference to `func'
+ hook called: cleanup.
+ #...

@@ -1,0 +1,21 @@
+--- glibc/Makeconfig
++++ glibc/Makeconfig
+@@ -276,7 +276,6 @@
+ ifndef infodir
+ infodir = $(prefix)/info
+ endif
+-inst_infodir = $(install_root)$(infodir)
+ 
+ # Where to install audit libraries.
+ ifndef auditdir
+@@ -944,8 +943,8 @@
+ all-subdirs = csu assert ctype locale intl catgets math setjmp signal	    \
+ 	      stdlib stdio-common libio malloc string wcsmbs time dirent    \
+ 	      grp pwd posix io termios resource misc socket sysvipc gmon    \
+-	      gnulib iconv iconvdata wctype manual shadow gshadow po argp   \
+-	      crypt nss localedata timezone rt conform debug		    \
++	      gnulib iconv iconvdata wctype shadow gshadow argp      \
++	      crypt nss localedata rt conform debug		    \
+ 	      $(add-on-subdirs) $(dlfcn) $(binfmt-subdir)
+ 
+ ifndef avoid-generated

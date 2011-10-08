@@ -1,0 +1,23 @@
+2004-12-09  Thorsten Kukuk  <kukuk@suse.de>
+
+	* nscd/nscd.h: Move persistent storage back to /var/run/nscd
+
+Index: nscd/nscd.h
+===================================================================
+--- nscd/nscd.h.orig
++++ nscd/nscd.h
+@@ -105,10 +105,10 @@ struct database_dyn
+ 
+ 
+ /* Paths of the file for the persistent storage.  */
+-#define _PATH_NSCD_PASSWD_DB	"/var/db/nscd/passwd"
+-#define _PATH_NSCD_GROUP_DB	"/var/db/nscd/group"
+-#define _PATH_NSCD_HOSTS_DB	"/var/db/nscd/hosts"
+-#define _PATH_NSCD_SERVICES_DB	"/var/db/nscd/services"
++#define _PATH_NSCD_PASSWD_DB	"/var/run/nscd/passwd"
++#define _PATH_NSCD_GROUP_DB	"/var/run/nscd/group"
++#define _PATH_NSCD_HOSTS_DB	"/var/run/nscd/hosts"
++#define _PATH_NSCD_SERVICES_DB	"/var/run/nscd/services"
+ 
+ /* Path used when not using persistent storage.  */
+ #define _PATH_NSCD_XYZ_DB_TMP	"/var/run/nscd/dbXXXXXX"

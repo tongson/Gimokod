@@ -1,0 +1,65 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=openssh
+pkgver=5.9p1
+pkgrel=1
+pkgdesc='Free version of the SSH connectivity tools'
+arch=('i686' 'x86_64')
+license=('custom:BSD')
+groups=('base')
+url='http://www.openssh.org/portable.html'
+backup=('etc/ssh/ssh_config' 'etc/ssh/sshd_config' 'etc/pam.d/sshd' 'etc/conf.d/sshd')
+depends=('openssl')
+install=openssh.install
+source=("ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/${pkgname}-${pkgver}.tar.gz"
+        'sshd.service'
+        'sshd.confd'
+        'sshd.pam')
+sha1sums=('ac4e0055421e9543f0af5da607a72cf5922dcc56'
+          'd43bdd824fcce40f1e6c3905087211a1cbba1031'
+          'ec102deb69cad7d14f406289d2fc11fee6eddbdd'
+          '07fecd5880b1c4fdd8c94ddb2e89ddce88effdc1')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --libexecdir=/usr/lib/ssh \
+              --sysconfdir=/etc/ssh \
+              --with-privsep-user=sshd \
+              --with-privsep-path=/var/empty \
+              --with-md5-passwords \
+              --with-pam \
+              --with-mantype=man \
+              --with-xauth=/usr/bin/xauth \
+              --with-ssl-engine \
+              --without-tcp-wrappers \
+              --disable-strip
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+
+  install -Dm644 ../sshd.pam "${pkgdir}"/etc/pam.d/sshd
+  install -Dm644 ../sshd.confd "${pkgdir}"/etc/conf.d/sshd
+  install -Dm644 LICENCE "${pkgdir}/usr/share/licenses/${pkgname}/LICENCE"
+  install -Dm644 ../sshd.service "${pkgdir}"/lib/systemd/system/sshd.service
+
+  rm "${pkgdir}"/usr/share/man/man1/slogin.1
+  ln -sf ssh.1.gz "${pkgdir}"/usr/share/man/man1/slogin.1.gz
+
+  # additional contrib scripts that we like
+  install -Dm755 contrib/findssl.sh "${pkgdir}"/usr/bin/findssl.sh
+  install -Dm755 contrib/ssh-copy-id "${pkgdir}"/usr/bin/ssh-copy-id
+  install -Dm644 contrib/ssh-copy-id.1 "${pkgdir}"/usr/share/man/man1/ssh-copy-id.1
+
+
+  # PAM is a common, standard feature to have
+  sed \
+    -e '/^#ChallengeResponseAuthentication yes$/c ChallengeResponseAuthentication no' \
+    -e '/^#UsePAM no$/c UsePAM yes' \
+    -i "${pkgdir}"/etc/ssh/sshd_config
+}

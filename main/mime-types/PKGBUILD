@@ -1,0 +1,20 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=mime-types
+pkgver=8
+pkgrel=1
+pkgdesc='Provides /etc/mime.types'
+url='http://www.archlinux.org/'
+license=('GPL2')
+depends=
+arch=('any')
+backup=('etc/mime.types')
+source=("http://mirrors.kernel.org/gentoo/distfiles/${pkgname}-${pkgver}.tar.bz2"
+        'archlinux.patch')
+sha1sums=('01682b0ad3111a6cf65e6c9db0c18ddd7523c593'
+          '2fc3e867317e7144bbf38359f3791c3f8899198a')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  patch -p1 -i ../archlinux.patch
+  install -Dm644 mime.types "${pkgdir}"/etc/mime.types
+}

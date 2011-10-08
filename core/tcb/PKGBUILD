@@ -1,0 +1,40 @@
+pkgname=tcb
+pkgver=1.1
+pkgrel=1
+pkgdesc="Libraries and tools implementing the tcb password shadowing scheme"
+arch=('i686' 'x86_64')
+url="http://www.openwall.com/tcb/"
+license=('BSD')
+groups=('base')
+depends=('pam')
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+  # from Mandriva
+  patch -Np1 -i "${srcdir}"/tcb-1.0.2-assume_shadow.patch
+  patch -Np1 -i "${srcdir}"/tcb-1.0.3-warn.patch
+  CFLAGS="${CFLAGS} -DENABLE_SETFSUGID -I../include -Wall"
+  LDFLAGS="${LDFLAGS} -L../libs"
+  make CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}"
+}
+
+package() {
+  cd "$srcdir/$pkgname-$pkgver"
+  make install-non-root install-pam_unix install-pam_pwdb DESTDIR="${pkgdir}" \
+       MANDIR=/usr/share/man LIBDIR=/usr/lib \
+       LIBEXECDIR=/usr/lib
+  install -Dm644 "${srcdir}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+  chgrp shadow "${pkgdir}/usr/lib/chkpwd/tcb_chkpwd"
+  chmod 2711 "${pkgdir}/usr/lib/chkpwd/tcb_chkpwd"
+  chgrp chkpwd "${pkgdir}/usr/lib/chkpwd"
+  chmod 0710 "${pkgdir}/usr/lib/chkpwd"
+}
+
+source=(http://www.openwall.com/${pkgname}/${pkgname}-$pkgver.tar.gz
+        LICENSE
+        tcb-1.0.2-assume_shadow.patch
+        tcb-1.0.3-warn.patch)
+
+sha256sums=('63ab4191e6a01dfd4d9e71eb1a2b714a49c9ce0a01416a2d40ebffcbf486eb65'
+            'fcc0bf2562c0d6145daacb0541ca70a75f8c79aef0b08566d1d5b52e903fc418'
+            'babbef9c3efe76249080df8f5b19c88b9d4160707a82866a1f63956e208d8cc0'
+            '07f2eeac838399ed065119bc4f37158346fd6f0daece2c093aaee3b6816f6e0c')

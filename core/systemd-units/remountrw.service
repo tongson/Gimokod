@@ -1,0 +1,11 @@
+[Unit]
+Description=remount root rw
+DefaultDependencies=no
+Before=systemd-random-seed-save.service shutdown.target
+
+[Service]
+Type=oneshot
+ExecStart=-/bin/mount -o remount,rw /
+
+[Install]
+WantedBy=shutdown.target

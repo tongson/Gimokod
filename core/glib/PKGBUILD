@@ -1,0 +1,64 @@
+pkgname=glib
+pkgver=2.30.0
+_mver=2.30
+pkgrel=1
+pkgdesc="Common C routines used by GTK+ and other libs"
+url="http://www.gtk.org/"
+arch=(i686 x86_64)
+license=('LGPL')
+depends=('zlib' 'libffi')
+groups=('base-devel')
+makedepends=('zlib' 'libffi')
+replaces=('glib2')
+conflicts=('glib2')
+provides=('glib2')
+options=('!libtool' '!docs')
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  sed 's/^\(.*\SUBDIRS .*\=.*\)po docs\(.*\)$/\1\2/' -i $(find . -name Makefile.am -o -name Makefile.in)
+  sed 's/^\(.*\SUBDIRS .*\=.*\)tests\(.*\)$/\1\2/' -i $(find . -name Makefile.am -o -name Makefile.in)
+  sed -i 's:^tests\/.*$::' configure.ac
+  sed -i 's:^docs\/.*$::' configure.ac
+  patch -Np1 -i "${srcdir}"/glib-2.29.18-external-gdbus-codegen.patch
+  ln -sfn /bin/true py-compile
+  AT_M4DIR="${srcdir}/${pkgname}-${pkgver}" autoreconf -v
+  find . -name configure | while read f ; do
+    patch --no-backup-if-mismatch -p0 "${f}" "${srcdir}"/nocxx.patch || return 0
+  done
+  export DBUS1_CFLAGS="-I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include"
+  export DBUS1_LIBS="-ldbus-1"
+  sed -i 's:^GTK_DOC_CHECK.*$::' configure
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --mandir=/usr/share/man \
+              --sysconfdir=/etc \
+              --enable-regex \
+              --with-pcre=internal \
+              --with-threads=posix \
+              --disable-dtrace \
+              --disable-systemtap \
+              --disable-dependency-tracking \
+              --enable-debug=yes \
+              --disable-selinux \
+              --enable-gtk-doc-html=no \
+              --disable-fam
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+  rm -rf "${pkgdir}/usr/share/gdb/" "${pkgdir}/usr/share/glib-2.0/gdb/"
+  for _i in "${pkgdir}/etc/bash_completion.d/"*; do
+    chmod -x "${_i}"
+  done
+}
+
+source=(http://ftp.gnome.org/pub/GNOME/sources/${pkgname}/${_mver}/${pkgname}-${pkgver}.tar.xz
+        glib-2.29.18-external-gdbus-codegen.patch
+        nocxx.patch)
+
+sha256sums=('d64c00b43409eabb89aad78501fcb1a992b002b314a4414a9bd069585cb7cdc1'
+            '4ddd01367518b22c000732c1ad27a2ff8c24cb7876874b2aecd2ebf8361dfd0b'
+            '2de7a721fb68699baf54b217df86bd290c51d4fad59eb595bdd145908e934547')

@@ -1,0 +1,84 @@
+pkgbase=lvm2
+pkgname=('lvm2' 'device-mapper')
+pkgver=2.02.88
+pkgrel=1
+arch=('i686' 'x86_64')
+url="http://sourceware.org/lvm2/"
+license=('GPL2' 'LGPL2')
+depends=
+groups=('base')
+
+build() {
+  cd "${srcdir}/LVM2.${pkgver}"
+  patch -Np1 -i "${srcdir}"/lvm2-2.02.63-always-make-static-libdm.patch
+  patch -Np1 -i "${srcdir}"/lvm2-2.02.64-dmeventd-libs.patch
+  patch -Np0 -i "${srcdir}"/lvm2-2.02.70-asneeded.patch
+  patch -Np1 -i "${srcdir}"/lvm2-2.02.73-locale-muck.patch
+  patch -Np1 -i "${srcdir}"/lvm2-no-export-dynamic.patch
+  sed -i 's|/usr/bin/tr|/bin/tr|' scripts/lvmdump.sh
+  sed -i -e 's:\(LIBS += $(UDEV_LIBS)\):\1 -lrt:' tools/Makefile.in
+  sed -i -e 's:\($(STATIC_LIBS)\):\1 -lrt:' daemons/dmeventd/Makefile.in
+  autoreconf -v
+  ./configure --prefix= \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --sysconfdir=/etc \
+              --localstatedir=/var \
+              --datarootdir=/usr/share \
+              --includedir=/usr/include \
+              --with-usrlibdir=/usr/lib \
+              --enable-pkgconfig \
+              --enable-static_link \
+              --disable-readline \
+              --disable-nls \
+              --disable-selinux \
+              --disable-valgrind-pool \
+              --disable-debug \
+              --disable-testing \
+              --disable-profiling \
+              --enable-cmdlib \
+              --enable-applib \
+              --with-udevdir=/lib/udev/rules.d/ \
+              --enable-udev_sync \
+              --enable-udev_rules
+  make
+}
+
+package_device-mapper() {
+  pkgdesc="Device mapper userspace library and tools"
+  url="http://sourceware.org/dm/"
+  depends=('udev')
+
+  cd "${srcdir}/LVM2.${pkgver}"
+  make DESTDIR="${pkgdir}" install_device-mapper
+}
+
+package_lvm2() {
+  pkgdesc="Logical Volume Manager 2 utilities"
+  depends=("device-mapper>=${pkgver}" 'udev')
+  conflicts=('lvm' 'mkinitcpio<0.7')
+  backup=('etc/lvm/lvm.conf')
+  options=('!makeflags')
+
+  cd "${srcdir}/LVM2.${pkgver}"
+  make DESTDIR="${pkgdir}" install_lvm2
+  make -C liblvm DESTDIR="${pkgdir}" install
+  install -d "${pkgdir}"/etc/lvm/{archive,backup}
+  install -D -m644 "${srcdir}/lvm2.service" "${pkgdir}/lib/systemd/system/lvm2.service"
+}
+
+source=(ftp://sources.redhat.com/pub/lvm2/LVM2.${pkgver}.tgz
+        lvm2-2.02.63-always-make-static-libdm.patch
+        lvm2-2.02.64-dmeventd-libs.patch
+        lvm2-2.02.70-asneeded.patch
+        lvm2-2.02.73-locale-muck.patch
+        lvm2-no-export-dynamic.patch
+        lvm2.service)
+
+sha256sums=('a129d1d3949524da7d6d2a67218254baea02df06a6744faa5808a4182b2fb432'
+            '1c498b5efce77ed16bbbfcd9e0ec6da404a9c70c7ad0959ed7b60733adfcfc21'
+            '1b8c281212b3c7edf456b38679c2c7ed838dd55789125c11cde691c2ccf62ace'
+            'b0f84dadc213a9daaa97ae7815f624f0bcdc883d627659c7fcf8b7131538b43e'
+            'ce2d8fc1edcd410723f9f8300f05782caa8361b1fdefaa67feb1fd98897c3196'
+            '35a8a335ed4e65e10ef06e93002eab479253ec7a389d91bf27ef09db1b00fc99'
+            '835bd763261c671af6f83f057d688ac1578fdaf996f68c11bad2a4d55589bc24')

@@ -1,0 +1,93 @@
+diff -upk.orig SimplePAMApps-0.60.orig/common/lib/checkfds.c SimplePAMApps-0.60/common/lib/checkfds.c
+--- SimplePAMApps-0.60.orig/common/lib/checkfds.c	1999-02-19 11:38:01 +0000
++++ SimplePAMApps-0.60/common/lib/checkfds.c	2005-06-28 15:12:56 +0000
+@@ -1,3 +1,4 @@
++#include <stdlib.h>
+ #include <unistd.h>
+ #include <fcntl.h>
+ #include <sys/stat.h>
+diff -upk.orig SimplePAMApps-0.60.orig/common/lib/login_indep.c SimplePAMApps-0.60/common/lib/login_indep.c
+--- SimplePAMApps-0.60.orig/common/lib/login_indep.c	1998-12-10 09:49:38 +0000
++++ SimplePAMApps-0.60/common/lib/login_indep.c	2005-06-28 15:12:56 +0000
+@@ -1,6 +1,7 @@
+ #define _BSD_SOURCE
+ #include <string.h>
+ #include <stdio.h>
++#include <stdlib.h>
+ #include <unistd.h>
+ #include <signal.h>
+ #include <termios.h>
+diff -upk.orig SimplePAMApps-0.60.orig/common/lib/passwd_indep.c SimplePAMApps-0.60/common/lib/passwd_indep.c
+--- SimplePAMApps-0.60.orig/common/lib/passwd_indep.c	1999-11-02 09:41:34 +0000
++++ SimplePAMApps-0.60/common/lib/passwd_indep.c	2005-06-28 15:12:56 +0000
+@@ -1,4 +1,6 @@
+ #include <stdio.h>
++#include <string.h>
++#include <stdlib.h>
+ #include <unistd.h>
+ #include <ctype.h>
+ 
+diff -upk.orig SimplePAMApps-0.60.orig/common/lib/wtmp.c SimplePAMApps-0.60/common/lib/wtmp.c
+--- SimplePAMApps-0.60.orig/common/lib/wtmp.c	2005-06-28 15:12:40 +0000
++++ SimplePAMApps-0.60/common/lib/wtmp.c	2005-06-28 15:12:56 +0000
+@@ -15,6 +15,7 @@
+ #include <string.h>
+ #include <malloc.h>
+ #include <unistd.h>
++#include <time.h>
+ 
+ #ifndef UT_IDSIZE
+ #define UT_IDSIZE 4            /* XXX - this is sizeof(struct utmp.ut_id) */
+diff -upk.orig SimplePAMApps-0.60.orig/pamapps/lib/wtmp-gate.c SimplePAMApps-0.60/pamapps/lib/wtmp-gate.c
+--- SimplePAMApps-0.60.orig/pamapps/lib/wtmp-gate.c	2005-06-28 15:12:40 +0000
++++ SimplePAMApps-0.60/pamapps/lib/wtmp-gate.c	2005-06-28 15:14:03 +0000
+@@ -2,6 +2,7 @@
+  * $Id: wtmp-gate.c,v 1.1 1998/11/25 12:33:32 saw Rel $
+  */
+ 
++#include <stdlib.h>
+ #include <utmp.h>
+ 
+ #include <security/pam_appl.h>
+@@ -21,22 +21,26 @@ int utmp_open_session(pam_handle_t *pamh
+                              , const char **callname, const char **err_descr)
+ {
+     const char *user, *terminal, *rhost;
++    const void *item;
+     int retval;
+ 
+-    retval = pam_get_item(pamh, PAM_USER, (const void **)&user);
++    retval = pam_get_item(pamh, PAM_USER, &item);
++    user = item;
+     if (retval != PAM_SUCCESS) {
+         *callname = "pam_get_item(PAM_USER)";
+         *err_descr = pam_strerror(pamh, retval);
+         return -1;
+     }
+-    retval = pam_get_item(pamh, PAM_TTY, (const void **)&terminal);
++    retval = pam_get_item(pamh, PAM_TTY, &item);
++    terminal = item;
+     if (retval != PAM_SUCCESS) {
+         *callname = "pam_get_item(PAM_TTY)";
+         *err_descr = pam_strerror(pamh, retval);
+         return -1;
+     }
+     if (!terminal) terminal = "???";
+-    retval = pam_get_item(pamh, PAM_RHOST, (const void **)&rhost);
++    retval = pam_get_item(pamh, PAM_RHOST, &item);
++    rhost = item;
+     if (retval != PAM_SUCCESS)
+         rhost = NULL;
+ 
+@@ -49,8 +53,10 @@ int utmp_close_session(pam_handle_t *pam
+ {
+     int retval;
+     const char *terminal;
++    const void *item;
+ 
+-    retval = pam_get_item(pamh, PAM_TTY, (const void **)&terminal);
++    retval = pam_get_item(pamh, PAM_TTY, &item);
++    terminal = item;
+     if (retval != PAM_SUCCESS) {
+         *callname = "pam_get_item(PAM_TTY)";
+         *err_descr = pam_strerror(pamh, retval);

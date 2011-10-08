@@ -1,0 +1,106 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=mplayer
+pkgver=34007
+pkgrel=1
+arch=('i686' 'x86_64')
+makedepends=( 'libxxf86vm' 'libmad' 'libcdio' 'libxinerama'  'lame' 'libtheora' 'xvidcore'  'libxss' 'libgl'
+              'x264'  'faad2'   'libxvmc'  'libvdpau'  'libdca' 'a52dec'  'libvpx'
+              'unzip' 'mesa' 'yasm'  'fontconfig' 'libass')
+license=('GPL')
+url="http://www.mplayerhq.hu/"
+options=(!buildflags !emptydirs)
+source=(ftp://ftp.archlinux.org/other/${pkgname}/${pkgname}-${pkgver}.tar.xz mplayer.desktop)
+md5sums=('675b929bab9e3540bb63207ed940fb7f'
+         'c0d6ef795cf6de48e3b87ff7c23f0319')
+
+build() {
+    cd "${srcdir}"/${pkgname}
+
+    ./configure --enable-runtime-cpudetection \
+                --confdir=/etc/mplayer \
+                --disable-fribidi \
+                --disable-inet6 \
+                --disable-libnut \
+                --disable-unrarexec \
+                --disable-smb \
+                --disable-lirc \
+                --disable-lircc \
+                --disable-apple-ir \
+                --disable-cdparanoia \
+                --charset=UTF-8 \
+                --disable-tv-bsdbt848 \
+                --disable-ivtv \
+                --enable-tv-v4l2 \
+                --disable-libdirac-lavc \
+                --disable-libschroedinger-lavc \
+                --disable-libopencore_amrnb \
+                --disable-libopencore_amrwb \
+                --disable-live \
+                --disable-mpg123 \
+                --disable-tga \
+                --disable-speex \
+                --disable-libopenjpeg \
+                --disable-mencoder \
+                --disable-faac-lavc \
+                --disable-qtx \
+                --disable-aa \
+                --disable-fbdev \
+                --disable-caca \
+                --disable-zr \
+                --disable-mga \
+                --disable-xmga \
+                --disable-3dfx \
+                --disable-tdfxvid \
+                --disable-tdfxfb \
+                --disable-xvr100 \
+                --disable-esd \
+                --disable-jack \
+                --disable-ladspa \
+                --disable-nas \
+                --disable-openal \
+                --disable-pulse \
+                --disable-ossaudio \
+                --disable-dga1 \
+                --disable-dga2 \
+                --disable-vesa \
+                --disable-dxr3 \
+                --disable-ggi \
+                --disable-mng \
+                --disable-enca \
+                --disable-nemesi \
+                --disable-sdl \
+                --prefix=/usr \
+                --disable-gui \
+                --disable-arts \
+                --disable-liblzo \
+                --disable-openal \
+                --disable-libdv \
+                --disable-musepack \
+                --disable-esd \
+                --disable-ass-internal \
+                --enable-xvmc
+    [ "$CARCH" = "i686" ] &&  sed 's|-march=i486|-march=i686|g' -i config.mak
+
+    make
+}
+
+package_mplayer() {
+    pkgdesc="A movie player for linux"
+    install=mplayer.install
+    backup=('etc/mplayer/codecs.conf' 'etc/mplayer/input.conf')
+    depends=('libxss' 'a52dec' 'libvpx' 'x264'  'libdca'  'lame' 'fontconfig' 'libgl'
+    'libxinerama' 'libvdpau' 'xvidcore' 'libcdio' 'libmad' 'libtheora'
+    'libjpeg' 'faad2' 'libxvmc' 'libass' 'libxxf86vm')
+
+    cd "${srcdir}"/${pkgbase}
+
+    make DESTDIR="${pkgdir}" install-mplayer install-mplayer-man
+    install -Dm644 etc/{codecs.conf,input.conf,example.conf} "${pkgdir}"/etc/mplayer/
+    install -dm755 "${pkgdir}"/usr/share/mplayer/
+    ln -s /usr/share/fonts/TTF/DejaVuSans.ttf "${pkgdir}"/usr/share/mplayer/subfont.ttf
+    rm -rf "${pkgdir}"/usr/share/mplayer/font
+    #desktop file  FS#14770
+    install -Dm644 "${srcdir}"/mplayer.desktop "${pkgdir}"/usr/share/applications/mplayer.desktop
+    install -Dm644 etc/mplayer.png "${pkgdir}"/usr/share/pixmaps/mplayer.png
+}
+

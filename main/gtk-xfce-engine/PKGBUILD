@@ -1,0 +1,31 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=gtk-xfce-engine
+pkgver=2.9.0
+pkgrel=1
+pkgdesc="A port of Xfce engine to GTK+-2.0"
+arch=('i686' 'x86_64')
+license=('GPL2')
+url="http://www.xfce.org/"
+groups=('xfce4')
+depends=("gtk2>=2.14.7")
+makedepends=('pkgconfig')
+options=('!libtool')
+source=(http://archive.xfce.org/src/xfce/${pkgname}/2.9/${pkgname}-${pkgver}.tar.bz2)
+md5sums=('e2bc76ab5093ff8472e728e6d6ad5da2')
+sha1sums=('ce0ef1220c98dddabaf7917f8d98579dd65f5009')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  ./configure --prefix=/usr \
+              --sysconfdir=/etc \
+              --libexecdir=/usr/lib \
+              --localstatedir=/var \
+              --disable-static \
+              --disable-debug
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}

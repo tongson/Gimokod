@@ -1,0 +1,58 @@
+diff -ru tcb-1.0.3/pam_tcb/pam_unix_acct.c tcb-1.0.3.new/pam_tcb/pam_unix_acct.c
+--- tcb-1.0.3/pam_tcb/pam_unix_acct.c	2005-12-28 00:05:02.000000000 +0100
++++ tcb-1.0.3/pam_tcb/pam_unix_acct.c	2009-12-17 14:32:43.000000000 +0100
+@@ -51,10 +51,12 @@
+ 
+ 	curdays = time(NULL) / (60 * 60 * 24);
+ 	D(("today is %d, last change %d", curdays, spw->sp_lstchg));
+-	if ((curdays > spw->sp_expire) && (spw->sp_expire != -1))
++	if ((curdays > spw->sp_expire) && (spw->sp_expire != -1) &&
++	    ((int)spw->sp_expire != -1))
+ 		return ACCT_3;
+ 
+ 	if ((curdays > (spw->sp_lstchg + spw->sp_max + spw->sp_inact)) &&
++	    ((int)spw->sp_max != -1) && ((int)spw->sp_inact != -1) &&
+ 	    (spw->sp_max != -1) && (spw->sp_inact != -1) &&
+ 	    (spw->sp_lstchg != 0))
+ 		return ACCT_4;
+@@ -65,11 +66,13 @@
+ 		return ACCT_5;
+ 
+ 	if (((spw->sp_lstchg + spw->sp_max) < curdays) &&
+-	    (spw->sp_max != -1))
++	    (spw->sp_max != -1) &&
++	    ((int)spw->sp_max != -1))
+ 		return ACCT_6;
+ 
+ 	if ((curdays > (spw->sp_lstchg + spw->sp_max - spw->sp_warn)) &&
+-	    (spw->sp_max != -1) && (spw->sp_warn != -1)) {
++	    (spw->sp_max != -1) && (spw->sp_warn != -1) &&
++	    ((int)spw->sp_max != -1) && ((int)spw->sp_warn != -1)) {
+ 		daysleft = (spw->sp_lstchg + spw->sp_max) - curdays;
+ 		return ACCT_7 + 256 * daysleft;
+ 	}
+diff -ru tcb-1.0.3/pam_tcb/pam_unix_passwd.c tcb-1.0.3.new/pam_tcb/pam_unix_passwd.c
+--- tcb-1.0.3/pam_tcb/pam_unix_passwd.c	2009-04-03 17:01:52.000000000 +0200
++++ tcb-1.0.3/pam_tcb/pam_unix_passwd.c	2009-12-17 14:33:33.000000000 +0100
+@@ -457,17 +457,19 @@
+ 		/* Get the current number of days since 1970. */
+ 		curdays = time(NULL) / (60 * 60 * 24);
+ 		if (curdays < spw->sp_lstchg + spw->sp_min &&
+-		    spw->sp_min != -1)
++		    spw->sp_min != -1 &&
++		    (int)spw->sp_min != -1)
+ 			/* too early */
+ 			return PAM_AUTHTOK_ERR;
+ 		else
+ 		if (curdays > spw->sp_lstchg + spw->sp_max + spw->sp_inact &&
+ 		    spw->sp_max != -1 && spw->sp_inact != -1 &&
++		    (int)spw->sp_max != -1 && (int)spw->sp_inact != -1 &&
+ 		    spw->sp_lstchg != 0)
+ 			/* too late */
+ 			return PAM_ACCT_EXPIRED;
+ 		else
+-		if (curdays > spw->sp_expire && spw->sp_expire != -1)
++		if (curdays > spw->sp_expire && spw->sp_expire != -1 && (int)spw->sp_expire != -1)
+ 			/* account expired */
+ 			return PAM_ACCT_EXPIRED;
+ 	}

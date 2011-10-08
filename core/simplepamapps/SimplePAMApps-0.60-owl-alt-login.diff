@@ -1,0 +1,545 @@
+diff -urp SimplePAMApps-0.60.orig/Discussions SimplePAMApps-0.60/Discussions
+--- SimplePAMApps-0.60.orig/Discussions	Sun Mar 28 08:15:58 1999
++++ SimplePAMApps-0.60/Discussions	Mon Nov 19 04:49:43 2001
+@@ -9,6 +9,10 @@
+    login command line.  People haven't agreed how to solve the problem.  I
+    need to think more.
+ 
++[ In this package, login has been patched to be able to obtain the username
++from LOGNAME (as well as from the command line) when started as root (not
++SUID).  This is to be used by getty's. ]
++
+ 3. Somebody (I don't remember who) stated that `su' had to provide a protection
+    against brute force attacks on user passwords.  The issue needs more
+    discussion.  Such a protection makes a sense only if all ways for brute
+diff -urp SimplePAMApps-0.60.orig/pamapps/login/login.1 SimplePAMApps-0.60/pamapps/login/login.1
+--- SimplePAMApps-0.60.orig/pamapps/login/login.1	Fri Jun 12 17:11:03 1998
++++ SimplePAMApps-0.60/pamapps/login/login.1	Tue Apr 15 12:46:44 2003
+@@ -8,7 +8,8 @@
+ login \- start an interactive session on the system
+ 
+ .SH SYNOPSIS
+-.B login [-p] [-h hostname] [-f] [--] [username]
++.B login
++[\fB-p\fR] [\fB-h \fIhostname\fR] [\fB-f\fR] [\fB--\fR] [\fIusername\fR]
+ .sp 2
+ .SH DESCRIPTION
+ The
+@@ -61,52 +62,6 @@ proceeding. Such updates are performed b
+ module(s).
+ 
+ .sp
+-A simple entry in the
+-.B /etc/pam.conf
+-configuration file for this service would be:
+-.br
+-  
+-.br
+- #
+-.br
+- # login service, most management service is provided
+-.br
+- # by pwdb, however securetty prevents root from
+-.br
+- # login in on an insecure terminal. Cracklib is used
+-.br
+- # to ensure that the user's new password is strong.
+-.br
+- #
+-.br
+- login auth requisite pam_securetty.so
+-.br
+- login auth required pam_pwdb.so
+-.br
+- login account required  pam_pwdb.so
+-.br
+- login password required pam_cracklib.so retry=2
+- login password required pam_pwdb.so use_authtok
+-.br
+- login session required  pam_pwdb.so
+-.br
+- #
+-
+-.sp
+-(To generate the equivalent
+-.B /etc/pam.d/login
+-file, you should simply remove the first field ("login") from the
+-above example.)
+-Note,
+-.BR account ", "
+-.BR auth ", "
+-.BR password
+-and
+-.BR session
+-module-types are all required for this application to function
+-correctly.
+-
+-.sp
+ For continuity of service, the administrator might wish to make the
+ .BR su "(1)"
+ and
+@@ -124,7 +79,7 @@ The arguments passed to
+ are generally used by other applications, and have the following
+ meanings:
+ .TP
+-.BR username
++.IR username
+ The prospective name of the user requesting services on the system.
+ .sp
+ .TP
+diff -urp SimplePAMApps-0.60.orig/pamapps/login/login.c SimplePAMApps-0.60/pamapps/login/login.c
+--- SimplePAMApps-0.60.orig/pamapps/login/login.c	Sun Mar 28 08:17:11 1999
++++ SimplePAMApps-0.60/pamapps/login/login.c	Tue Apr 15 09:02:39 2003
+@@ -35,6 +35,7 @@ static const char rcsid[] =
+ #include <termios.h>
+ #include <unistd.h>
+ #include <signal.h>
++#include <syslog.h>
+ /* should be in above(?): */ extern int vhangup(void);
+ 
+ #include <security/pam_appl.h>
+@@ -58,15 +59,15 @@ static const char rcsid[] =
+ #define DEFAULT_SHELL             "/bin/sh"
+ 
+ #define LOGIN_WARNING_TIMEOUT     65
+-#define LOGIN_WARNING_TEXT        "\a..Hurry! Login will terminate soon..\n"
++#define LOGIN_WARNING_TEXT        "\aHurry! Login will terminate soon...\n"
+ 
+ #define LOGIN_ABORT_TIMEOUT       80
+-#define LOGIN_ABORT_TEXT          "\a..Login canceled!\n"
++#define LOGIN_ABORT_TEXT          "\a\n"
+ 
+ #define MAX_LOGIN                 3  /* largest tolerated delay */
+ #define SLEEP_AFTER_MAX_LOGIN     5  /* failed login => delay before retry */
+ 
+-#define GOODBYE_MESSAGE           ""  /* make "" for no message */
++#undef GOODBYE_MESSAGE
+ #define GOODBYE_DELAY             1  /* time to display good-bye */
+ 
+ #define SERIOUS_ABORT_DELAY       3600                    /* yes, an hour! */
+@@ -78,6 +79,9 @@ static const char rcsid[] =
+ 				      * care that MIN_DELAY*2^MAX_LOGIN
+ 				      * is not too large for (int) */
+ 
++#define SYSLOG_IDENT			"login"
++#define SYSLOG_FACILITY			LOG_AUTH
++#define SYSLOG_PRIORITY			LOG_ERR
+ 
+ #define LOGIN_STATE_ARGS_PARSED		2
+ #define LOGIN_STATE_TERMINAL_OBTAINED	3
+@@ -92,7 +96,9 @@ static const char rcsid[] =
+ /* internal strings and flags */
+ 
+ #define DEFAULT_HOME              "/"
+-#define LOGIN_ATTEMPT_FAILED      "Sorry, please try again\n\n"
++#define LOGIN_ATTEMPT_FAILED      "Login incorrect\n\n"
++#define LOGIN_AUTHTOK_EXPIRED \
++	"Please update your authentication token(s)\n"
+ 
+ /* for login session - after login */
+ #define TERMINAL_PERMS            (S_IRUSR|S_IWUSR | S_IWGRP)
+@@ -117,11 +123,24 @@ static const char *terminal_name=NULL;
+ static int login_flags=0;
+ static const char *login_remote_host="localhost";
+ static const char *login_remote_user="[system]";
+-static const char *login_prompt = "Login: ";    /* default first time round */
+-static const char *user_prompt = "Login: ";     /* default second, third... */
++static const char *login_prompt = "login: ";    /* default first time round */
++static const char *user_prompt = "login: ";     /* default second, third... */
+ 
+ /* ------ some local (static) functions ------- */
+ 
++#ifdef __GNUC__
++__attribute__ ((format (printf, 1, 2)))
++#endif
++static void logit(const char *format, ...)
++{
++    va_list args;
++
++    openlog(SYSLOG_IDENT, LOG_PID, SYSLOG_FACILITY);
++    va_start(args, format);
++    vsyslog(SYSLOG_PRIORITY, format, args);
++    va_end(args);
++}
++
+ /*
+  * set up the conversation timeout facilities.
+  */
+@@ -146,7 +165,7 @@ static void set_timeout(int set)
+  *  This function is to be used in cases of programmer error.
+  */
+ 
+-static void serious_abort(const char *s)
++static void serious_abort(void)
+ {
+     if (pamh != NULL)
+         (void) pam_end(pamh, PAM_ABORT);
+@@ -155,25 +174,17 @@ static void serious_abort(const char *s)
+ #endif
+ 
+     (void) fprintf (stderr, "Login internal error: please seek help!\n");
+-    (void) fprintf (stderr, "This message will persist for an hour.\n");
+-    (void) fprintf (stderr, "The problem is that,\n\n %s\n\n", s);
+-    (void) fprintf (stderr, "Obviously, this should never happen! It could possibly be\n");
+-    (void) fprintf (stderr, "a problem with (Linux-)PAM -- A recently installed module\n");
+-    (void) fprintf (stderr, "perhaps? For reference, this is the version of this\n");
+-    (void) fprintf (stderr, "application:\n\n %s", rcsid);
+ 
+     /* delay - to read the message */
+-
+     (void) sleep(SERIOUS_ABORT_DELAY);
+ 
+     /* quit the program */
+-
+     exit(1);	
+ }
+ 
+ static int login_authenticate_user(void)
+ {
+-    int delay, retval ,logins;
++    int delay, retval, logins;
+ 
+     /*
+      *  This is the main authentication loop.
+@@ -222,25 +233,15 @@ static int login_authenticate_user(void)
+ 	    return PAM_PERM_DENIED;
+ 	}
+ 
++	/* what should we do about the failure? */
++	(void) fprintf(stderr, LOGIN_ATTEMPT_FAILED);
++
+ 	/* was that too many failures? */
+ 	if (retval == PAM_MAXTRIES || logins >= MAX_LOGIN) {
+ 	    D(("Tried too many times"));
+ 	    return PAM_MAXTRIES;
+ 	}
+ 
+-	/* what should we do about the failure? */
+-	switch (retval) {
+-	case PAM_ABORT:
+-	case PAM_CRED_INSUFFICIENT:
+-	case PAM_AUTHINFO_UNAVAIL:
+-	case PAM_CONV_ERR:
+-	case PAM_SERVICE_ERR:
+-	    D(("system failed; %s", pam_strerror(pamh,retval)));
+-	    return retval;
+-	default:
+-	    (void) fprintf(stderr, LOGIN_ATTEMPT_FAILED);
+-	}
+-
+ 	/* reset the login prompt */
+ 	retval = pam_set_item(pamh, PAM_USER_PROMPT, user_prompt);
+ 
+@@ -274,32 +275,15 @@ static void login_invoke_shell(const cha
+      * take lose root privilege.
+      */
+ 
+-    do
+-    {
+-	pw_dir = pam_getenv(pamh, "HOME");
+-	if ( !pw_dir || *pw_dir == '\0' || chdir(pw_dir) ) {
+-	    (void) fprintf (stderr, "home directory for %s does not work..", 
+-								user);
+-	    if (!strcmp(pw_dir,DEFAULT_HOME) || chdir(DEFAULT_HOME) ) 
+-	    {
+-		(void) fprintf (stderr, ". %s not available either; exiting\n", DEFAULT_HOME);
+-		break;
+-	    }
+-	    if (!pw_dir || *pw_dir == '\0') {
+-		(void) fprintf(stderr, ". setting to " DEFAULT_HOME "\n");
+-		pw_dir = DEFAULT_HOME;
+-	    } else {
+-		(void) fprintf(stderr, ". changing to " DEFAULT_HOME "\n");
+-	    }
+-	    if (pam_misc_setenv(pamh, "HOME", pw_dir, 0) != PAM_SUCCESS) {
+-		D(("failed to set $HOME"));
+-		(void) fprintf(stderr, 
+-			"Warning: unable to set HOME environment variable\n");
+-	    }
++    do {
++	if (chdir(DEFAULT_HOME)) {
++	    logit("chdir: " DEFAULT_HOME ": %m");
++	    break;
+ 	}
++	pw_dir = strdup(pam_getenv(pamh, "HOME"));
+ 
+ 	/*
+-	 * next we attempt to obtain the preferred shell + arglist
++	 * attempt to obtain the preferred shell + arglist
+ 	 */
+ 
+ 	D(("what is their shell?"));
+@@ -308,10 +292,13 @@ static void login_invoke_shell(const cha
+ 	{
+ 	    delay = STANDARD_DELAY;
+ 	    pam_retval = PAM_BUF_ERR;
+-	    (void) fprintf (stderr, "unable to build shell arguments");
++	    logit("unable to build shell arguments");
+ 	    break;
+ 	}
+ 
++	retval = pam_misc_setenv(pamh, "SHELL", shell_args[0], 0);
++	D(("pam_misc_setenv: SHELL=%s: retval=%d", shell_args[0], retval));
++
+ 	/*
+ 	 * Just before we shutdown PAM, we copy the PAM-environment to local
+ 	 * memory. (The parent process retains the PAM-environment so it can
+@@ -325,7 +312,7 @@ static void login_invoke_shell(const cha
+ 	if (shell_env == NULL) 
+ 	{
+ 	    delay = STANDARD_DELAY;
+-	    (void) fprintf (stderr, "environment corrupt; sorry..");
++	    logit("environment corrupt");
+ 	    break;
+ 	}
+ 
+@@ -345,9 +332,9 @@ static void login_invoke_shell(const cha
+ 	user = NULL;                            /* user's name not valid now */
+ 	if (retval != PAM_SUCCESS) 
+ 	{
+-	    delay =STANDARD_DELAY;
++	    delay = STANDARD_DELAY;
+ 	    pam_retval = retval;
+-	    (void) fprintf (stderr, "login failed to release authenticator");
++	    logit("login failed to release authenticator");
+ 	    break;
+ 	}
+ 
+@@ -357,8 +344,7 @@ static void login_invoke_shell(const cha
+ 	if (gr == NULL) 
+ 	{
+ 	    delay = STANDARD_DELAY;
+-	    (void) fprintf (stderr, "Failed to find `%s' group\n", 
+-							TERMINAL_GROUP);
++	    logit("failed to find `%s' group", TERMINAL_GROUP);
+ 	    break;
+ 	}
+ 
+@@ -368,7 +354,8 @@ static void login_invoke_shell(const cha
+ 		|| chmod(terminal_name, TERMINAL_PERMS)) 
+ 	{
+ 	    delay = STANDARD_DELAY;
+-	    (void) fprintf (stderr, "Failed to change access permission	to terminal %s\n", terminal_name);
++	    logit("failed to change access permission to terminal %s",
++		terminal_name);
+ 	    break;
+ 	}
+ 
+@@ -377,13 +364,20 @@ static void login_invoke_shell(const cha
+ 	while ( pwdb_end() == PWDB_SUCCESS );            /* forget all */
+ #endif
+ 
++	closelog();
++
+ 	/*
+ 	 * become user irrevocably
+ 	 */
+ 
+ 	if (setuid(uid) != 0) {
+-	    (void) fprintf(stderr, "su: cannot assume uid\n");
+-	    exit(1);
++	    logit("cannot assume uid");
++	    break;
++	}
++
++	if (!pw_dir || *pw_dir == '\0' || chdir(pw_dir)) {
++	    logit("cannot enter home directory");
++	    chdir(DEFAULT_HOME);
+ 	}
+ 
+ 	/* finally we invoke the user's preferred shell */
+@@ -408,7 +402,7 @@ static void login_invoke_shell(const cha
+  * main program; login top-level skeleton
+  */
+ 
+-void main(int argc, const char **argv)
++int main(int argc, const char **argv)
+ {
+     static const char *shell=NULL;
+     int retval=LOGIN_FALSE, status;
+@@ -424,8 +418,14 @@ void main(int argc, const char **argv)
+      */
+ 
+     parse_args(argc, argv, &user, &login_remote_host, &login_flags);
++    if (getuid()) login_flags &= ~LOGIN_FORCE_AUTH;
++    if (!user && !getuid()) user = getenv("LOGNAME");
+     state = LOGIN_STATE_ARGS_PARSED;
+ 
++/* set_user_credentials() should take care of supplementary groups, but
++ * we'd better have safe defaults */
++    if (setgroups(0, NULL)) return 1;
++
+     do
+     {
+ 	/*
+@@ -441,7 +441,7 @@ void main(int argc, const char **argv)
+ 	{
+ 	    delay = 10;
+ 	    pam_retval = PAM_SUCCESS;
+-	    (void) fprintf (stderr, "unable to attach to terminal\n");
++	    logit("unable to attach to terminal");
+ 	    err_descr = "terminal error";
+ 	    break;
+ 	}
+@@ -452,14 +452,13 @@ void main(int argc, const char **argv)
+ 	 */
+ 
+ #ifdef HAVE_PWDB
+-	place = "pwdb_start()";
++	place = "pwdb_start";
+ 	retval = pwdb_start();
+ 	if (retval != PWDB_SUCCESS) 
+ 	{
+ 	    delay = 60;
+             pam_retval = PAM_ABORT;
+-            (void) fprintf (stderr, "Problem initializing;\n\t%s\n", 
+-							pwdb_strerror(retval));
++            logit("pwdb_start: %s", pwdb_strerror(retval));
+ 	    err_descr = "start error";
+             break;
+ 	}
+@@ -472,8 +471,7 @@ void main(int argc, const char **argv)
+ 	{
+ 	    delay = 60;
+ 	    pam_retval = retval;
+-	    (void) fprintf (stderr, "Error initializing;\n\t%s\n", 
+-						pam_strerror(pamh,retval));
++	    logit("pam_start: %s", pam_strerror(pamh,retval));
+ 	    err_descr = "start error";
+ 	    break;
+ 	}
+@@ -507,9 +505,8 @@ void main(int argc, const char **argv)
+ 	{
+ 	    delay = 60;
+ 	    pam_retval = retval;
+-	    (void) fprintf (stderr, "Internal failure;\n\t%s\n", 
+-						pam_strerror(pamh,retval));
+ 	    err_descr = "environment setting error";
++	    logit("%s: %s", err_descr, pam_strerror(pamh,retval));
+ 	    break;
+ 	}
+ 	state = LOGIN_STATE_ENV_INITIALIZED;
+@@ -564,14 +561,9 @@ void main(int argc, const char **argv)
+ 	    set_timeout(LOGIN_TRUE);
+ 	    retval = pam_chauthtok(pamh, PAM_CHANGE_EXPIRED_AUTHTOK);
+ 
+-	    /* test for specific errors */
+-	    switch (retval) {
+-	    case PAM_AUTHTOK_LOCK_BUSY:
+-	    case PAM_TRY_AGAIN:
++	    if (retval != PAM_SUCCESS) {
+ 		D(("chauthtok: %s", pam_strerror(pamh,retval)));
+-		retval = PAM_SUCCESS;
+-		(void) fprintf(stderr
+-			, "login: please update your authentication token(s)\n");
++		(void) fprintf (stderr, "%s", LOGIN_AUTHTOK_EXPIRED);
+ 	    }
+ 	}
+ 
+@@ -583,9 +575,8 @@ void main(int argc, const char **argv)
+ 	{
+ 	    delay = STANDARD_DELAY;
+ 	    pam_retval = retval;
+-	    (void) fprintf (stderr, "Login failure;\n\t%s\n", 
+-						pam_strerror(pamh,retval));
+ 	    err_descr = "authentication failure";
++	    logit("%s: %s", err_descr, pam_strerror(pamh,retval));
+ 	    break;
+ 	}
+ 	state = LOGIN_STATE_AUTHEN_SUCCESS;
+@@ -603,9 +594,8 @@ void main(int argc, const char **argv)
+ 	{
+ 	    delay = STANDARD_DELAY;
+ 	    pam_retval = retval;
+-	    (void) fprintf (stderr, "Error opening session;\n\t%s\n", 
+-						pam_strerror(pamh,retval));
+ 	    err_descr = "unable to open session";
++	    logit("%s: %s", err_descr, pam_strerror(pamh,retval));
+ 	    break;
+ 	}
+ 	state = LOGIN_STATE_SESSION_OPENED;
+@@ -651,7 +641,13 @@ void main(int argc, const char **argv)
+ 	    login_invoke_shell(shell, uid);                    /* never returns */
+ 
+ 	    D(("this should not have returned"));
+-	    serious_abort("shell failed to execute");
++	    serious_abort();
++	}
++
++	if (child == -1) {
++		logit("fork: %m");
++		fprintf(stderr, "Failed to create a shell process\n");
++		break;
+ 	}
+ 
+ 	retval = utmp_open_session(pamh, getpid(), &place, &err_descr);
+@@ -659,13 +655,13 @@ void main(int argc, const char **argv)
+ 	{
+ 	    delay = 60;
+ 	    pam_retval = PAM_ABORT;
+-	    printf ("login: %s: %s\n", place, err_descr);
++	    logit("%s: %s", place, err_descr);
+ 	    err_descr = "error opening utmp session";
+ 	    break;
+ 	}
+ 	else if (retval > 0) 
+ 	{
+-	    (void) fprintf (stderr, "login: %s: %s\n", place, err_descr);
++	    logit("%s: %s", place, err_descr);
+ 	    err_descr = NULL;
+ 	}
+ 	state = LOGIN_STATE_UTMP_OPENED;
+@@ -690,13 +686,13 @@ void main(int argc, const char **argv)
+ 	    {
+ 		delay = 60;
+ 		pam_retval = PAM_ABORT;
+-		(void) fprintf (stderr, "login: %s: %s\n", place, err_descr);
++		logit("%s: %s", place, err_descr);
+ 		err_descr = "error closing utmp session";
+ 		break;
+ 	    }
+ 	    else if (retval > 0)
+ 	    { 
+-		(void) fprintf(stderr, "login: %s: %s\n", place, err_descr);
++		logit("%s: %s", place, err_descr);
+ 		err_descr = NULL;
+ 	    }
+ 	}
+@@ -706,7 +702,8 @@ void main(int argc, const char **argv)
+ 	{
+ 	    retval = pam_setcred(pamh, PAM_DELETE_CRED);
+ 	    if (retval != PAM_SUCCESS) 
+-		(void) fprintf(stderr, "WARNING: could not delete credentials\n\t%s\n", pam_strerror(pamh,retval));
++		logit("could not delete credentials: %s",
++		    pam_strerror(pamh,retval));
+ 	}
+ 
+ 	if (state >= LOGIN_STATE_SESSION_OPENED)
+@@ -731,15 +728,18 @@ void main(int argc, const char **argv)
+     while (pwdb_end() == PWDB_SUCCESS);
+ #endif
+ 
+-    /* delay - to read the message */
+-
+-    if (err_descr != NULL)
+-	(void) fprintf (stderr, "%s: %s\n", place, err_descr);
+-    else
+-	(void) fprintf (stderr, "%s\n", GOODBYE_MESSAGE); 
++    if (err_descr != NULL) {
++	logit("%s: %s", place, err_descr);
++	return retcode;
++    }
++#ifdef GOODBYE_MESSAGE
++    else {
++	(void) fprintf (stderr, "%s\n", GOODBYE_MESSAGE);
+ 
+-    /*Give time to read the goodbye message*/
+-    (void) sleep(delay);
++	/* Give time to read the goodbye message */
++	(void) sleep(delay);
++    }
++#endif
+ 
+-    exit (retcode);
++    return retcode;
+ }

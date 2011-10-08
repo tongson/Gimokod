@@ -1,0 +1,87 @@
+# Significant parts from Gentoo's "openssl-1.0.0e.ebuild"
+pkgname=openssl
+_ver=1.0.0e
+pkgver=${_ver/[a-z]/.${_ver//[0-9.]/}}
+pkgrel=1
+pkgdesc='The Open Source toolkit for Secure Sockets Layer and Transport Layer Security'
+arch=('i686' 'x86_64')
+url='https://www.openssl.org'
+license=('OPENSSL')
+groups=('base')
+depends=('zlib' 'gmp')
+options=('!makeflags')
+makedepends=('perl' 'zlib' 'gmp' 'bc')
+backup=('etc/ssl/openssl.cnf')
+PKGEXT='.pkg.tar.gz'
+
+build() {
+  cd "${srcdir}/${pkgname}-$_ver"
+
+  if [ "${CARCH}" == 'x86_64' ]; then
+    openssltarget='linux-x86_64'
+  elif [ "${CARCH}" == 'i686' ]; then
+    openssltarget='linux-elf'
+  fi
+
+  sed -i -e '/DIRS/s: fips : :g' \
+         -e '/^MAKEDEPPROG/s:=.*:=$(CC):' \
+         -e '/^install:/s:install_docs::' \
+         Makefile{,.org}
+
+  sed -i '/^SET_X/s:=.*:=set -x:' Makefile.shared
+
+  export CC=/usr/bin/gcc
+  export AR=/usr/bin/ar
+  export RANLIB=/usr/bin/ranlib
+  export CFLAGS="${CFLAGS} -fno-strict-aliasing -Wa,--noexecstack"
+
+  ./Configure --prefix=/usr \
+              --openssldir=/etc/ssl \
+              --libdir=lib \
+              shared \
+              zlib \
+              threads \
+              enable-md2 \
+              enable-camellia \
+              enable-tlsext \
+              no-ec \
+              no-idea \
+              no-rc5 \
+              enable-gmp -lgmp \
+              "${openssltarget}"
+
+  local CFLAG=$(grep ^CFLAG= Makefile | LC_ALL=C sed \
+            -e 's:^CFLAG=::' \
+            -e 's:-fomit-frame-pointer ::g' \
+            -e 's:-O[0-9] ::g' \
+            -e 's:-march=[-a-z0-9]* ::g' \
+            -e 's:-mcpu=[-a-z0-9]* ::g' \
+            -e 's:-m[a-z0-9]* ::g' \
+  )
+
+  sed -i -e "/^CFLAG/s|=.*|=${CFLAG} ${CFLAGS}|" \
+         -e "/^SHARED_LDFLAGS=/s|$| ${LDFLAGS}|" \
+         Makefile
+
+  make depend
+  make all rehash
+}
+
+check() {
+  cd "${srcdir}/${pkgname}-$_ver"
+  make test
+  msg "${pkgname} TESTS: SUCCESSFUL"
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-$_ver"
+  make INSTALL_PREFIX="${pkgdir}" MANDIR=/usr/share/man install
+  install -D -m755 "${srcdir}"/c_rehash "${pkgdir}"/usr/bin/c_rehash
+  install -D -m644 LICENSE "${pkgdir}"/usr/share/licenses/${pkgname}/LICENSE
+}
+
+source=(https://www.openssl.org/source/${pkgname}-${_ver}.tar.gz
+        c_rehash)
+
+sha256sums=('e361dc2775733fb84de7b5bf7b504778b772869e8f7bfac0b28b935cbf7380f7'
+            '4999ee79892f52bd6a4a7baba9fac62262454d573bbffd72685d3aae9e48cee0')

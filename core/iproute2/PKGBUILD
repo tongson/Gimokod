@@ -1,0 +1,36 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=iproute2
+pkgver=2.6.39
+pkgrel=1
+pkgdesc="IP Routing Utilities"
+arch=('i686' 'x86_64')
+license=('GPL2')
+depends=
+url="http://www.linux-foundation.org/en/Net:Iproute2"
+groups=('base')
+options=('!makeflags')
+makedepends=('bison' 'flex')
+backup=('etc/iproute2/ematch_map' 'etc/iproute2/rt_dsfield' 'etc/iproute2/rt_protos' \
+  'etc/iproute2/rt_realms' 'etc/iproute2/rt_scopes' 'etc/iproute2/rt_tables')
+source=(http://devresources.linux-foundation.org/dev/iproute2/download/iproute2-${pkgver}.tar.gz
+  'iproute2-fhs.patch')
+sha1sums=('9044ad0b4a34a377a54197724373330294d743c7'
+          '2416b11252364d7a6c742eabb4a6924a75637a46')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  sed -i '/^TARGETS=/s: arpd : :' misc/Makefile
+  patch -Np1 -i "${srcdir}"/iproute2-fhs.patch
+  ./configure --build=${CBUILD} --host=${CHOST}
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+  install -d -m0755 "${pkgdir}"/sbin
+  mv "${pkgdir}"/usr/sbin/ip "${pkgdir}"/sbin/ip
+  ln -s /sbin/ip "${pkgdir}"/usr/sbin/ip
+  install -D -m0644 include/libnetlink.h "${pkgdir}"/usr/include/libnetlink.h
+  install -D -m0644 lib/libnetlink.a "${pkgdir}"/usr/lib/libnetlink.a
+}

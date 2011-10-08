@@ -1,0 +1,25 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=gperf
+pkgver=3.0.4
+pkgrel=3
+pkgdesc="Perfect hash function generator"
+arch=('x86_64' 'i686')
+url="http://www.gnu.org/software/gperf/"
+license=('GPL3')
+groups=('base-devel')
+depends=
+source=("http://ftp.gnu.org/pub/gnu/gperf/${pkgname}-${pkgver}.tar.gz")
+md5sums=('c1f1db32fb6598d6a93e6e88796a8632')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  ./configure --prefix=/usr \
+              --build=${CHOST} \
+              --host=${CHOST} \
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}

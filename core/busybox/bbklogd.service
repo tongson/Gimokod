@@ -1,0 +1,10 @@
+[Unit]
+Description=BusyBox klogd
+After=syslogd.service
+
+[Service]
+Restart=always
+ExecStart=/bin/busybox klogd -n
+
+[Install]
+WantedBy=syslog.target

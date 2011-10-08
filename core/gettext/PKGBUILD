@@ -1,0 +1,50 @@
+pkgname=gettext
+pkgver=0.18.1.1
+pkgrel=1
+pkgdesc="GNU internationalization library"
+arch=('i686' 'x86_64')
+url="http://www.gnu.org/software/gettext/"
+license=('GPL')
+groups=('base-devel')
+depends=('ncurses')
+options=(!libtool)
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  find . -name configure | while read f ; do
+    patch --no-backup-if-mismatch -p0 "${f}" "${srcdir}"/nocxx.patch || return 0
+  done
+  export CXX=/usr/bin/cc
+  sed -i -e 's/libexpat.so.0/libexpat.so.1/' gettext-tools/src/x-glade.c
+  ./configure --prefix=/usr \
+              --build=${CHOST} \
+              --host=${CHOST} \
+              --without-libxml2-prefix \
+              --disable-csharp \
+              --without-emacs \
+              --disable-java \
+              --disable-native-java \
+              --disable-nls \
+              --without-git \
+              --without-lispdir \
+              --without-cvs \
+              --with-included-glib \
+              --with-included-libcroco \
+              --with-included-libunistring \
+              --with-included-gettext \
+              --with-included-libxml \
+              --disable-acl \
+              --disable-openmp \
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}
+
+source=(ftp://ftp.gnu.org/pub/gnu/gettext/${pkgname}-${pkgver}.tar.gz
+        nocxx.patch)
+
+sha256sums=('93ac71a7afa5b70c1b1032516663658c51e653087f42a3fc8044752c026443e9'
+            '2de7a721fb68699baf54b217df86bd290c51d4fad59eb595bdd145908e934547')

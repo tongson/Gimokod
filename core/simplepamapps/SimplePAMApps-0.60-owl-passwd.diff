@@ -1,0 +1,146 @@
+diff -urp SimplePAMApps-0.60.orig/pamapps/passwd/passwd.1 SimplePAMApps-0.60/pamapps/passwd/passwd.1
+--- SimplePAMApps-0.60.orig/pamapps/passwd/passwd.1	Fri Jun 12 17:11:03 1998
++++ SimplePAMApps-0.60/pamapps/passwd/passwd.1	Tue Apr 15 12:49:27 2003
+@@ -5,17 +5,18 @@
+ .TH PASSWD 1 "1996 Dec 14" "SimplePAMApps 0.55" "PAM only applications"
+ .SH NAME
+ 
+-passwd \- update a user's authentication tokens(s)
++passwd \- update a user's authentication token(s)
+ 
+ .SH SYNOPSIS
+-.B passwd [-k] [-N suffix] [username]
++.B passwd
++[\fB-k\fR] [\fB-N \fIsuffix\fR] [\fIusername\fR]
+ .sp 2
+ .SH DESCRIPTION
+ Passwd is used to update a user's authentication token(s).
+ 
+ .sp
+ Only the superuser may update another user's password by supplying a
+-.BR username ". "
++.IR username ". "
+ The option,
+ .BR -k ", "
+ is used to indicate that the update should only be for expired
+@@ -63,35 +64,6 @@ feature enables the administrator to con
+ application to update separate classes of passwords independently.
+ 
+ .sp
+-A simple entry in the
+-.I Linux-PAM
+-configuration file for this service would be:
+-.br
+-  
+-.br
+- #
+-.br
+- # passwd service entry that does strength checking of
+-.br
+- # a proposed password before updating it.
+-.br
+- #
+-.br
+- passwd password requisite \\
+-.br
+-             /usr/lib/security/pam_cracklib.so retry=3
+-.br
+- passwd password required \\
+-.br
+-             /usr/lib/security/pam_pwdb.so use_authtok
+-.br
+- #
+-
+-.sp
+-Note, other module-types are not required for this application to
+-function correctly.
+-
+-.sp
+ By using the
+ .B "-N"
+ .I "suffix"
+@@ -101,7 +73,7 @@ can be modified. Accordingly, an entry f
+ should be placed in the
+ .B Linux-PAM
+ configuration file.  For this
+-.B suffix
++.I suffix
+ to be acceptable to the
+ .B passwd
+ application, however, it must be listed in the
+diff -urp SimplePAMApps-0.60.orig/pamapps/passwd/passwd.c SimplePAMApps-0.60/pamapps/passwd/passwd.c
+--- SimplePAMApps-0.60.orig/pamapps/passwd/passwd.c	Thu Feb 18 12:29:43 1999
++++ SimplePAMApps-0.60/pamapps/passwd/passwd.c	Mon Nov 19 04:51:57 2001
+@@ -49,7 +49,7 @@ static struct pam_conv conv = {
+ 
+ /* ------- the application itself -------- */
+ 
+-void main(int argc, const char **argv)
++int main(int argc, const char **argv)
+ {
+     const char *service, *user, *suffix;
+     int passwd_flags, retval;
+@@ -81,32 +81,28 @@ void main(int argc, const char **argv)
+     }
+ 
+     if (user == NULL) {
+-#ifndef HAVE_PWDB
+ 	struct passwd *pwent;
+-#endif /* HAVE_PWDB */
+-	if ((user = getlogin()) == NULL) {
+-	    fprintf(stderr, "passwd: cannot retrieve user's name\n");
+-	    exit(1);
+-	}
+-#ifndef HAVE_PWDB
+-	/* attempt to patch over libc's inability to handle longer that
+-	   fixed length login names from the utmp file */
+-
+-	if ((pwent = getpwnam(user)) == NULL
+-	    || (pwent = getpwuid(getuid())) == NULL
+-	    || !(pwent->pw_name
+-		 && !strncmp(pwent->pw_name, user, strlen(user)))) {
++
++	if ((user = getlogin())) {
++	    pwent = getpwnam(user);
++	    if (!pwent || pwent->pw_uid != getuid())
++		pwent = getpwuid(getuid());
++	} else
++	    pwent = getpwuid(getuid());
++
++	if (!pwent || !pwent->pw_name) {
+ 	    fprintf(stderr, "passwd: cannot retrieve user's name\n");
+ 	    exit(1);
+-	} else {
+-	    user = pwent->pw_name;
+ 	}
+-#endif /* HAVE_PWDB */
++
++	user = pwent->pw_name;
+     }
+ 
+     /* here we know whose passwords are to be changed and whether
+        we'll change everything or just the expired ones */
+ 
++    setlinebuf(stdout);
++
+     D(("service=%s, user=%s\n", service, user));
+     retval = pam_start(service, user, &conv, &pamh);
+     user = NULL;                         /* can no longer rely on this */
+@@ -145,13 +141,13 @@ void main(int argc, const char **argv)
+ 	exit(0);
+     }
+ 
++    if (retval != PAM_SUCCESS)
++	fprintf(stderr, "passwd: %s\n", pam_strerror(pamh, retval));
++
+     if (pamh != NULL) {
+ 	(void) pam_end(pamh,PAM_SUCCESS);
+ 	pamh = NULL;
+     }
+ 
+-    if (retval != PAM_SUCCESS)
+-	fprintf(stderr, "passwd: %s\n", pam_strerror(pamh, retval));
+-
+-    exit(1);
++    return 1;
+ }

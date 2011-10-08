@@ -1,0 +1,68 @@
+diff -uprk.orig SimplePAMApps-0.60.orig/common/lib/su_indep.c SimplePAMApps-0.60/common/lib/su_indep.c
+--- SimplePAMApps-0.60.orig/common/lib/su_indep.c	2005-08-23 15:05:50 +0000
++++ SimplePAMApps-0.60/common/lib/su_indep.c	2005-08-23 15:11:34 +0000
+@@ -144,11 +144,9 @@ void restore_terminal_owner()
+ {
+     if (terminal_uid != (uid_t) -1) {
+         if(fchown(STDIN_FILENO, terminal_uid, -1) != 0) {
+-            openlog("su", LOG_CONS | LOG_PERROR | LOG_PID, LOG_AUTHPRIV);
+ 	    syslog(LOG_ALERT
+ 		    , "Terminal owner hasn\'t been restored: %s"
+ 		    , strerror(errno));
+-	    closelog();
+         }
+         terminal_uid = (uid_t) -1;
+     }
+diff -uprk.orig SimplePAMApps-0.60.orig/pamapps/login/login.c SimplePAMApps-0.60/pamapps/login/login.c
+--- SimplePAMApps-0.60.orig/pamapps/login/login.c	2005-08-23 15:05:50 +0000
++++ SimplePAMApps-0.60/pamapps/login/login.c	2005-08-23 15:05:06 +0000
+@@ -364,8 +364,6 @@ static void login_invoke_shell(const cha
+ 	while ( pwdb_end() == PWDB_SUCCESS );            /* forget all */
+ #endif
+ 
+-	closelog();
+-
+ 	/*
+ 	 * become user irrevocably
+ 	 */
+@@ -412,6 +410,8 @@ int main(int argc, const char **argv)
+     int state, delay;
+     int pam_retval, retcode = 1;
+     
++    openlog(SYSLOG_IDENT, LOG_PID, SYSLOG_FACILITY);
++
+     /*
+      * Parse the arguments to login. There are static variables
+      * above that indicate the intentions of the invoking process
+diff -uprk.orig SimplePAMApps-0.60.orig/pamapps/passwd/passwd.c SimplePAMApps-0.60/pamapps/passwd/passwd.c
+--- SimplePAMApps-0.60.orig/pamapps/passwd/passwd.c	2005-08-23 15:05:50 +0000
++++ SimplePAMApps-0.60/pamapps/passwd/passwd.c	2005-08-23 15:11:06 +0000
+@@ -13,6 +13,7 @@
+ #include <string.h>
+ #include <unistd.h>
+ #include <sys/types.h>
++#include <syslog.h>
+ 
+ #include <security/pam_appl.h>
+ #include <security/pam_misc.h>
+@@ -57,6 +58,8 @@ int main(int argc, const char **argv)
+ 
+     checkfds();
+ 
++    openlog("passwd", LOG_PID, LOG_AUTH);
++
+     /* obtain user's specific request */
+ 
+     passwd_flags = parse_pass_args(argc, argv, &suffix, &user);
+diff -uprk.orig SimplePAMApps-0.60.orig/pamapps/su/su.c SimplePAMApps-0.60/pamapps/su/su.c
+--- SimplePAMApps-0.60.orig/pamapps/su/su.c	2005-08-23 15:05:50 +0000
++++ SimplePAMApps-0.60/pamapps/su/su.c	2005-08-23 15:10:19 +0000
+@@ -87,6 +87,8 @@ int main(int argc, char *argv[])
+ 
+     checkfds();
+ 
++    openlog("su", LOG_PID, LOG_AUTH);
++
+     /*
+      * Check whether stdin is a terminal and store terminal modes for later.
+      */

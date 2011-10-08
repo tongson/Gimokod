@@ -1,0 +1,19 @@
+pkgname=gnuconfig
+pkgver=20110202
+pkgrel=1
+pkgdesc="Updated config.sub and config.guess file from GNU"
+arch=('any')
+url="http://savannah.gnu.org/projects/config"
+license=('GPL2')
+groups=('base-devel')
+depends=
+package() {
+  cd "${srcdir}"
+  install -D -m0644 config.guess "${pkgdir}"/usr/share/gnuconfig/config.guess
+  install -D -m0644 config.sub "${pkgdir}"/usr/share/gnuconfig/config.sub
+}
+source=($pkgname-$pkgver.tar.bz2)
+sha256sums=('8519d51905de01b56887a841e5325970b2ff052bf3ae6054b1046fb91155611b')
+
+
+

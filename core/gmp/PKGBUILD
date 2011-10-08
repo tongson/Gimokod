@@ -1,0 +1,45 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=gmp
+pkgver=5.0.2
+pkgrel=1
+pkgdesc="A free library for arbitrary precision arithmetic"
+arch=('i686' 'x86_64')
+url="http://gmplib.org/"
+depends=('gcc-libs')
+license=('LGPL3')
+groups=('base-devel')
+options=('!libtool' '!makeflags')
+source=(ftp://ftp.gnu.org/gnu/gmp/gmp-${pkgver}.tar.bz2
+        gmp-4.1.4-noexecstack.patch
+        538dfce27f41.patch)
+md5sums=('0bbaedc82fb30315b06b1588b9077cd3'
+         '13c34f00e77ded6673270cfea06c35c3'
+         'a769be9c41618ca9c35d83375e7097d0')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+
+  patch -Np1 -i "${srcdir}"/538dfce27f41.patch
+  patch -Np1 -i "${srcdir}"/gmp-4.1.4-noexecstack.patch
+
+  [ "${CARCH}" = "i686" ] && export ABI="32"
+  export CC=/usr/bin/gcc
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --infodir=/usr/share/info \
+              --disable-mpbsd \
+              --enable-cxx
+  make
+}
+
+check() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make check
+  msg "${pkgname} TESTS SUCCESSFUL"
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}

@@ -1,0 +1,55 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=conky
+pkgver=1.8.1
+pkgrel=1
+pkgdesc='An advanced, highly configurable system monitor for X based on torsmo'
+arch=('i686' 'x86_64')
+url='http://conky.sourceforge.net/'
+license=('custom')
+replaces=('torsmo')
+makedepends=('pkg-config')
+depends=('alsa-lib' 'libxml2' 'curl' 'wireless_tools' 'libxft' 'glib2' 'libxdamage' 'imlib2')
+backup=('etc/conky/conky.conf' 'etc/conky/conky_no_x11.conf')
+source=("http://downloads.sourceforge.net/project/${pkgname}/${pkgname}/${pkgver}/${pkgname}-${pkgver}.tar.gz"
+        'current-power.patch')
+
+sha1sums=('06bbe9b7eed8603fa7a971b27c5c61f38424ac6f'
+          '2eeef0cc5a0b612826b2a7f0b43b7a3b7e10bf0b')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+
+  patch -p1 < ../current-power.patch # See FS#21984
+
+  ./configure \
+    --prefix=/usr \
+    --sysconfdir=/etc \
+    --enable-ibm \
+    --enable-curl \
+    --enable-rss \
+    --enable-weather-xoap \
+    --enable-imlib2 \
+    --disable-lua \
+    --enable-wlan \
+    --enable-iostats \
+    --enable-x11 \
+    --enable-double-buffer \
+    --enable-argb \
+    --enable-own-window \
+    --enable-math \
+    --disable-audacious \
+    --disable-xmms2 \
+    --disable-nvidia \
+    --disable-apcupsd \
+    --disable-debug \
+    --disable-hddtemp \
+    --disable-eve
+
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+  install -D -m644 COPYING "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
