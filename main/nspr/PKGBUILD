@@ -7,7 +7,6 @@ arch=(i686 x86_64)
 url="http://www.mozilla.org/projects/nspr/"
 license=('MPL' 'GPL')
 depends=
-makedepends=('zip')
 options=(!emptydirs)
 source=(ftp://ftp.mozilla.org/pub/mozilla.org/nspr/releases/v${pkgver}/src/${pkgname}-${pkgver}.tar.gz
         nspr.pc.in)
@@ -21,10 +20,14 @@ build() {
   else
     confflags=""
   fi
-  unset CFLAGS
-  unset CXXFLAGS
+
+  sed -e 's/\$(MKSHLIB) \$(OBJS)/\$(MKSHLIB) \$(LDFLAGS) \$(OBJS)/g' \
+      -i mozilla/nsprpub/config/rules.mk
+
   ./mozilla/nsprpub/configure \
       --prefix=/usr \
+      --build=${CBUILD} \
+      --host=${CHOST} \
       --libdir=/usr/lib \
       --includedir=/usr/include/nspr \
       --enable-optimize \
