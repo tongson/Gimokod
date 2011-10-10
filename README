@@ -21,9 +21,11 @@ mpfr
 mpc
 openssl
 zlib
+nss
 
 Misc features:
 /etc/tcb support courtesy of Openwall and Mandriva patches
 read-only root filesystem (made possible by Systemd)
 
+[if email is your thing, there's a mailing list at gimokod@librelist.com]
 

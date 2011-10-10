@@ -24,6 +24,7 @@ build() {
   sed -i '2s:tests += tst-writev::' sysdeps/wordsize-64/Makefile # Debian:629862
   sed -i '48s:tst-mqueue5::' rt/Makefile # http://sourceware.org/ml/libc-alpha/2010-09/msg00030.html
   sed -i '50s:tst-cpuclock2::' rt/Makefile # bogus
+  sed -i '35s:nss3:nss:' scripts/check-local-headers.sh # correct dir
   patch -Np1 -i ../glibc-2.14-no-tzdata-info-translation.patch
 
   # Gentoo
@@ -136,7 +137,7 @@ build() {
       --libdir=/usr/lib --libexecdir=/usr/lib \
       --with-headers=/usr/include \
       --enable-add-ons=nptl,libidn \
-      --enable-kernel=3.0.1 \
+      --enable-kernel=2.6.32 \
       --enable-oldest-abi=2.12 \
       --with-tls --with-__thread \
       --enable-bind-now --without-gd \
@@ -155,7 +156,6 @@ check() {
   cd ${srcdir}/glibc-build
   export TIMEOUTFACTOR=16
   make -k check || return 0
-  make -k check-abi || return 0
 }
 
 package() {
@@ -169,7 +169,7 @@ package() {
   install -m644 "${srcdir}"/${pkgname}-${pkgver}/nscd/nscd.conf "${pkgdir}"/etc/nscd.conf
   install -m755 "${srcdir}"/locale-gen "${pkgdir}"/usr/sbin
   install -m644 "${srcdir}"/${pkgname}-${pkgver}/posix/gai.conf "${pkgdir}"/etc/gai.conf
-  echo "precedence ::ffff:0:0/96 100" >> "${pkgdir}"/etc/gai.conf
+  echo -e "precedence ::ffff:0:0/96\t100" >> "${pkgdir}"/etc/gai.conf
 
   sed -i -e 's/^\tserver-user/#\tserver-user/' "${pkgdir}"/etc/nscd.conf
 
