@@ -5,28 +5,48 @@ pkgrel=1
 pkgdesc="XML parsing library, version 2"
 arch=(i686 x86_64)
 license=('custom')
-depends=('zlib>=1.2.4' 'ncurses>=5.7')
+depends=('zlib' 'ncurses')
 options=('!libtool')
 url="http://www.xmlsoft.org/"
-source=(ftp://ftp.xmlsoft.org/${pkgname}/${pkgname}-${pkgver}.tar.gz
-        largefile64.patch shared_library_versionning.patch)
-md5sums=('8127a65e8c3b08856093099b52599c86'
-         '5ad4915665608ebfa5b89f7908467a72'
-         '84aeb7c6db023eae044e95d9211dba53')
+source=(ftp://ftp.xmlsoft.org/${pkgname}/${pkgname}-${pkgver}.tar.gz)
+md5sums=('8127a65e8c3b08856093099b52599c86')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
+  sed -i 's:doc example::g' Makefile.in
   patch -Np1 -i "${srcdir}/largefile64.patch"
   patch -Np1 -i "${srcdir}/shared_library_versionning.patch"
   autoreconf -fi
-  ./configure --prefix=/usr --with-threads --with-history \
-  --without-readline --without-history --without-python --without-run-debug --without-icu
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --includedir=/usr/include/minimal \
+              --libdir=/usr/lib/minimal \
+              --program-suffix=-minimal \
+              --enable-ipv6=no \
+              --enable-rebuild-docs=no \
+              --disable-dependency-tracking \
+              --with-threads \
+              --with-minimum \
+              --with-output \
+              --without-modules \
+              --without-readline \
+              --without-history \
+              --without-python \
+              --without-run-debug \
+              --without-icu \
+              --without-docbook \
+              --without-ftp \
+              --without-html \
+
   make
 }
 
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   make DESTDIR="${pkgdir}" install
+  rm -rf "${pkgdir}/usr/share/aclocal"
+  rm -rf "${pkgdir}/usr/share/man"
   install -Dm644 COPYING "${pkgdir}/usr/share/licenses/${pkgname}/COPYING"
 }
 
