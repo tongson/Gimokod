@@ -1,7 +1,7 @@
 pkgname=glib
 pkgver=2.30.0
 _mver=2.30
-pkgrel=1
+pkgrel=2
 pkgdesc="Common C routines used by GTK+ and other libs"
 url="http://www.gtk.org/"
 arch=(i686 x86_64)
@@ -9,9 +9,6 @@ license=('LGPL')
 depends=('zlib' 'libffi')
 groups=('base-devel')
 makedepends=('zlib' 'libffi')
-replaces=('glib2')
-conflicts=('glib2')
-provides=('glib2')
 options=('!libtool' '!docs')
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
@@ -27,6 +24,8 @@ build() {
   done
   export DBUS1_CFLAGS="-I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include"
   export DBUS1_LIBS="-ldbus-1"
+  export LIBFFI_CFLAGS="-I$(echo /usr/lib/libffi-*/include)"
+  export LIBFFI_LIBS="-lffi"
   sed -i 's:^GTK_DOC_CHECK.*$::' configure
   ./configure --prefix=/usr \
               --build=${CBUILD} \
