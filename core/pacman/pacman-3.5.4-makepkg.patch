@@ -19,8 +19,8 @@
  	if [[ $(check_option emptydirs) = "n" ]]; then
  		msg2 "$(gettext "Removing empty directories...")"
 -		find . -depth -type d -empty -delete
-+		find . -depth -type d -print0 | while read -r -d $'\0' workdir ; do
-+			[[ "${workdir}" != '.' ]] && rmdir --ignore-fail-on-non-empty "${workdir}"
++		find . -mindepth 1 -depth -type d -print0 | while read -r -d $'\0' workdir ; do
++			rmdir --ignore-fail-on-non-empty "${workdir}"
 +	        done
  	fi
  }

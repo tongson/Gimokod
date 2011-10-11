@@ -21,7 +21,7 @@ md5sums=('2dd3a85d55ee3dd89abd349aa837447c'
          'e99eb721b6b704f68c5f47468507c102'
          'f8b939d9b2beb79a0436961a2d707d7c'
          'c034b061c86b3f26a9646cf8efc7ff11'
-         'd421f555f0d4d12b646b08143c638e13'
+         '199cccf475d558130dd030340972f22d'
          '749a4ddc6d8418d8d031f1c9b4e09d6f')
 
 PKGEXT='.pkg.tar.gz'
