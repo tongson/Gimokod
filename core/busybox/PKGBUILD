@@ -19,15 +19,15 @@ symlinks=(/bin/inotifyd
           /usr/sbin/crond
           /usr/bin/eject
           /usr/bin/volname
-          /usr/bin/chpst
-          /usr/bin/runsv
-          /usr/bin/runsvdir
-          /usr/bin/sv
-          /usr/bin/svlogd
-          /usr/bin/setuidgid
-          /usr/bin/envuidgid
-          /usr/bin/envdir
-          /usr/bin/softlimit
+          /sbin/chpst
+          /sbin/runsv
+          /sbin/runsvdir
+          /sbin/sv
+          /sbin/svlogd
+          /sbin/setuidgid
+          /sbin/envuidgid
+          /bin/envdir
+          /bin/softlimit
           /usr/bin/wget
           /bin/sed
           /usr/bin/diff
@@ -86,7 +86,7 @@ symlinks=(/bin/inotifyd
           /sbin/ifenslave)
 
 build() {
-  cd "${srcdir}/${pkgname}-${pkgver}"/
+  cd "${srcdir}/${pkgname}-${pkgver}"
 
   cp "${srcdir}"/config .config
 
@@ -102,9 +102,12 @@ build() {
 }
 
 package() {
-  cd "${srcdir}/${pkgname}-${pkgver}"/
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make install
+  rm _install/bin/busybox
+  tar -cf busybox-links.tar -C _install .
   install -D -m0755 busybox "${pkgdir}"/bin/busybox
-
+  install -D -m0644 busybox-links.tar "${pkgdir}/usr/share/busybox/busybox-links.tar"
   install -m0755 -d "${pkgdir}"/usr/bin "${pkgdir}"/usr/sbin "${pkgdir}"/sbin
 
   for x in $(seq 0 $((${#symlinks[@]} - 1))); do
@@ -116,7 +119,8 @@ package() {
 
   install -D -m0644 "${srcdir}"/man_db.conf "${pkgdir}"/etc/man_db.conf
   install -D -m0755 "${srcdir}"/runsvdir-start "${pkgdir}"/sbin/runsvdir-start
-  install -D -m0755 "${srcdir}"/script "${pkgdir}"/usr/share/udhcpc/script
+  install -D -m0755 "${srcdir}"/runsvdir-log "${pkgdir}"/sbin/runsvdir-log
+  install -D -m0755 "${srcdir}"/udhcpc-script "${pkgdir}"/usr/share/udhcpc/udhcpc-script
   install -D -m0644 "${srcdir}"/sysctl.conf "${pkgdir}"/etc/sysctl.conf
   install -D -m0644 "${srcdir}"/bbcrond.service "${pkgdir}"/lib/systemd/system/bbcrond.service
   install -D -m0644 "${srcdir}"/bbklogd.service "${pkgdir}"/lib/systemd/system/bbklogd.service
@@ -126,7 +130,9 @@ package() {
   install -D -m0644 LICENSE "${pkgdir}"/usr/share/licenses/${pkgname}/LICENSE
 }
 
-source=(${url}/downloads/${pkgname}-${pkgver}.tar.bz2
+source=(${url}/downloads/${pkgname}-${pkgver}.tar.bz2)
+sha256sums=('ea7ec9b6df70b8c528f4a2b6300e9913431c7223308fb08dfafa7508d75a0cb9')
+source=(${source[@]-}
         bbcrond.service
         bbklogd.service
         bbntpd.service
@@ -136,20 +142,22 @@ source=(${url}/downloads/${pkgname}-${pkgver}.tar.bz2
         busybox-1.19.2-mandoc.patch
         config
         man_db.conf
+        runsvdir-log
         runsvdir-start
-        script
-        sysctl.conf)
+        sysctl.conf
+        udhcpc-script)
 
-sha256sums=('ea7ec9b6df70b8c528f4a2b6300e9913431c7223308fb08dfafa7508d75a0cb9'
-            'bb2a3f3aa128195803b87123824a3e0c3123c51ec7bdf29fe2739d0973c7713e'
-            '17d4feec48263bb36363cfa78d5e987364d64d91e5c4c1da4829dae1ce9efec9'
-            'beb1bb6bce591c494a6e298dea05a77afa8740598d6992491c380ae62a55634d'
-            '2b8ecc7658d6c4ec512116933cf57e3d7875e50fd5ec231215ea145cf4b34ad9'
-            'ec23c12f410dbc50174cdd94dc2c474b7a3e5d048e653220ba8ffbe0032c8a70'
+sha256sums=(${sha256sums[@]-}
+            '3122a606b691fabcae650eb5f36eac551ec5255070b097af65c316d539435e11'
+            '3047fdb640361644758cc46b83a29468fef28184d4e9629fcf38ecc62452dbea'
+            '7864a8f71f9b367a0c3da7bd6725a2eb139c2f2808d0a97b74f9b6bc7a1b4590'
+            '78e5ed652eb56fbc0b7af085b1dfae3f686972fa9e866ec29f89eaec1056160c'
+            '40f27e22ca1cc64e0675e923653f12c78ccb98a643face774eb80a51cea69225'
             '98f92c2edbcf61d1bacef783ea8b08cce07051b0a4489ed3f4579296846f89f1'
             '733e23d851e68ecd27ed8bb8f4c4b8ea27b0d143069ec49aadb04deeb65dd9f5'
-            '3e2916db816a76880cc86a7aba4cfaa918ccaf90278b9d19f4e0ed5814788dae'
+            '90356e3a5ad63b6194394bb00bf7e620ca566c40e159388a6b7f5b6bdd1ab0bf'
             'bf0092798438c18fd3e7f6d9a8a281d6575cf4258d2457b6320d9c6bc8443eae'
+            '3e9a01d07f0d8a6f98bee545aa3009344c9f0d7a4b76b88582f9ca693d789cf7'
             'a70d24036a7ae14f213147fe6727fee4320b2090bc59d8a4ffa609d8fdd14cef'
-            '0bd8f7430da15355026891046af390d6311303630cb15407ab6133978c32c3fe'
-            'c0fe1acecbe92678bdf10245fdf30a4b04012c27b58ec4deedc70c57d2fa9501')
+            'c0fe1acecbe92678bdf10245fdf30a4b04012c27b58ec4deedc70c57d2fa9501'
+            '1ee4ae122a3beb89d4a322bbf2b06190971216da42ff9428fdc9d40afea3958f')

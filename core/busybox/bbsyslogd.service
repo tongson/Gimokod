@@ -6,5 +6,4 @@ Restart=always
 ExecStart=/bin/busybox syslogd -n -C1024
 
 [Install]
-#WantedBy=basic.target
 WantedBy=syslog.target

@@ -1,11 +1,9 @@
 [Unit]
 Description=BusyBox crond
-After=syslogd.service
 
 [Service]
 Restart=always
 SyslogFacility=cron
-StandardOutput=syslog
 ExecStart=/bin/busybox crond -f -l 5
 
 [Install]

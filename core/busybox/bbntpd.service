@@ -4,7 +4,6 @@ After=network.target
 
 [Service]
 Restart=always
-StandardOutput=syslog
 ExecStart=-/bin/busybox ntpd -l -p pool.ntp.org -p ntp.xs4all.nl -n 2>&1
 
 [Install]
