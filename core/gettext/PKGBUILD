@@ -11,9 +11,6 @@ options=(!libtool)
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  find . -name configure | while read f ; do
-    patch --no-backup-if-mismatch -p0 "${f}" "${srcdir}"/nocxx.patch || return 0
-  done
   export CXX=/usr/bin/cc
   sed -i -e 's/libexpat.so.0/libexpat.so.1/' gettext-tools/src/x-glade.c
   ./configure --prefix=/usr \
@@ -43,8 +40,6 @@ package() {
   make DESTDIR="${pkgdir}" install
 }
 
-source=(ftp://ftp.gnu.org/pub/gnu/gettext/${pkgname}-${pkgver}.tar.gz
-        nocxx.patch)
+source=(ftp://ftp.gnu.org/pub/gnu/gettext/${pkgname}-${pkgver}.tar.gz)
 
-sha256sums=('93ac71a7afa5b70c1b1032516663658c51e653087f42a3fc8044752c026443e9'
-            '2de7a721fb68699baf54b217df86bd290c51d4fad59eb595bdd145908e934547')
+sha256sums=('93ac71a7afa5b70c1b1032516663658c51e653087f42a3fc8044752c026443e9')

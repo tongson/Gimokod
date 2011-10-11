@@ -19,9 +19,6 @@ build() {
   patch -Np1 -i "${srcdir}"/glib-2.29.18-external-gdbus-codegen.patch
   ln -sfn /bin/true py-compile
   AT_M4DIR="${srcdir}/${pkgname}-${pkgver}" autoreconf -v
-  find . -name configure | while read f ; do
-    patch --no-backup-if-mismatch -p0 "${f}" "${srcdir}"/nocxx.patch || return 0
-  done
   export DBUS1_CFLAGS="-I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include"
   export DBUS1_LIBS="-ldbus-1"
   export LIBFFI_CFLAGS="-I$(echo /usr/lib/libffi-*/include)"
@@ -55,9 +52,7 @@ package() {
 }
 
 source=(http://ftp.gnome.org/pub/GNOME/sources/${pkgname}/${_mver}/${pkgname}-${pkgver}.tar.xz
-        glib-2.29.18-external-gdbus-codegen.patch
-        nocxx.patch)
+        glib-2.29.18-external-gdbus-codegen.patch)
 
 sha256sums=('d64c00b43409eabb89aad78501fcb1a992b002b314a4414a9bd069585cb7cdc1'
-            '4ddd01367518b22c000732c1ad27a2ff8c24cb7876874b2aecd2ebf8361dfd0b'
-            '2de7a721fb68699baf54b217df86bd290c51d4fad59eb595bdd145908e934547')
+            '4ddd01367518b22c000732c1ad27a2ff8c24cb7876874b2aecd2ebf8361dfd0b')
