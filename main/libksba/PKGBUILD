@@ -1,0 +1,25 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=libksba
+pkgver=1.2.0
+pkgrel=1
+pkgdesc="A CMS and X.509 access library"
+arch=(i686 x86_64)
+license=('GPL')
+url="ftp://ftp.gnupg.org/gcrypt/alpha/libksba"
+depends=('libgpg-error')
+source=(ftp://ftp.gnupg.org/gcrypt/"${pkgname}"/"${pkgname}"-"${pkgver}".tar.bz2)
+options=(!libtool)
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST}
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}
+md5sums=('e797f370b69b4dc776499d6a071ae137')

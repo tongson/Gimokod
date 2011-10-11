@@ -22,6 +22,7 @@ mpc
 openssl
 zlib
 nss
+libgcrypt
 
 Misc features:
 /etc/tcb support courtesy of Openwall and Mandriva patches

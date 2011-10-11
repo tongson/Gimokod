@@ -1,0 +1,47 @@
+pkgname=gnupg
+pkgver=1.4.11
+pkgrel=1
+pkgdesc="GNU Privacy Guard - a PGP replacement tool"
+arch=('i686' 'x86_64')
+license=('GPL3')
+groups=('base')
+depends=
+url="http://www.gnupg.org/"
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  LDFLAGS="${LDFLAGS} -static"
+  sed -i -e 's:PIC:__PIC__:' mpi/i386/mpih-{add,sub}1.S intl/relocatable.c
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST}  \
+              --disable-ldap \
+              --with-included-zlib \
+              --disable-nls \
+              --disable-bzip2 \
+              --disable-card-support \
+              --disable-selinux-support \
+              --without-capabilities \
+              --without-readline \
+              --enable-static-rnd=linux \
+              --enable-mailto \
+              --enable-hkp \
+              --enable-finger \
+              --libexecdir=/usr/lib \
+              --enable-noexecstack \
+              CC_FOR_BUILD=/usr/bin/gcc
+  make
+}
+
+check() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make -k check
+}
+
+package () {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}
+
+source=(ftp://ftp.gnupg.org/gcrypt/gnupg/${pkgname}-${pkgver}.tar.bz2)
+sha256sums=('d18ceeac16e554a501170b9bfde611625252d0fe9448685a69c93bf149ee6ef6')
