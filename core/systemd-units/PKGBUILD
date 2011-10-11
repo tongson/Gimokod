@@ -14,12 +14,14 @@ package() {
   done
 }
 
-source=(nscd.service
+source=(${source[@]-}
+        nscd.service
         remountrw.service
         staticip.service
         sync.service)
 
-sha256sums=('977de98004c7eb7952b6cb0767c18bd99bb7a413bafd2d9b66579959c3778814'
+sha256sums=(${sha256sums[@]-}
+            '977de98004c7eb7952b6cb0767c18bd99bb7a413bafd2d9b66579959c3778814'
             '01338f8163da81c70bc2d76156b85758f33b5f2207c5fa73cced7a95d4a60acd'
-            '57c489ce002b098abae9e99a0bf80cca0c2e0c6332ee8e638100584022fdac73'
+            'c69ddc2363b1f427143d2a0f4caf90b3ae028b99e3ba19e02a98c7119f9a8de1'
             'aa2d5a3eabdd6e6722819409a01feebb533c59b62acba270d84dcb3b1013b54d')
