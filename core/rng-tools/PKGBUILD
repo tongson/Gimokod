@@ -5,12 +5,9 @@ pkgdesc='Daemon to use hardware random number generators'
 arch=('i686' 'x86_64')
 url='http://gkernel.sourceforge.net/'
 license=('GPL')
-depends=
 groups=('base')
-source=(http://downloads.sourceforge.net/gkernel/$pkgname-$pkgver.tar.gz
-        rngd.service)
-sha256sums=('27f8041836f74342268aed4acdc28bcc0438b8461695d277cb81096d7ecaf4cc'
-            '27784334d8d6207beb2401de0c63e70492f0ba6c9ff62d415cba32afb6d269f5')
+source=(http://downloads.sourceforge.net/gkernel/$pkgname-$pkgver.tar.gz)
+sha256sums=('27f8041836f74342268aed4acdc28bcc0438b8461695d277cb81096d7ecaf4cc')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
@@ -22,6 +19,5 @@ build() {
 
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  install -D -m0644 "${srcdir}"/rngd.service "${pkgdir}"/lib/systemd/system/rngd.service
   make DESTDIR="${pkgdir}" install
 }
