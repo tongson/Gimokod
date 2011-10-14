@@ -1,24 +1,23 @@
 pkgname=mdocml
-pkgver=1.11.7
+pkgver=1.12.0
 pkgrel=1
 pkgdesc="mdoc macro compiler"
 url="http://mdocml.bsd.lv/"
 arch=('i686' 'x86_64')
 license="BSD"
 groups=('base')
-depends=
 source=(http://mdocml.bsd.lv/snapshots/mdocml-$pkgver.tar.gz)
-sha256sums=('ec55b9e6c526897f84cf3d2048bae9feefc670f5fae9093a80b8406d914a0357')
+sha256sums=('887dbe722e459ce60a6f1e29e278f68932fab9592768b9b324503ba80fe17a5e')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  make PREFIX=/usr
+  make PREFIX=/usr DBBIN=
 }
 
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
 
-  make DESTDIR="${pkgdir}" PREFIX=/usr MANDIR=/usr/share/man \
+  make DESTDIR="${pkgdir}" PREFIX=/usr MANDIR=/usr/share/man DBBIN= \
     EXAMPLEDIR=/usr/share/doc/mdocml/examples install
 }
 
