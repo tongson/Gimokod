@@ -1,0 +1,10 @@
+[Unit]
+Description=BusyBox crond
+
+[Service]
+Restart=always
+SyslogFacility=cron
+User=crond
+Group=crond
+ExecStart=/bin/busybox crond -f -l 5
+

@@ -1,0 +1,10 @@
+[Unit]
+Description=BusyBox syslogd
+
+[Service]
+Sockets=syslog.socket
+Restart=always
+User=syslogd
+Group=syslogd
+ExecStart=/bin/busybox syslogd -n -C1024
+StandardOutput=null

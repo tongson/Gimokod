@@ -1,27 +1,46 @@
 pkgname=systemd-units
 pkgver=2011.09
 pkgrel=1
-pkgdesc="Systemd unites"
+pkgdesc="Systemd units"
 arch=('any')
 url="http://localhost.localdomain"
 license=('ISC')
 groups=('base')
-depends=
+depends=('busybox')
+install=systemd-units.install
 package() {
   cd ${srcdir}
-  for s in nscd remountrw staticip sync; do
+  for s in *.service ; do
     install -D -m0644 ${s}.service "${pkgdir}/lib/systemd/system/${s}.service"
   done
 }
 
 source=(${source[@]-}
+        crond.service
+        klogd.service
+        lvm2.service
+        network-dhcp.service
+        network-lxc.service
+        network-static.service
         nscd.service
+        ntpd.service
         remountrw.service
-        staticip.service
-        sync.service)
+        rngd.service
+        sshd.service
+        sync.service
+        syslogd.service)
 
 sha256sums=(${sha256sums[@]-}
-            '977de98004c7eb7952b6cb0767c18bd99bb7a413bafd2d9b66579959c3778814'
-            '01338f8163da81c70bc2d76156b85758f33b5f2207c5fa73cced7a95d4a60acd'
-            'c69ddc2363b1f427143d2a0f4caf90b3ae028b99e3ba19e02a98c7119f9a8de1'
-            'aa2d5a3eabdd6e6722819409a01feebb533c59b62acba270d84dcb3b1013b54d')
+            '94a32f38ab6ab6440eff5c00db16178152a70e95de07cae600bd1a33e2abc901'
+            'bfb8b07f1a36e0c677282db2cea51293fbaa28ca28eee9b635a1b93f0539a4bc'
+            '835bd763261c671af6f83f057d688ac1578fdaf996f68c11bad2a4d55589bc24'
+            '93b13bf9b937fddd07c84f9eae80e99c3439b7e4e6844eef00d42445e10d9237'
+            '5a2b1359a26ded65eee2dc91e26de124cc8e4970a94416e1324818a273ee97a9'
+            'a095f409c6712bf8c60edee7cc28acc4fdcb2f44dc9515bfd509af10bbaddfca'
+            '46abb773eea5dda9d63ede0b2485fbfdd48d795190122311e94f3090dc389ccc'
+            'bab695720aed5c8a756f07d13d198f3905b4cfbbd0fedf8a632a6c71629025a0'
+            '133b0bf643da2284d1381cea8ac1603279c84402bf27c5293a2a42f092c0fa47'
+            '6e7e7edf8e09e41c64e5c6b94a8140b9ab09c9c2f63ec27dc189e3356f5ecdd4'
+            '0a8fdb24d313f77aec62287cc18bf902866931f34766ba27eb84868437c86163'
+            '59e725f31489f2f0b89c398f28dfbaff96adbe8d4cc8f1e7292c4e18f86e9d30'
+            '4c29f62d8ad4000d73c363cc57ed41fb317518d6b6dd988ab4ba71863dbca7b1')

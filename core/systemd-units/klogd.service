@@ -1,0 +1,10 @@
+[Unit]
+Description=BusyBox klogd
+
+[Service]
+Restart=always
+User=klogd
+Group=klogd
+ExecStart=/bin/busybox klogd -n
+StandardOutput=null
+

@@ -10,6 +10,3 @@ ExecStart=/bin/sync
 ExecStart=/bin/echo 3 > /proc/sys/vm/drop_caches
 ExecStart=/bin/echo 0 > /proc/sys/vm/drop_caches
 ExecStart=/bin/mount -o remount,ro /
-
-[Install]
-WantedBy=shutdown.target

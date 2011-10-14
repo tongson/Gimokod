@@ -1,0 +1,9 @@
+[Unit]
+Description=BusyBox udhcpc
+
+[Service]
+Restart=always
+EnvironmentFile=/etc/conf.d/net
+User=dhcp
+Group=dhcp
+ExecStart=-/bin/busybox udhcpc -v -f -S -i $interface
