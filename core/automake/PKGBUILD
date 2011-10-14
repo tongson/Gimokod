@@ -7,7 +7,6 @@ arch=('any')
 license=('GPL')
 url="http://www.gnu.org/software/automake"
 groups=('base-devel')
-depends=
 makedepends=('autoconf')
 source=(ftp://ftp.gnu.org/gnu/${pkgname}/${pkgname}-${pkgver}.tar.gz)
 md5sums=('4ee7f0ff5f0e467d58b6bd5da96b1c74')

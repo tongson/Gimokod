@@ -6,7 +6,6 @@ pkgdesc='A compression/decompression Library'
 arch=('i686' 'x86_64')
 license=('custom')
 groups=('base')
-depends=
 url="http://www.zlib.net/"
 options=('!makeflags')
 source=("http://zlib.net/zlib-${pkgver}.tar.gz"

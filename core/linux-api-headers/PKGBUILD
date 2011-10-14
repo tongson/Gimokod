@@ -8,7 +8,6 @@ arch=('i686' 'x86_64')
 url="http://www.gnu.org/software/libc"
 license=('GPL2')
 groups=('base-devel')
-depends=
 provides=("kernel-headers=${pkgver}")
 conflicts=('kernel-headers')
 replaces=('kernel-headers')

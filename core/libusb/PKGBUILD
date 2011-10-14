@@ -7,7 +7,6 @@ arch=(i686 x86_64)
 url="http://libusb.sourceforge.net/"
 license=('LGPL')
 groups=('base')
-depends=
 source=(http://downloads.sourceforge.net/libusb/libusb-${pkgver}.tar.bz2)
 options=(!libtool)
 replaces=(libusb1)

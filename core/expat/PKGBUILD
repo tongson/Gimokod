@@ -7,7 +7,6 @@ arch=('i686' 'x86_64')
 url="http://expat.sourceforge.net"
 license=('custom')
 groups=('base')
-depends=
 options=('!libtool')
 source=(http://downloads.sourceforge.net/sourceforge/expat/${pkgname}-${pkgver}.tar.gz
         CVE-2009-3560.patch

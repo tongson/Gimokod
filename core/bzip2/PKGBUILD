@@ -5,7 +5,6 @@ pkgrel=1
 pkgdesc="A high-quality data compression program"
 arch=('i686' 'x86_64')
 license=('custom')
-depends=
 url="http://sources.redhat.com/bzip2"
 groups=('base')
 

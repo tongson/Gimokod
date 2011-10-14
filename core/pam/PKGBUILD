@@ -7,7 +7,6 @@ arch=('i686' 'x86_64')
 license=('GPL2')
 groups=('base')
 url="http://www.kernel.org/pub/linux/libs/pam/"
-depends=
 backup=(etc/security/{access.conf,group.conf,limits.conf,namespace.conf,namespace.init,pam_env.conf,time.conf}
         etc/environment)
 options=('!libtool' '!emptydirs')

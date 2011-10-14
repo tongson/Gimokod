@@ -7,7 +7,6 @@ arch=('i686' 'x86_64')
 url='http://tukaani.org/xz/'
 license=('GPL' 'LGPL' 'custom')
 groups=('base')
-depends=
 provides=('lzma' 'lzma-utils' 'xz-utils')
 replaces=('lzma' 'lzma-utils' 'xz-utils')
 conflicts=('lzma' 'lzma-utils' 'xz-utils')

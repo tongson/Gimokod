@@ -7,7 +7,6 @@ arch=('i686' 'x86_64')
 url="http://sourceware.org/libffi"
 license=('MIT')
 groups=('base-devel')
-depends=
 options=('!libtool')
 source=(ftp://sourceware.org/pub/libffi/libffi-${pkgver}.tar.gz)
 md5sums=('79390673f5d07a8fb342bc09b5055b6f')

@@ -6,7 +6,6 @@ arch=('i686' 'x86_64')
 url="http://savannah.nongnu.org/projects/attr"
 license=('LGPL')
 groups=('base')
-depends=
 options=('!libtool')
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"

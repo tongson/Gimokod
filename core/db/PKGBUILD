@@ -7,7 +7,6 @@ arch=('i686' 'x86_64')
 url='http://www.oracle.com/technology/software/products/berkeley-db/index.html'
 license=('custom')
 groups=('base-devel')
-depends=
 options=('!libtool')
 source=(http://download.oracle.com/berkeley-db/db-${pkgver}.tar.gz)
 sha1sums=('e6572e3356cf8bc998da4e889db3b12638833435')

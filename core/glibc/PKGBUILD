@@ -7,7 +7,6 @@ pkgdesc="GNU C Library"
 arch=('i686' 'x86_64')
 url="http://www.gnu.org/software/libc"
 license=('GPL' 'LGPL')
-depends=
 groups=('base')
 makedepends=('gcc' 'gawk' 'tzdata' 'linux-api-headers')
 options=('!makeflags')
@@ -137,7 +136,7 @@ build() {
       --libdir=/usr/lib --libexecdir=/usr/lib \
       --with-headers=/usr/include \
       --enable-add-ons=nptl,libidn \
-      --enable-kernel=2.6.32 \
+      --enable-kernel=2.6.37 \
       --enable-oldest-abi=2.12 \
       --with-tls --with-__thread \
       --enable-bind-now --without-gd \
@@ -191,6 +190,7 @@ package() {
   # valgrind on x86_64
 
   cd "${pkgdir}"
+  rm usr/lib/pt_chown
   strip $STRIP_BINARIES sbin/{ldconfig,sln} \
                         usr/bin/{gencat,getconf,getent,iconv,locale} \
                         usr/bin/{localedef,pcprofiledump,rpcgen,sprof} \
@@ -205,7 +205,7 @@ package() {
                       lib/libnss_{compat,dns,files,hesiod,nis,nisplus}-"${pkgver}".so \
                       lib/{libdl,libm,libnsl,libresolv,librt,libutil}-"${pkgver}".so \
                       lib/{libmemusage,libpcprofile,libSegFault}.so \
-                      usr/lib/{pt_chown,{audit,gconv}/*.so}
+                      usr/lib/{audit,gconv}/*.so
 }
 source=(http://ftp.gnu.org/gnu/glibc/glibc-2.14.tar.xz)
 sha256sums=('4b20592dd4c841e54fde4c0f1d28cc75f91fb61fb3e91a906d5025dd187bfb08')

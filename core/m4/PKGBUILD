@@ -7,7 +7,6 @@ arch=('i686' 'x86_64')
 url="http://www.gnu.org/software/m4"
 license=('GPL3')
 groups=('base-devel')
-depends=
 source=(ftp://ftp.gnu.org/gnu/m4/${pkgname}-${pkgver}.tar.xz)
 md5sums=('7548ec061a1ba993790159764f522d0e')
 

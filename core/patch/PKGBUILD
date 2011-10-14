@@ -7,7 +7,6 @@ arch=('i686' 'x86_64')
 url="http://www.gnu.org/software/patch/patch.html"
 license=('GPL')
 groups=('base-devel')
-depends=
 source=(ftp://ftp.gnu.org/gnu/${pkgname}/${pkgname}-${pkgver}.tar.gz patch-2.6.1-get-arg.patch)
 md5sums=('d758eb96d3f75047efc004a720d33daf' '45cd5709adbbcdcb3ab95dc43559c07c')
 

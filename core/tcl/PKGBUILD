@@ -7,7 +7,6 @@ arch=('i686' 'x86_64')
 url="http://tcl.sourceforge.net/"
 license=('custom')
 groups=('base-devel')
-depends=
 source=(http://downloads.sourceforge.net/sourceforge/tcl/tcl${pkgver}-src.tar.gz)
 md5sums=('a08eaf8467c0631937067c1948dd326b')
 

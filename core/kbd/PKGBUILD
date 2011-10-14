@@ -7,7 +7,6 @@ arch=('i686' 'x86_64')
 url="ftp://ftp.altlinux.org/pub/people/legion/kbd/"
 license=('GPL')
 groups=('base')
-depends=
 source=(ftp://ftp.altlinux.org/pub/people/legion/kbd/${pkgname}-${pkgver}.tar.gz)
 md5sums=('8143e179a0f3c25646ce5085e8777200')
 

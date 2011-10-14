@@ -7,7 +7,6 @@ url="http://www.kernel.org/pub/linux/utils/kernel/hotplug/udev.html"
 license=('GPL')
 groups=('base')
 options=(!makeflags !libtool)
-depends=
 install=udev.install
 backup=(etc/udev/udev.conf)
 makedepends=('pciutils' 'libusb-compat' 'glib')

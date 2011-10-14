@@ -5,7 +5,6 @@ pkgdesc="GNU Privacy Guard - a PGP replacement tool"
 arch=('i686' 'x86_64')
 license=('GPL3')
 groups=('base')
-depends=
 url="http://www.gnupg.org/"
 
 build() {

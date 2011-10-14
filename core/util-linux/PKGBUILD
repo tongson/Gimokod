@@ -49,6 +49,8 @@ package() {
 
   install -dm755 "${pkgdir}/var/lib/hwclock"
   make DESTDIR="${pkgdir}" install
+  chmod 0700 "${pkgdir}/bin/mount"
+  chmod 0700 "${pkgdir}/bin/umount"
 }
 
 md5sums=('4dcacdbdafa116635e52b977d9d0e879'

@@ -6,7 +6,6 @@ arch=('any')
 url="http://savannah.gnu.org/projects/config"
 license=('GPL2')
 groups=('base-devel')
-depends=
 package() {
   cd "${srcdir}"
   install -D -m0644 config.guess "${pkgdir}"/usr/share/gnuconfig/config.guess

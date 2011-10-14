@@ -7,7 +7,6 @@ url="http://www.gnu.org/software/gdbm/gdbm.html"
 license=('GPL')
 groups=('base-devel')
 arch=('i686' 'x86_64')
-depends=
 source=(ftp://ftp.gnu.org/gnu/gdbm/${pkgname}-${pkgver}.tar.gz
         gdbm-1.8.3-zeroheaders.patch
         gdbm-1.8.3-fhs.patch)

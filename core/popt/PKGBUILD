@@ -7,7 +7,6 @@ arch=('i686' 'x86_64')
 url="http://rpm5.org"
 license=('custom')
 groups=('base')
-depends=
 options=('!libtool')
 source=(http://rpm5.org/files/${pkgname}/${pkgname}-${pkgver}.tar.gz)
 md5sums=('3743beefa3dd6247a73f8f7a32c14c33')

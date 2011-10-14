@@ -5,10 +5,8 @@ pkgrel=1
 pkgdesc="Ext2/3/4 filesystem utilities"
 arch=('i686' 'x86_64')
 license=('GPL' 'LGPL' 'MIT')
-depends=
 url="http://e2fsprogs.sourceforge.net"
 groups=('base')
-makedepends=
 source=("http://downloads.sourceforge.net/sourceforge/${pkgname}/${pkgname}-${pkgver}.tar.gz"
         'e2fsprogs-1.41.14-no-docs-test-translations.patch'
         'MIT-LICENSE')
