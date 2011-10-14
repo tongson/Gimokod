@@ -5,14 +5,15 @@ pkgdesc='Utilities for rescue, embedded and minimal systems'
 arch=('i686' 'x86_64')
 url='http://busybox.net'
 license=('GPL')
-depends=
 options=('emptydirs')
 provides=('wget' 'sed' 'diffutils' 'findutils' 'awk' 'gzip' 'unzip' 'tar' 'which'
           'run-parts' 'vi' 'procps' 'cpio' 'cron' 'eject' 'runit' 'psmisc' 'bridge-utils'
           'iputils' 'net-tools' 'inetutils' 'man-db' 'logger' 'ntp' 'dhcpcd' 'grep' 'ifenslave')
 groups=('base')
 
-symlinks=(/bin/inotifyd
+symlinks=(/usr/bin/ip
+          /bin/smemcap
+          /bin/inotifyd
           /bin/cpio
           /usr/bin/run-parts
           /usr/bin/crontab
@@ -78,7 +79,7 @@ symlinks=(/bin/inotifyd
           /sbin/syslogd
           /sbin/klogd
           /bin/logread
-          /usr/bin/ntp
+          /usr/bin/ntpd
           /sbin/udhcpc
           /bin/grep
           /bin/egrep
@@ -91,7 +92,8 @@ build() {
   cp "${srcdir}"/config .config
 
   patch -Np1 -i "${srcdir}"/"${pkgname}"-"${pkgver}"-bb.patch
-  patch -Np1 -i "${srcdir}"/"${pkgname}"-"${pkgver}"-mandoc.patch
+  patch -Np1 -i "${srcdir}"/"${pkgname}"-"${pkgver}"-man.patch
+  patch -Np1 -i "${srcdir}"/"${pkgname}"-"${pkgver}"-logread.patch
 
   sed -i -r \
     -e 's:[[:space:]]?-(Werror|Os|falign-(functions|jumps|loops|labels)=1|fomit-frame-pointer)\>::g' \
@@ -114,32 +116,23 @@ package() {
     ln -sf /bin/busybox "${pkgdir}"/${symlinks[$x]}
   done
 
-  install -o 0 -g 16 -m0750 -d "${pkgdir}"/var/spool/cron
-  install -o 0 -g 409 -m1730 -d "${pkgdir}"/var/spool/cron/crontabs
+  install -o 160 -g 16 -m0750 -d "${pkgdir}"/var/spool/cron
+  install -o 160 -g 409 -m1730 -d "${pkgdir}"/var/spool/cron/crontabs
 
+  install -D -m0644 "${srcdir}"/sysctl.conf "${pkgdir}"/etc/sysctl.conf
   install -D -m0644 "${srcdir}"/man_db.conf "${pkgdir}"/etc/man_db.conf
   install -D -m0755 "${srcdir}"/runsvdir-start "${pkgdir}"/sbin/runsvdir-start
   install -D -m0755 "${srcdir}"/runsvdir-log "${pkgdir}"/sbin/runsvdir-log
-  install -D -m0755 "${srcdir}"/udhcpc-script "${pkgdir}"/usr/share/udhcpc/udhcpc-script
-  install -D -m0644 "${srcdir}"/sysctl.conf "${pkgdir}"/etc/sysctl.conf
-  install -D -m0644 "${srcdir}"/bbcrond.service "${pkgdir}"/lib/systemd/system/bbcrond.service
-  install -D -m0644 "${srcdir}"/bbklogd.service "${pkgdir}"/lib/systemd/system/bbklogd.service
-  install -D -m0644 "${srcdir}"/bbntpd.service "${pkgdir}"/lib/systemd/system/bbntpd.service
-  install -D -m0644 "${srcdir}"/bbsyslogd.service "${pkgdir}"/lib/systemd/system/bbsyslogd.service
-  install -D -m0644 "${srcdir}"/bbudhcpc.service "${pkgdir}"/lib/systemd/system/bbudhcpc.service
+  install -D -m0755 "${srcdir}"/udhcpc-script "${pkgdir}"/sbin/udhcpc-script
   install -D -m0644 LICENSE "${pkgdir}"/usr/share/licenses/${pkgname}/LICENSE
 }
 
 source=(${url}/downloads/${pkgname}-${pkgver}.tar.bz2)
 sha256sums=('ea7ec9b6df70b8c528f4a2b6300e9913431c7223308fb08dfafa7508d75a0cb9')
 source=(${source[@]-}
-        bbcrond.service
-        bbklogd.service
-        bbntpd.service
-        bbsyslogd.service
-        bbudhcpc.service
         busybox-1.19.2-bb.patch
-        busybox-1.19.2-mandoc.patch
+        busybox-1.19.2-logread.patch
+        busybox-1.19.2-man.patch
         config
         man_db.conf
         runsvdir-log
@@ -148,14 +141,10 @@ source=(${source[@]-}
         udhcpc-script)
 
 sha256sums=(${sha256sums[@]-}
-            '3122a606b691fabcae650eb5f36eac551ec5255070b097af65c316d539435e11'
-            '3047fdb640361644758cc46b83a29468fef28184d4e9629fcf38ecc62452dbea'
-            '7864a8f71f9b367a0c3da7bd6725a2eb139c2f2808d0a97b74f9b6bc7a1b4590'
-            '78e5ed652eb56fbc0b7af085b1dfae3f686972fa9e866ec29f89eaec1056160c'
-            '40f27e22ca1cc64e0675e923653f12c78ccb98a643face774eb80a51cea69225'
             '98f92c2edbcf61d1bacef783ea8b08cce07051b0a4489ed3f4579296846f89f1'
+            'b713a4de8d2340c73839969a47b607125f82665a4e3fb57e24ea1ab942660e7f'
             '733e23d851e68ecd27ed8bb8f4c4b8ea27b0d143069ec49aadb04deeb65dd9f5'
-            '90356e3a5ad63b6194394bb00bf7e620ca566c40e159388a6b7f5b6bdd1ab0bf'
+            'b075d703d695bf10237af8d88647852fdad4e39e39760afe552ac0bdc40c47f1'
             'bf0092798438c18fd3e7f6d9a8a281d6575cf4258d2457b6320d9c6bc8443eae'
             '3e9a01d07f0d8a6f98bee545aa3009344c9f0d7a4b76b88582f9ca693d789cf7'
             'a70d24036a7ae14f213147fe6727fee4320b2090bc59d8a4ffa609d8fdd14cef'
