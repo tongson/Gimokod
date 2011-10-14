@@ -1,12 +1,12 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=systemd
-pkgver=36
+pkgver=37
 pkgrel=1
 pkgdesc="Session and Startup manager"
 arch=('i686' 'x86_64')
 url="http://www.freedesktop.org/wiki/Software/systemd"
 license=('GPL2')
-depends=('dbus-core' 'kbd' 'libcap' 'cryptsetup' 'udev>=172')
+depends=('dbus-core' 'kbd' 'libcap' 'cryptsetup' 'udev')
 makedepends=('cryptsetup' 'intltool' 'gettext' 'gperf')
 groups=('base')
 options=('!libtool' '!strip')
@@ -16,11 +16,6 @@ backup=(etc/dbus-1/system.d/org.freedesktop.systemd1.conf
         etc/systemd/user.conf
         etc/systemd/systemd-logind.conf)
 install=systemd.install
-source=("http://www.freedesktop.org/software/${pkgname}/${pkgname}-${pkgver}.tar.bz2"
-        "os-release")
-md5sums=('e1213338efb697abc8215d9a66a7f082'
-         '752636def0db3c03f121f8b4f44a63cd')
-
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
 
@@ -65,9 +60,10 @@ build() {
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   make DESTDIR="${pkgdir}" install
-  install -Dm644 "${srcdir}/os-release" "${pkgdir}/etc/os-release"
   printf "d /run/console 755 root root\n" > "${pkgdir}/usr/lib/tmpfiles.d/console.conf"
-
-  # fix systemd-analyze for python2
-  sed -i '1s/python$/python2/' "${pkgdir}/usr/bin/systemd-analyze"
 }
+
+source=("http://www.freedesktop.org/software/${pkgname}/${pkgname}-${pkgver}.tar.bz2")
+sha256sums=('b38492bde73649cc3520953354ef446c268169c1d342614183655e9ee1a1bbc5')
+
+
