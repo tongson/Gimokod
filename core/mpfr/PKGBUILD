@@ -1,6 +1,8 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=mpfr
-pkgver=3.1.0
+_pkgver=3.1.0
+_patchlevel=p1
+pkgver="${_pkgver}.${_patchlevel}"
 pkgrel=1
 pkgdesc="Multiple-precision floating-point library"
 arch=('i686' 'x86_64')
@@ -9,11 +11,14 @@ license=('LGPL')
 groups=('base-devel')
 depends=('gmp')
 options=('!libtool' '!makeflags')
-source=(http://www.mpfr.org/mpfr-current/mpfr-${pkgver}.tar.xz)
-md5sums=('6e495841bb026481567006cec0f821c3')
+source=(http://www.mpfr.org/mpfr-current/mpfr-${_pkgver}.tar.xz
+        mpfr-${_pkgver}.${_patchlevel}.patch)
+md5sums=('6e495841bb026481567006cec0f821c3'
+         'ec988293368d4988c76f50d6a3460166')
 
 build() {
-  cd "${srcdir}/${pkgname}-${pkgver}"
+  cd "${srcdir}/${pkgname}-${_pkgver}"
+  patch -Np1 -i $srcdir/mpfr-${_pkgver}.${_patchlevel}.patch
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
@@ -23,12 +28,12 @@ build() {
 }
 
 check() {
-  cd "${srcdir}/${pkgname}-${pkgver}"
+  cd "${srcdir}/${pkgname}-${_pkgver}"
   make check
   msg "${pkgname} TESTS SUCCESSFUL"
 }
 
 package() {
-  cd "${srcdir}/${pkgname}-${pkgver}"
+  cd "${srcdir}/${pkgname}-${_pkgver}"
   make DESTDIR="${pkgdir}" install
 }
