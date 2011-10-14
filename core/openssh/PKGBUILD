@@ -15,7 +15,7 @@ source=("ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/${pkgname}-${pkgver}
         'sshd.confd'
         'sshd.pam')
 sha1sums=('ac4e0055421e9543f0af5da607a72cf5922dcc56'
-          'd43bdd824fcce40f1e6c3905087211a1cbba1031'
+          '91b391f389a7043627dc013eec30dcd15a0d4250'
           'ec102deb69cad7d14f406289d2fc11fee6eddbdd'
           '07fecd5880b1c4fdd8c94ddb2e89ddce88effdc1')
 
@@ -46,7 +46,6 @@ package() {
   install -Dm644 ../sshd.pam "${pkgdir}"/etc/pam.d/sshd
   install -Dm644 ../sshd.confd "${pkgdir}"/etc/conf.d/sshd
   install -Dm644 LICENCE "${pkgdir}/usr/share/licenses/${pkgname}/LICENCE"
-  install -Dm644 ../sshd.service "${pkgdir}"/lib/systemd/system/sshd.service
 
   rm "${pkgdir}"/usr/share/man/man1/slogin.1
   ln -sf ssh.1.gz "${pkgdir}"/usr/share/man/man1/slogin.1.gz
@@ -56,6 +55,7 @@ package() {
   install -Dm755 contrib/ssh-copy-id "${pkgdir}"/usr/bin/ssh-copy-id
   install -Dm644 contrib/ssh-copy-id.1 "${pkgdir}"/usr/share/man/man1/ssh-copy-id.1
 
+  chmod 0700 "${pkgdir}/usr/lib/ssh/ssh-keysign"
 
   # PAM is a common, standard feature to have
   sed \

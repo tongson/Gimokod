@@ -5,7 +5,6 @@ pkgrel=1
 arch=('i686' 'x86_64')
 url="http://sourceware.org/lvm2/"
 license=('GPL2' 'LGPL2')
-depends=
 groups=('base')
 
 build() {
@@ -64,7 +63,6 @@ package_lvm2() {
   make DESTDIR="${pkgdir}" install_lvm2
   make -C liblvm DESTDIR="${pkgdir}" install
   install -d "${pkgdir}"/etc/lvm/{archive,backup}
-  install -D -m644 "${srcdir}/lvm2.service" "${pkgdir}/lib/systemd/system/lvm2.service"
 }
 
 source=(ftp://sources.redhat.com/pub/lvm2/LVM2.${pkgver}.tgz
