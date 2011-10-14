@@ -5,7 +5,6 @@ pkgrel=1
 pkgdesc="IP Routing Utilities"
 arch=('i686' 'x86_64')
 license=('GPL2')
-depends=
 url="http://www.linux-foundation.org/en/Net:Iproute2"
 groups=('base')
 options=('!makeflags')
@@ -33,4 +32,6 @@ package() {
   ln -s /sbin/ip "${pkgdir}"/usr/sbin/ip
   install -D -m0644 include/libnetlink.h "${pkgdir}"/usr/include/libnetlink.h
   install -D -m0644 lib/libnetlink.a "${pkgdir}"/usr/lib/libnetlink.a
+  chmod 2710 "${pkgdir}/sbin/ip"
+  chown 0:188 "${pkgdir}/sbin/ip"
 }
