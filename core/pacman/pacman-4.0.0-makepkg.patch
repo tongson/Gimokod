@@ -1,6 +1,6 @@
---- pacman-3.5.4-/scripts/makepkg.sh.in
-+++ pacman-3.5.4+/scripts/makepkg.sh.in
-@@ -728,6 +728,13 @@
+--- pacman-4.0.0/scripts/makepkg.sh.in
++++ pacman-4.0.0/scripts/makepkg.sh.in
+@@ -844,6 +844,13 @@ extract_sources() {
  		fi
  	done
  
@@ -9,41 +9,41 @@
 +			msg "Updating ${x/${workdir}\/} with /usr/share/gnuconfig/${x##*/}"
 +			cp -f /usr/share/gnuconfig/"${x##*/}" "${x}"
 +		done
-+        done
++	done
 +
  	if (( EUID == 0 )); then
  		# change perms of all source files to root user & root group
  		chown -R 0:0 "$srcdir"
-@@ -928,7 +935,9 @@
+@@ -1038,7 +1045,9 @@ tidy_install() {
  
  	if [[ $(check_option emptydirs) = "n" ]]; then
  		msg2 "$(gettext "Removing empty directories...")"
 -		find . -depth -type d -empty -delete
 +		find . -mindepth 1 -depth -type d -print0 | while read -r -d $'\0' workdir ; do
 +			rmdir --ignore-fail-on-non-empty "${workdir}"
-+	        done
++		done
  	fi
- }
  
-@@ -999,10 +1008,10 @@
+ 	if [[ $(check_option upx) = "y" ]]; then
+@@ -1203,10 +1212,10 @@ check_package() {
  	done
  
  	# check for references to the build and package directory
 -	if find "${pkgdir}" -type f -print0 | xargs -0  grep -q -I "${srcdir}" ; then
-+	if find "${pkgdir}" -type f -print0 | xargs -0  grep -q -s "${srcdir}" ; then
++	if find "${pkgdir}" -type f -print0 | xargs -0 grep -q -s "${srcdir}" ; then
  		warning "$(gettext "Package contains reference to %s")" "\$srcdir"
  	fi
 -	if find "${pkgdir}" -type f -print0 | xargs -0  grep -q -I "${pkgdir}" ; then
-+	if find "${pkgdir}" -type f -print0 | xargs -0  grep -q -s "${pkgdir}" ; then
++	if find "${pkgdir}" -type f -print0 | xargs -0 grep -q -s "${pkgdir}" ; then
  		warning "$(gettext "Package contains reference to %s")" "\$pkgdir"
  	fi
  
-@@ -1071,7 +1080,7 @@
- 	shopt -s nullglob
- 	# TODO: Maybe this can be set globally for robustness
- 	shopt -s -o pipefail
+@@ -1271,7 +1280,7 @@ create_package() {
+ 	# bsdtar's gzip compression always saves the time stamp, making one
+ 	# archive created using the same command line distinct from another.
+ 	# Disable bsdtar compression and use gzip -n for now.
 -	bsdtar -cf - $comp_files * |
 +	LANG="en_US.UTF-8" bsdtar -cf - $comp_files * |
  	case "$PKGEXT" in
- 	    *tar.gz)  gzip -c -f -n ;;
- 	    *tar.bz2) bzip2 -c -f ;;
+ 		*tar.gz)  gzip -c -f -n ;;
+ 		*tar.bz2) bzip2 -c -f ;;

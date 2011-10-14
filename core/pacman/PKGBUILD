@@ -1,51 +1,50 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=pacman
-pkgver=3.5.4
+pkgver=4.0.0
 pkgrel=1
 pkgdesc="A library-based package manager with dependency support"
 arch=('i686' 'x86_64')
 url="http://www.archlinux.org/pacman/"
 license=('GPL')
 groups=('base')
-depends=('libarchive>=2.8.4')
+depends=('libarchive' 'gpgme')
 backup=(etc/pacman.conf etc/makepkg.conf)
 install=pacman.install
-options=('!libtool')
-source=(ftp://ftp.archlinux.org/other/pacman/${pkgname}-${pkgver}.tar.gz
+options=(!libtool)
+source=(ftp://ftp.archlinux.org/other/pacman/"${pkgname}"-"${pkgver}".tar.gz
+        pacman-4.0.0-dload_h.patch
+        pacman-4.0.0-makepkg.patch
         pacman.conf
         pacman.conf.x86_64
-        makepkg.conf
-        pacman-3.5.4-makepkg.patch
-        0001-makepkg-fix-removing-symbolic-link.patch)
-md5sums=('2dd3a85d55ee3dd89abd349aa837447c'
-         'e99eb721b6b704f68c5f47468507c102'
-         'f8b939d9b2beb79a0436961a2d707d7c'
-         'c034b061c86b3f26a9646cf8efc7ff11'
-         '199cccf475d558130dd030340972f22d'
-         '749a4ddc6d8418d8d031f1c9b4e09d6f')
+        makepkg.conf)
+md5sums=('8c97f4804d2a0847956c45888b0ea517'
+         '4e9c51348456dc8dc1687bbf6b05ee7b'
+         'b73f08ce20f8b6ef9378e93d42038bec'
+         'ae4abf6df12483d26b39529ab27c0837'
+         'eb78f7191a61921416ce1a090f8fd3ba'
+         'db051afbd12993b7743ccd4d58668499')
 
 PKGEXT='.pkg.tar.gz'
 
 build() {
-  cd "${srcdir}/${pkgname}-${pkgver}"
-
-  patch -Np1 -i ../pacman-3.5.4-makepkg.patch
-  patch -Np1 -i ../0001-makepkg-fix-removing-symbolic-link.patch
-
+  cd "${srcdir}"/"${pkgname}"-"${pkgver}"
+  patch -Np1 -i ../pacman-4.0.0-dload_h.patch
+  patch -Np1 -i ../pacman-4.0.0-makepkg.patch
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
               --sysconfdir=/etc \
               --localstatedir=/var \
               --disable-doc \
-              --disable-git-version \
-              --without-fetch \
-              --disable-nls
+              --disable-nls \
+              --with-openssl \
+              --without-libcurl \
+              --with-gpgme
   make
 }
 
 package() {
-  cd "${srcdir}/${pkgname}-${pkgver}"
+  cd "${srcdir}"/"${pkgname}"-"${pkgver}"
   make DESTDIR="${pkgdir}" install
 
   # install Arch specific stuff
