@@ -16,6 +16,7 @@ uucp:x:14:
 cron:x:16:
 log:x:19:root
 utmp:x:20:
+nscd:x:28:
 http:x:33:
 shadow:x:42:
 crontab:x:49:
@@ -27,5 +28,11 @@ storage:x:95:
 power:x:98:
 nobody:x:99:
 users:x:100:
+crond:x:160:
 chkpwd:x:163:
 auth:x:164:
+klogd:x:180:
+syslogd:x:181:
+ntpd:x:185:
+dhcp:x:188:
+rngd:x:800:

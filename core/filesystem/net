@@ -2,3 +2,4 @@ interface=eth0
 address=
 netmask=
 gateway=
+ntpdopts="-p pool.ntp.org"

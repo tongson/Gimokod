@@ -4,9 +4,8 @@ pkgrel=1
 pkgdesc='Filesystem layout'
 arch=('any')
 url='http://localhost.localdomain'
-license=('ISC')
+license=('LGPL3')
 groups=('base')
-depends=
 backup=(etc/fstab
         etc/group
         etc/gshadow
@@ -14,7 +13,7 @@ backup=(etc/fstab
         etc/hosts
         etc/inputrc
         etc/issue
-        usr/lib/tmpfiles.d/layout.conf
+        etc/tmpfiles.d/layout.conf
         etc/ld.so.conf
         etc/motd
         etc/conf.d/net
@@ -33,7 +32,6 @@ package() {
     done
 
     install -d -m755 "${pkgdir}"/run/.root/etc
-    install -d -m1777 "${pkgdir}"/run/.root/tmp
     install -d -m555 "${pkgdir}"/proc
     install -d -m0750 "${pkgdir}"/root
 
@@ -41,8 +39,8 @@ package() {
       install -d -m755 "${pkgdir}"/etc/${d}
     done
 
-    for f in fstab group host.conf hosts issue ld.so.conf locale.conf motd \
-    nsswitch.conf passwd securetty shells profile vconsole.conf; do
+    for f in fstab group host.conf hosts hostname issue inputrc ld.so.conf locale.conf motd \
+    nsswitch.conf passwd securetty shells profile vconsole.conf os-release; do
       install -m0644 "${srcdir}"/${f} "${pkgdir}"/etc/
     done
 
@@ -53,10 +51,17 @@ package() {
     install -d -m02710 -o 2 -g 164 "${pkgdir}/etc/tcb/daemon"
     install -d -m02710 -o 8 -g 164 "${pkgdir}/etc/tcb/mail"
     install -d -m02710 -o 14 -g 164 "${pkgdir}/etc/tcb/ftp"
+    install -d -m02710 -o 28 -g 164 "${pkgdir}/etc/tcb/nscd"
     install -d -m02710 -o 33 -g 164 "${pkgdir}/etc/tcb/http"
     install -d -m02710 -o 99 -g 164 "${pkgdir}/etc/tcb/nobody"
+    install -d -m02710 -o 160 -g 164 "${pkgdir}/etc/tcb/crond"
+    install -d -m02710 -o 180 -g 164 "${pkgdir}/etc/tcb/klogd"
+    install -d -m02710 -o 181 -g 164 "${pkgdir}/etc/tcb/syslogd"
+    install -d -m02710 -o 185 -g 164 "${pkgdir}/etc/tcb/ntpd"
+    install -d -m02710 -o 188 -g 164 "${pkgdir}/etc/tcb/dhcp"
+    install -d -m02710 -o 800 -g 164 "${pkgdir}/etc/tcb/rngd"
 
-    for id in root bin daemon mail ftp http nobody; do
+    for id in root bin daemon mail ftp nscd http nobody crond klogd syslogd ntpd dhcp rngd; do
       echo "${id}:!:-1::::::" > "${pkgdir}/etc/tcb/${id}/shadow"
       chmod 0640 "${pkgdir}/etc/tcb/${id}/shadow"
     done
@@ -66,8 +71,15 @@ package() {
     chown 2:164 "${pkgdir}/etc/tcb/daemon/shadow"
     chown 8:164 "${pkgdir}/etc/tcb/mail/shadow"
     chown 14:164 "${pkgdir}/etc/tcb/ftp/shadow"
+    chown 28:164 "${pkgdir}/etc/tcb/nscd/shadow"
     chown 33:164 "${pkgdir}/etc/tcb/http/shadow"
     chown 99:164 "${pkgdir}/etc/tcb/nobody/shadow"
+    chown 160:164 "${pkgdir}/etc/tcb/crond/shadow"
+    chown 180:164 "${pkgdir}/etc/tcb/klogd/shadow"
+    chown 181:164 "${pkgdir}/etc/tcb/syslogd/shadow"
+    chown 185:164 "${pkgdir}/etc/tcb/ntpd/shadow"
+    chown 188:164 "${pkgdir}/etc/tcb/dhcp/shadow"
+    chown 800:164 "${pkgdir}/etc/tcb/rngd/shadow"
 
     for d in spool local opt lib/misc empty; do
       install -d -m755 "${pkgdir}"/var/${d}
@@ -97,15 +109,15 @@ package() {
     ln -s /run/.root/var/spool/mail "${pkgdir}"/var/mail
     ln -s /run/.root/etc/resolv.conf "${pkgdir}"/etc/resolv.conf
 
-    install -D -m0644 layout.conf "${pkgdir}"/usr/lib/tmpfiles.d/layout.conf
-    install -D -m0644 inputrc "${pkgdir}"/etc/inputrc
+    install -D -m0644 layout.conf "${pkgdir}"/etc/tmpfiles.d/layout.conf
     install -D -m0644 net "${pkgdir}"/etc/conf.d/net
 }
-
-source=(fstab
+source=(${source[@]-}
+        fstab
         group
         gshadow
         host.conf
+        hostname
         hosts
         inputrc
         issue
@@ -115,6 +127,7 @@ source=(fstab
         motd
         net
         nsswitch.conf
+        os-release
         passwd
         profile
         protocols
@@ -123,20 +136,23 @@ source=(fstab
         shells
         vconsole.conf)
 
-sha256sums=('797dbd2f4f22ea9a8f8d1bb4142b66f64dd220888ebd89829adf8e1a456a0432'
-            '9493111a34663dd621c1986483d762e354ed36b8cf5b76c5ec860478cdf17862'
-            'f0ccf9d4b9e59ab2f58e76197fd02cc79b7d53ca212f1b2e5ad2e7667f81894e'
+sha256sums=(${sha256sums[@]-}
+            '797dbd2f4f22ea9a8f8d1bb4142b66f64dd220888ebd89829adf8e1a456a0432'
+            'be09e6b414c5dca65a8bc44a74b3e27025d4b28e2978bafb83fde297b5c7f119'
+            '9de8dda6a99fa7b25153ef7a7f03066e3b3d3c15ea6773cb4de4300d5c292f93'
             'f0709706ce9bf46c58358e040d7eaa96994767438bab274ee5239ac19b0b814b'
+            'ab014e33cfd4212e76d000310534b7528f0e2a39ee8e78660a0d9cfcdbac4e4b'
             'e3414c188757954ee34da03cf324fc9864b1758dc472cfe36884ce6415bbdbd3'
             '2644a0457e61bff454c317938878d827a6e1d0a403a2cea5891e373b2d9a4b35'
-            '48f87137ef8a1ac53226de7c7aed394122a1ff4fd83c43c0ed8446fd5548b2dd'
-            '9f63189ee40690b8b7e675a520f433057282d371808e55933f0b75c23adf8ca6'
+            '0d50b092887d0cd5063e82629860d7e70c683b22a49d7119dc116f38e134c359'
+            '89c4b6441b6c69e62236e451bd7008f8514d7550fda60eac7579226acc3d4619'
             '27d7ebd402e1b9a20fd3a0663ccc10e1b1feff2d9dfb1ad7dd12bb76cfe0880a'
             '586ae0a486992c367e38ee8e103a92ad2b0baeb3a8b9898f2e4e7e0c63e5c112'
             'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
-            '71683f98fe31be60b5164e0adacd671b7d5535bfcc17130860bcca6be08158e6'
+            'e210afefc512ab81447e21b12fa7389e7df3a2dc7be663a6663f210a4847ef8e'
             'a1e248357083b55d83659ab50f32c94bf1bcf0825470ccb41702dad3cff712c7'
-            '61f3203e6b7d666e22d6d4d75f3c688640c2905186641aaa285d332db0e1456a'
+            '99b8059593daf12e7136a3f858daedde1a9c7788ef7447361ffdaea595e89996'
+            'bd7a47bafc318f57c4d76ac193dfdfbe6f15e6381f4590b755535448ecea60a5'
             '7f44161b93c5fd74211d7b3be2900568631127110df029ad32ec12ea2d897ac1'
             '9b0d54d258b62c437aefe09e9c3e4e9307051b749e680024bc353f0eb92eb486'
             '845fec1cf9b279b2d94eb7d49f1c117d3c58c3cafa6ae4dec20ed62b91c9fb67'

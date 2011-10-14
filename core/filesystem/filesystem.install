@@ -1,8 +1,8 @@
 post_install() {
   rm -rf tmp
   rm -rf var/tmp
-  ln -s run/.root/tmp tmp
-  ln -s /run/.root/tmp var/tmp
+  ln -s run/tmp tmp
+  ln -s run/tmp var/tmp
 }
 
 _addgroup() {
