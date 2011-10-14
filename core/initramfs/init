@@ -1,0 +1,63 @@
+#!/bin/sh
+exec >/dev/console </dev/console 2>&1
+
+parse_opt() {
+  case "$1" in
+    *\=*)
+      echo "$1" | cut -d= -f2-
+  ;;
+  esac
+}
+
+cmdline=$(cat /proc/cmdline)
+for x in ${cmdline}; do
+  case "${x}" in
+    debug)
+    DEBUG='yes'
+    ;;
+    real_root\=*)
+    REAL_ROOT=$(parse_opt "${x}")
+    ;;
+    real_rootflags\=*)
+    REAL_ROOTFLAGS=$(parse_opt "${x}")
+    ;;
+    systemd_opts\=*)
+    SYSTEMD_OPTS=$(parse_opt "${x}")
+    ;;
+  esac
+done
+
+echo "Setting up BusyBox..."
+/bin/busybox --install -s
+
+echo "Setting up /dev..."
+mount -n -t tmpfs -o size=64k,mode=0755 tmpfs /dev
+mount -n -t proc -o noexec,nosuid,nodev proc /proc
+mount -n -t sysfs -o noexec,nosuid,nodev sysfs /sys
+mknod /dev/console c 5 1
+mknod /dev/tty1 c 4 1
+mknod /dev/null c 1 3
+ln -snf /proc/self/fd /dev/fd
+ln -snf fd/0 /dev/stdin
+ln -snf fd/1 /dev/stdout
+ln -snf fd/2 /dev/stderr
+/sbin/mdev -s
+
+echo "Mounting root..."
+mount -o remount,rw /
+
+echo "Activating volumes...'
+lvm_commands="#! /bin/lvm"
+lvm_commands="${lvm_commands} \nvgchange -ay --sysinit"
+printf "%b\n" "${lvm_commands}" | /bin/lvm /proc/self/fd/0
+
+[ -n ${DEBUG} ] && exec /bin/ash
+
+echo "Running mount -o ro,${REAL_ROOTFLAGS} ..."
+mount -o ro,${REAL_ROOTFLAGS} ${REAL_ROOT} /real_root
+
+echo "Switching root..."
+exec /sbin/switch_root -c "/dev/console" "/real_root" "/bin/systemd" "${SYSTEMD_OPTS}"
+
+echo "Did not boot properly. Running a shell"
+exec /bin/ash
