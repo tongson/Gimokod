@@ -1,4 +1,4 @@
-systemdir="../../../lib/systemd/systemd"
+systemdir="../../../../lib/systemd/systemd"
 etcsystemdir="etc/systemd/system"
 _basic() {
   for s in "${1}"; do
@@ -18,7 +18,7 @@ _shutdown() {
 }
 
 post_install() {
-  ln -s ${systemdir}/multi-user.target ${etcsystemdir}/default.target
+  ln -s ../../../multi-user.target ${etcsystemdir}/default.target
   ln -s /dev/null ${etcsystemdir}/console-shell.service
   mkdir ${etcsystemdir}/basic.target.wants
   mkdir ${etcsystemdir}/multi-user.target.wants
