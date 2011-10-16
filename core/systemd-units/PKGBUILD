@@ -11,7 +11,7 @@ install=systemd-units.install
 package() {
   cd ${srcdir}
   for s in *.service ; do
-    install -D -m0644 ${s}.service "${pkgdir}/lib/systemd/system/${s}.service"
+    install -D -m0644 ${s} "${pkgdir}/lib/systemd/system/${s}"
   done
 }
 
