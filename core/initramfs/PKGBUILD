@@ -6,7 +6,7 @@ arch=('i686' 'x86_64')
 url="http://gimokod.org"
 license=('LGPL3')
 groups=('base')
-makedepends=('lvm' 'busybox')
+makedepends=('lvm2' 'busybox')
 
 root="${srcdir}/root"
 build() {
