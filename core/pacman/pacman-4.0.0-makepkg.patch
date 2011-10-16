@@ -1,6 +1,16 @@
---- pacman-4.0.0/scripts/makepkg.sh.in
-+++ pacman-4.0.0/scripts/makepkg.sh.in
-@@ -844,6 +844,13 @@ extract_sources() {
+diff -Naur pacman-4.0.0-//scripts/makepkg.sh.in pacman-4.0.0/scripts/makepkg.sh.in
+--- pacman-4.0.0-//scripts/makepkg.sh.in	2011-10-11 00:18:37.000000000 +0000
++++ pacman-4.0.0/scripts/makepkg.sh.in	2011-10-16 20:20:15.069384298 +0000
+@@ -43,7 +43,7 @@
+ startdir="$PWD"
+ 
+ packaging_options=('strip' 'docs' 'libtool' 'emptydirs' 'zipman' 'purge' 'upx')
+-other_options=('ccache' 'distcc' 'buildflags' 'makeflags')
++other_options=('ccache' 'distcc' 'buildflags' 'makeflags' 'binchecks')
+ splitpkg_overrides=('pkgver' 'pkgrel' 'epoch' 'pkgdesc' 'arch' 'license' \
+                     'groups' 'depends' 'optdepends' 'provides' 'conflicts' \
+                     'replaces' 'backup' 'options' 'install' 'changelog')
+@@ -844,6 +844,13 @@
  		fi
  	done
  
@@ -14,7 +24,88 @@
  	if (( EUID == 0 )); then
  		# change perms of all source files to root user & root group
  		chown -R 0:0 "$srcdir"
-@@ -1038,7 +1045,9 @@ tidy_install() {
+@@ -960,6 +967,80 @@
+ tidy_install() {
+ 	cd "$pkgdir"
+ 	msg "$(gettext "Tidying install...")"
++  
++ 	if [[ $(check_option binchecks) = "y" ]]; then
++		msg2 "Running binary checks..."
++		local x f dir l
++		local workdir="."
++		local tempdir="${srcdir}/temp"
++		local forbidden_dirs="${pkgdir} ${srcdir} lib64"
++		local rpath_files=$(scanelf -F '%F:%r' -qBR "${workdir}")
++
++        	f=""
++		for dir in ${forbidden_dirs}; do
++			for l in $(echo "${rpath_files}" | grep -E ":${dir}|::|: " || return 0); do
++				f+="  ${l%%:*}\n"
++			done
++		done
++		x=$(
++  		find "${workdir}" -type f \( -perm -u+s -o -perm -g+s \) -print0 | \
++  		xargs -0 scanelf -qyRF '%r %p' | grep -F '$ORIGIN' || return 0
++  		)
++
++		if [[ -n ${f}${x} ]] ; then
++			echo -e "\n"
++			warning "QA notice: files containing problem RPATHS"
++ 			warning "${f}${f:+${x:+\n}}${x}"
++ 			echo -e "\n"
++		fi
++
++		f=$(scanelf -qyRF '%t %p' "${workdir}" | grep -v 'usr/lib/debug/' || return 0)
++		if [[ -n ${f} ]] ; then
++			echo -e "\n"
++			warning "QA notice: TEXTRELs found"
++			warning "${f}"
++  			echo -e "\n"
++		fi
++
++		f=$(scanelf -qyRAF '%e %p' "${workdir}" | grep -v 'usr/lib/debug/' || return 0)
++		if [[ -n ${f} ]] ; then
++			echo -e "\n"
++			warning "QA notice: executable stack found"
++			warning "${f}"
++			echo -e "\n"
++		fi
++
++		f=$(scanelf -ByF '%S %p' "${workdir}"{,usr/}lib*/lib*.so* | gawk '$2 == "" { print }' | sed -e "s:^[[:space:]]${D}:/:")
++		if [[ -n ${f} ]] ; then
++			echo "${f}" > "${tempdir}"/scanelf-missing-SONAME.log
++			sed -e "/^\$/d" -i "${tempdir}"/scanelf-missing-SONAME.log
++			f=$(<"${tempdir}"/scanelf-missing-SONAME.log)
++			if [[ -n ${f} ]] ; then
++				echo -e "\n"
++				warning "QA notice: shared libraries lack a SONAME"
++				warning "${f}"
++				echo -e "\n"
++			else
++				rm -f "${tempdir}"/scanelf-missing-SONAME.log
++			fi
++		fi
++
++
++		f=$(scanelf -ByF '%n %p' "${workdir}"{,usr/}lib*/lib*.so* | gawk '$2 == "" { print }' | sed -e "s:^[[:space:]]${D}:/:")
++		if [[ -n ${f} ]] ; then
++			echo "${f}" > "${tempdir}"/scanelf-missing-NEEDED.log
++			sed -e "/^\$/d" -i "${tempdir}"/scanelf-missing-NEEDED.log
++			f=$(<"${tempdir}"/scanelf-missing-NEEDED.log)
++			if [[ -n ${f} ]] ; then
++				echo -e "\n"
++				warning "QA notice: shared libraries lack NEEDED entries"
++				warning "${f}"
++				echo -e "\n"
++			else
++    				rm -f "${tempdir}"/scanelf-missing-NEEDED.log
++			fi
++		fi
++	fi
+ 
+ 	if [[ $(check_option docs) = "n" && -n ${DOC_DIRS[*]} ]]; then
+ 		msg2 "$(gettext "Removing doc files...")"
+@@ -1038,7 +1119,9 @@
  
  	if [[ $(check_option emptydirs) = "n" ]]; then
  		msg2 "$(gettext "Removing empty directories...")"
@@ -25,7 +116,7 @@
  	fi
  
  	if [[ $(check_option upx) = "y" ]]; then
-@@ -1203,10 +1212,10 @@ check_package() {
+@@ -1203,10 +1286,10 @@
  	done
  
  	# check for references to the build and package directory
@@ -38,7 +129,7 @@
  		warning "$(gettext "Package contains reference to %s")" "\$pkgdir"
  	fi
  
-@@ -1271,7 +1280,7 @@ create_package() {
+@@ -1271,7 +1354,7 @@
  	# bsdtar's gzip compression always saves the time stamp, making one
  	# archive created using the same command line distinct from another.
  	# Disable bsdtar compression and use gzip -n for now.
