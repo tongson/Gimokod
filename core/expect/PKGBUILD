@@ -9,10 +9,8 @@ license=('custom')
 groups=('base-devel')
 depends=('tcl>=8.5.3')
 changelog=ChangeLog
-source=(http://downloads.sourceforge.net/project/expect/Expect/${pkgver}/expect${pkgver}.tar.gz
-        expect-5.44.1.14-no-tk.patch)
-md5sums=('44e1a4f4c877e9ddc5a542dfa7ecc92b'
-         'b6158443de759f192ae8877f30e2ebd3')
+source=(http://downloads.sourceforge.net/project/expect/Expect/${pkgver}/expect${pkgver}.tar.gz)
+md5sums=('44e1a4f4c877e9ddc5a542dfa7ecc92b')
 
 build() {
   cd "${srcdir}"/expect${pkgver}
