@@ -1,11 +1,13 @@
 --- busybox-1.19.2/sysklogd/logread.c
 +++ busybox-1.19.2/sysklogd/logread.c
-@@ -179,7 +179,7 @@ int logread_main(int argc UNUSED_PARAM,
+@@ -179,7 +179,9 @@
  
  #if ENABLE_FEATURE_LOGREAD_REDUCED_LOCKING
  		for (i = 0; i < len_total; i += strlen(copy + i) + 1) {
 -			fputs(copy + i, stdout);
-+			puts(copy + i);
++			if (strlen(copy + i) != 0) {
++				puts(copy + i);
++			}
  		}
  		free(copy);
  #endif
