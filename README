@@ -5,7 +5,7 @@ Yet another distro.
 So straight to the details.
 Pacman for package management--I had the option of using Pkgin/Pkgsrc but Pacman/ABS was so much easier to work with. I'm aiming for a very small footprint. No NLS support, multilib, texinfo manuals and HTML docs. Removed Perl dependency from ca-certificates and replaced groff for manpage viewing with mdocml. Several components usually provided by GNU utilities are replaced by BusyBox applets, except for coreutils and util-linux.
 
-You can think of it as a distribution between minimal Linux distributions using uClibc/BusyBox and full blown Linux distributions. The initial packages were built in Exherbo but now the base system is able to build itself. The base system and development tools needed to build itself total in at 82 packages only.
+You can think of it as a distribution between minimal Linux distributions using uClibc/BusyBox and full blown Linux distributions. The initial packages were built in Exherbo but now the base system is able to build itself. The base system and development tools needed to build itself total in at 85 packages only.
 
 I believe it's easier to secure and maintain a host if the packages are kept simple and minimum as much as possible.
 
