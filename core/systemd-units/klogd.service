@@ -5,6 +5,6 @@ Description=BusyBox klogd
 Restart=always
 User=klogd
 Group=klogd
-ExecStart=/bin/busybox klogd -n
+ExecStart=/sbin/klogd -n
 StandardOutput=null
 

@@ -6,6 +6,6 @@ Restart=always
 EnvironmentFile=/etc/conf.d/net
 User=ntpd
 Group=ntpd
-ExecStart=-/bin/busybox ntpd -l -n -N $ntpdopts
+ExecStart=-/usr/bin/ntpd -l -n -N $ntpdopts
 StandardError=syslog
 
