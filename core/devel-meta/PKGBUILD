@@ -1,0 +1,36 @@
+pkgname=devel-meta
+pkgver=20111016
+pkgrel=1
+pkgdesc="base-devel meta package"
+arch=('any')
+url="http://gimokod.org"
+license=('LGPL3')
+groups=('base-devel')
+depends=(
+  autoconf
+  autogen
+  automake
+  bison
+  dejagnu
+  expect
+  fakeroot
+  file
+  flex
+  gawk
+  gcc
+  gettext
+  glib
+  gnuconfig
+  gperf
+  guile
+  intltool
+  libtool
+  linux-api-headers
+  m4
+  make
+  patch
+  pax-utils
+  perl-xml-parser
+  pkg-config
+  tcl
+)
