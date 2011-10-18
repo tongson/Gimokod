@@ -2,18 +2,18 @@ systemdir="../../../../lib/systemd/systemd"
 etcsystemdir="etc/systemd/system"
 _basic() {
   for s in "${1}"; do
-    ln -s ${systemdir}/${s}.service ${etcsystemdir}/basic.target.wants/${s}.service
+    ln -sf ${systemdir}/${s}.service ${etcsystemdir}/basic.target.wants/${s}.service
   done
 }
 _multi-user() {
   for s in "${1}"; do
-    ln -s ${systemdir}/${s}.service ${etcsystemdir}/multi-user.target.wants/${s}.service
+    ln -sf ${systemdir}/${s}.service ${etcsystemdir}/multi-user.target.wants/${s}.service
   done
 }
 
 _shutdown() {
   for s in "${1}"; do
-    ln -s ${systemdir}/${s}.service ${etcsystemdir}/shutdown.target.wants/${s}.service
+    ln -sf ${systemdir}/${s}.service ${etcsystemdir}/shutdown.target.wants/${s}.service
   done
 }
 
