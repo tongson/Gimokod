@@ -25,12 +25,12 @@ build() {
   sed -i '50s:tst-cpuclock2::' rt/Makefile # bogus
   sed -i '35s:nss3:nss:' scripts/check-local-headers.sh # correct dir
   patch -Np1 -i ../glibc-2.14-no-tzdata-info-translation.patch
+  patch -Np1 -i ../glibc-2.14-revert-4462fad3.patch
 
   # Gentoo
   patch -Np1 -i ../0020_all_glibc-tweak-rfc1918-lookup.patch
   patch -Np1 -i ../0030_all_glibc-respect-env-CPPFLAGS.patch
   patch -Np1 -i ../0040_all_glibc-2.14-ssp-typo.patch
-  patch -Np1 -i ../0051_all_glibc-2.14-resolver-crash.patch
   patch -Np1 -i ../0061_all_glibc-2.13-static-memset.patch
   patch -Np1 -i ../1005_all_glibc-sigaction.patch
   patch -Np1 -i ../1010_all_glibc-queue-header-updates.patch
@@ -213,7 +213,6 @@ source=(${source[@]-}
         0020_all_glibc-tweak-rfc1918-lookup.patch
         0030_all_glibc-respect-env-CPPFLAGS.patch
         0040_all_glibc-2.14-ssp-typo.patch
-        0051_all_glibc-2.14-resolver-crash.patch
         0061_all_glibc-2.13-static-memset.patch
         1005_all_glibc-sigaction.patch
         1010_all_glibc-queue-header-updates.patch
@@ -243,6 +242,7 @@ source=(${source[@]-}
         glibc-2.14-owl-wrapper-sha.patch
         glibc-2.14-reexport-rpc-interface.patch
         glibc-2.14-reinstall-nis-rpc-headers.patch
+        glibc-2.14-revert-4462fad3.patch
         glibc-2.15-getsysstats-speedup.patch
         glibc-2.2-sunrpc.diff
         glibc-2.3.3-nscd-db-path.diff
@@ -265,7 +265,6 @@ sha256sums=(${sha256sums[@]-}
             'b14477c710b7d25db20bc907052fce840a2abfae41e7d5abfeb9429115f33bf6'
             '0f8ecb7697a8e004b78da2b81657ff4a88e1a64fd2633750198f07c9679dcc74'
             'a12403336f294aa71ec638601a3f90897af63e13602dc7ad695a2f4d8063fdb5'
-            '85a2e3916f76c3c730e761bce34d0507c4f836e418d362481814f0ccbcd9535c'
             'a791015f1801e60e9095eed0ee784ed90d6a7ecec59ff410c240fbcea4435383'
             'a53d562750b72cb00f4cd859fe9ef2a7e2574e19b0c69c7b416673184c450161'
             '598b08b96f68173995725f7868cdb2c9f5b94d85fd0c0ff49475f7f3af7d876d'
@@ -295,6 +294,7 @@ sha256sums=(${sha256sums[@]-}
             'a531bd2ce1f63d6e74fdcb6cdfc4eeceaaf0e947855f1dc8371348f139713518'
             '9fdc1600ebaf917e68baf2507788d9f17f69c3d95cb6d479076eba48c14a24a5'
             'f1e6e8fef5545f84905c4acd73307490726bf8d627d7e4be24dd8a3edbac0a9e'
+            'c92ed586ba14ad67bfc38490cb5523d151a645687ef6a3b0fea5376f49386f25'
             '251d57a4f41fa037076ae849dba4c85e69b54dd1673d3e7e838eedd2715079b5'
             '9188e23d9097ba357b5cd65c826de1f52c08afbbbe830be9c9f0c4e97c2d8912'
             '0e16b9c4bb468a9076f2549f0f1709ba89335c1479b76e8ec68035423297a202'
