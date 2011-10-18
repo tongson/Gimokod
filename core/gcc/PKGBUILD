@@ -36,6 +36,10 @@ build() {
   patch -Np1 -i ../amd-save-the-initial-options-after-checking-vzeroupper.patch
   patch -Np1 -i ../amd-ix86_reorg-run-move_or_dele.patch
 
+  patch -Np1 -i ../pr49279.diff
+  patch -Np1 -i ../pr49539.diff
+  patch -Np1 -i ../pr49651.diff
+
   echo ${pkgver} > gcc/BASE-VER
 
   cd ${srcdir}
@@ -164,7 +168,10 @@ source=(${source[@]-}
         gcc-4.6.1-test-stack-limit.patch
         gcc-hash-style-both.patch
         gcc_pure64.patch
-        pr33763.diff)
+        pr33763.diff
+        pr49279.diff
+        pr49539.diff
+        pr49651.diff)
 
 sha256sums=(${sha256sums[@]-}
             'e2f9d6b971e0e7d44a3d1ca2cab60948789b2d74dcfbe2ce5c6b275f2904fdea'
@@ -173,4 +180,7 @@ sha256sums=(${sha256sums[@]-}
             'd8ccc639f5c2472b4ab53beada7c8552343ae960565f685c5cc8979fb28a74d1'
             '3492332fa78b545ff46c2b5293d17c63c122be6f8f6fa4798864b7d4572b0024'
             '2d369cf93c6e15c3559c3560bce581e0ae5f1f34dc86bca013ac67ef1c1a9ff9'
-            'd7a0a02d59e1403261bffd04579638de0c2f7faf830ff76ee5b85ce6f3c60c08')
+            'd7a0a02d59e1403261bffd04579638de0c2f7faf830ff76ee5b85ce6f3c60c08'
+            'b27c8e6d0746dfbc607d5f14d498c37e4e75b6efcffb25afa7317ed1c9623deb'
+            '8f936332ed13679061922c8b7b6d4f102b46fdb4c3b858b4778aed84edbf5cf4'
+            'baba61c8d496c46270f18da38ff3c12ee3fb87df85499e8c1e935a8118803588')
