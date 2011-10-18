@@ -1,0 +1,57 @@
+--- gcc-4_6-branch/gcc/tree-ssa-structalias.c	2011/07/14 14:53:30	176274
++++ gcc-4_6-branch/gcc/tree-ssa-structalias.c	2011/07/14 14:56:27	176275
+@@ -3349,9 +3349,18 @@
+ 
+ 	      /* If we are not taking the address then make sure to process
+ 		 all subvariables we might access.  */
++	      if (address_p)
++		return;
++
+ 	      cs = *VEC_last (ce_s, *results);
+-	      if (address_p
+-		  || cs.type != SCALAR)
++	      if (cs.type == DEREF)
++		{
++		  /* For dereferences this means we have to defer it
++		     to solving time.  */
++		  VEC_last (ce_s, *results)->offset = UNKNOWN_OFFSET;
++		  return;
++		}
++	      if (cs.type != SCALAR)
+ 		return;
+ 
+ 	      vi = get_varinfo (cs.var);
+--- /dev/null
++++ gcc-4_6-branch/gcc/testsuite/gcc.dg/torture/pr49651.c
+@@ -0,0 +1,31 @@
++/* { dg-do run } */
++
++extern void abort (void);
++
++struct X {
++    int *p;
++    int *q;
++};
++
++void __attribute__((noinline, noclone))
++foo (struct X x) { *x.q = 0; }
++
++volatile int what;
++struct X y;
++
++int main()
++{
++  int i, j;
++  struct X x, *p;
++  x.p = &i;
++  x.q = &j;
++  if (what)
++    p = &y;
++  else
++    p = &x;
++  j = 1;
++  foo (*p);
++  if (j != 0)
++    abort ();
++  return 0;
++}
