@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=libxml2
 pkgver=2.7.8
-pkgrel=1
+pkgrel=2
 pkgdesc="XML parsing library, version 2"
 arch=(i686 x86_64)
 license=('custom')
@@ -9,13 +9,23 @@ depends=('zlib' 'ncurses')
 options=('!libtool')
 url="http://www.xmlsoft.org/"
 source=(ftp://ftp.xmlsoft.org/${pkgname}/${pkgname}-${pkgver}.tar.gz)
-md5sums=('8127a65e8c3b08856093099b52599c86')
+sha256sums=('cda23bc9ebd26474ca8f3d67e7d1c4a1f1e7106364b690d822e009fdc3c417ec')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   sed -i 's:doc example::g' Makefile.in
   patch -Np1 -i "${srcdir}/largefile64.patch"
   patch -Np1 -i "${srcdir}/shared_library_versionning.patch"
+
+  # Gentoo
+  patch -Np1 -i ../libxml2-2.7.8-xpath-memory.patch
+  patch -Np1 -i ../libxml2-2.7.8-xpath-freeing.patch
+  patch -Np1 -i ../libxml2-2.7.8-xpath-freeing2.patch
+  patch -Np1 -i ../libxml2-2.7.8-reallocation-failures.patch
+  patch -Np0 -i ../libxml2-2.7.8-disable_static_modules.patch
+  patch -Np1 -i ../libxml2-2.7.8-hardening-xpath.patch
+  patch -Np1 -i ../libxml2-2.7.8-error-xpath.patch
+
   autoreconf -fi
   ./configure --prefix=/usr \
               --build=${CBUILD} \
@@ -50,3 +60,24 @@ package() {
   install -Dm644 COPYING "${pkgdir}/usr/share/licenses/${pkgname}/COPYING"
 }
 
+source=(${source[@]-}
+        largefile64.patch
+        libxml2-2.7.8-disable_static_modules.patch
+        libxml2-2.7.8-error-xpath.patch
+        libxml2-2.7.8-hardening-xpath.patch
+        libxml2-2.7.8-reallocation-failures.patch
+        libxml2-2.7.8-xpath-freeing.patch
+        libxml2-2.7.8-xpath-freeing2.patch
+        libxml2-2.7.8-xpath-memory.patch
+        shared_library_versionning.patch)
+
+sha256sums=(${sha256sums[@]-}
+            '7ccd86fc493af76244e655b0f8a0c4b2df0bc5ef15856b07903f409f52bb0cde'
+            '2f2ade9ee034af32cbd6600d45b2e23d3153dd9bb57a07a9f364836d24b189df'
+            '2b2ee18463baa212539f1c8747e549e6ed18e49989ebaa42843729524f1cf253'
+            '7eac2cd552158347244806730e2b8a4c09e39cddfcf67ed74a5ec989763abbfe'
+            '8a115c7ead8612ff7f8bd1e36615ebf20dbe42d3e79f216ee66d5cf6a59f02d6'
+            '655a1cd96df3bcbd02e3a7fe9b812ee7e116dea036a9a5bfb529be714f288e87'
+            '112e93fb8c4f76e74b705d709ae741f33228cad82ba3bd2f55524af2fd863bfd'
+            '919a7dd27fd22cd30d8301d3ca8a8f8a8f971d4494c9914f7f8e6531216be5a1'
+            '379102cf7547c47fdcc94daecb310e55b80bd157ea5280d72194eedf9ad371de')
