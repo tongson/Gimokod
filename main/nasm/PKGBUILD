@@ -6,7 +6,7 @@ pkgdesc="An 80x86 assembler designed for portability and modularity"
 arch=('i686' 'x86_64')
 url="http://www.nasm.us"
 license=('BSD')
-source=(http://www.nasm.us/pub/nasm/releasebuilds/${pkgver}/${pkgbase}-${pkgver}.tar.bz2)
+source=(http://www.nasm.us/pub/nasm/releasebuilds/${pkgver}/${pkgname}-${pkgver}.tar.bz2)
 md5sums=('15c79dcb5838870a0fac15feb5fade66')
 sha1sums=('ca57a7454b29e18c64018e49cdf5c832937497ab')
 
