@@ -13,7 +13,7 @@ md5sums=('dd67dca96ac79e7cb963bfcbf68e017b')
 build() {
   cd "${srcdir}/${pkgname}-snapshot-${pkgver}-2245"
 
-  ./configure --host="${CHOST}"
+  ./configure --host="${CHOST}" \
               --enable-shared \
               --disable-cli \
               --disable-avs \
