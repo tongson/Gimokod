@@ -16,7 +16,7 @@ build() {
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
-              --with-jpg \
+              --with-jpeg \
               --with-zlib \
               --with-tiff
   make
