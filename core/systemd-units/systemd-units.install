@@ -1,29 +1,28 @@
-systemdir="../../../../lib/systemd/systemd"
+systemdir="../../../../lib/systemd/system"
 etcsystemdir="etc/systemd/system"
 _basic() {
-  for s in "${1}"; do
-    ln -sf ${systemdir}/${s}.service ${etcsystemdir}/basic.target.wants/${s}.service
+  for s in "${@}"; do
+    ln -sf "${systemdir}/${s}.service" "${etcsystemdir}/basic.target.wants/${s}.service"
   done
 }
-_multi-user() {
-  for s in "${1}"; do
-    ln -sf ${systemdir}/${s}.service ${etcsystemdir}/multi-user.target.wants/${s}.service
+_multiuser() {
+  for s in "${@}"; do
+    ln -sf "${systemdir}/${s}.service" "${etcsystemdir}/multi-user.target.wants/${s}.service"
   done
 }
 
 _shutdown() {
-  for s in "${1}"; do
-    ln -sf ${systemdir}/${s}.service ${etcsystemdir}/shutdown.target.wants/${s}.service
+  for s in "${@}"; do
+    ln -sf "${systemdir}/${s}.service" "${etcsystemdir}/shutdown.target.wants/${s}.service"
   done
 }
 
 post_install() {
-  ln -s ../../../multi-user.target ${etcsystemdir}/default.target
+  ln -s ../../../lib/systemd/system/multi-user.target ${etcsystemdir}/default.target
   ln -s /dev/null ${etcsystemdir}/console-shell.service
   mkdir ${etcsystemdir}/basic.target.wants
-  mkdir ${etcsystemdir}/multi-user.target.wants
   mkdir ${etcsystemdir}/shutdown.target.wants
-  _basic "klogd lvm2 nscd rngd syslogd"
-  _multi-user "crond ntpd sshd"
-  _shutdown "remountrw systemd-random-seed-save.service sync"
+  _basic klogd lvm2 nscd rngd syslogd
+  _multiuser crond ntpd sshd
+  _shutdown remountrw systemd-random-seed-save.service sync
 }
