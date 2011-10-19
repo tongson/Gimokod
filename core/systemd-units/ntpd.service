@@ -4,8 +4,7 @@ Description=BusyBox ntpd
 [Service]
 Restart=always
 EnvironmentFile=/etc/conf.d/net
-User=ntpd
-Group=ntpd
-ExecStart=-/usr/bin/ntpd -l -n -N $ntpdopts
+CapabilityBoundingSet=CAP_SYS_TIME
+ExecStart=-/usr/bin/ntpd -n -N $ntpdopts
 StandardError=syslog
 

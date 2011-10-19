@@ -6,4 +6,4 @@ Restart=always
 EnvironmentFile=/etc/conf.d/net
 User=dhcp
 Group=dhcp
-ExecStart=-/bin/busybox udhcpc -v -f -S -i $interface
+ExecStart=-/sbn/udhcpc -v -f -S -i $interface

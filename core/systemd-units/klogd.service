@@ -3,8 +3,7 @@ Description=BusyBox klogd
 
 [Service]
 Restart=always
-User=klogd
-Group=klogd
+CapabilityBoundingSet=CAP_SYS_ADMIN
 ExecStart=/sbin/klogd -n
 StandardOutput=null
 
