@@ -24,6 +24,7 @@ zlib
 nss
 libgcrypt
 gnupg
+libevent
 
 Misc features:
 /etc/tcb support
