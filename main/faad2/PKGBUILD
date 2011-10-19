@@ -6,7 +6,6 @@ pkgdesc="ISO AAC audio decoder"
 arch=('i686' 'x86_64')
 url="http://www.audiocoding.com/"
 license=('custom:GPL')
-depends=
 options=('!libtool' '!makeflags')
 source=(http://downloads.sourceforge.net/sourceforge/faac/${pkgname}-${pkgver}.tar.bz2 LICENSE)
 md5sums=('4c332fa23febc0e4648064685a3d4332'
@@ -16,7 +15,11 @@ sha1sums=('b0e80481d27ae9faf9e46c8c8dfb617a0adb91b5'
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  ./configure --prefix=/usr --without-xmms --disable-dependency-tracking
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --without-xmms \
+              --disable-dependency-tracking
   make CFLAGS="${CFLAGS} -fPIC"
 }
 

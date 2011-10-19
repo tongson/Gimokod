@@ -6,7 +6,6 @@ pkgdesc="Ogg bitstream and framing library"
 arch=('i686' 'x86_64')
 url="http://www.xiph.org/ogg/"
 license=('BSD')
-depends=
 options=('!libtool')
 source=(http://downloads.xiph.org/releases/ogg/${pkgname}-${pkgver}.tar.xz
         config_types.h)
@@ -15,7 +14,9 @@ md5sums=('84a35715170f2cd4c77a4448772b95d5'
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  ./configure --prefix=/usr 
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST}
   make
 }
 

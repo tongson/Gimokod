@@ -6,18 +6,20 @@ arch=('i686' 'x86_64')
 url="http://code.google.com/intl/en/speed/webp/"
 license=('BSD')
 depends=('libpng' 'libjpeg')
-source=(http://webp.googlecode.com/files/$pkgname-$pkgver.tar.gz)
+source=(http://webp.googlecode.com/files/"${pkgname}"-"${pkgver}".tar.gz)
 sha256sums=('d5ff8df777010a5fb8dd5bac85eb30e98fe665e089ad9d3be2d01724a4c23eb5')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   ./autogen.sh
-  ./configure --prefix=/usr
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST}
   make
 }
 
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  make DESTDIR="$pkgdir" install
+  make DESTDIR=""${pkgdir}"" install
 }
 

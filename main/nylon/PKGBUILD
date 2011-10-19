@@ -6,19 +6,21 @@ arch=('i686' 'x86_64')
 url='http://monkey.org/~marius/pages/?page=nylon'
 license=('BSD')
 depends=('libevent')
-source=(http://monkey.org/~marius/nylon/$pkgname-$pkgver.tar.gz
+source=(http://monkey.org/~marius/nylon/"${pkgname}"-"${pkgver}".tar.gz
        nylon.conf)
 sha256sums=('34c132b005c025c1a5079aae9210855c80f50dc51dde719298e1113ad73408a4'
             'f76023e332e379fcba3ac1f98385450fb8999726c85803dc8a74f19ce69680e2')
 
 build() {
-  cd "${srcdir}/${pkgname}-${pkgver}"/
-  ./configure --prefix=/usr
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST}
   make
 }
 
 package() {
-  cd "${srcdir}/${pkgname}-${pkgver}"/
+  cd "${srcdir}/${pkgname}-${pkgver}"
   make bindir="${pkgdir}"/usr/bin mandir="${pkgdir}"/usr/share/man install
 
   install -D -m644 "${srcdir}"/nylon.conf "${pkgdir}"/etc/nylon.conf

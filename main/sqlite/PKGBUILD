@@ -8,7 +8,6 @@ pkgrel=1
 pkgdesc="A C library that implements an SQL database engine"
 arch=('i686' 'x86_64')
 license=('custom')
-depends=
 url="http://www.sqlite.org/"
 options=('!libtool' '!emptydirs')
 source=(http://www.sqlite.org/sqlite-autoconf-$_amalgamationver.tar.gz

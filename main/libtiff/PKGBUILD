@@ -15,6 +15,8 @@ sha1sums=('f40aab20fb2f609b5cbc1171c40b66a1445e3773')
 build() {
   cd "${srcdir}/tiff-${pkgver}"
   ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
               --without-x \
               --disable-jpeg \
               --disable-jbig \

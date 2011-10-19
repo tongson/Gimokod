@@ -16,6 +16,8 @@ build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
 
   ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
               --enable-nasm \
               --enable-shared \
               --disable-mp3x

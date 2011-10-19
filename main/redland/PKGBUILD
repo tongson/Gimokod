@@ -7,7 +7,7 @@ url="http://librdf.org/"
 license=("GPL")
 arch=('i686' 'x86_64')
 depends=('libtool' 'libxml2' 'openssl' 'rasqal' 'raptor')
-makedepends=('rasqal>=0.9.26' 'raptor>=2.0.4')
+makedepends=('rasqal' 'raptor')
 options=('!libtool')
 source=(http://download.librdf.org/source/${pkgname}-${pkgver}.tar.gz
         rpath.diff)
@@ -17,6 +17,8 @@ md5sums=('3400579d137da82c4175debf9f6d53ba'
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
               --enable-release \
               --disable-static \
               --with-raptor=system \

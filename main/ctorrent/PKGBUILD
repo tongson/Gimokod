@@ -1,3 +1,4 @@
+# Based upon the PKGBUILD from Arch Linux
 pkgname=ctorrent
 pkgver=3.3.2
 pkgrel=1
@@ -19,7 +20,9 @@ build() {
   patch -Np0 -i "${srcdir}"/2782875.diff
   patch -Np1 -i "${srcdir}"/ctorrent-3.3.2-negative-ints.patch
 
-  ./configure --prefix=/usr
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST}
   make
 }
 

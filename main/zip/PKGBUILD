@@ -7,7 +7,6 @@ pkgdesc="Creates PKZIP-compatible .zip files"
 arch=(i686 x86_64)
 url="http://www.info-zip.org/pub/infozip/Zip.html"
 license=('BSD')
-depends=
 options=('!makeflags')
 source=("ftp://ftp.info-zip.org/pub/infozip/src/${pkgname}${_pkgver}.zip")
 md5sums=('e88492c8abd68fa9cfba72bc08757dba')

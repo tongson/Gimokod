@@ -13,7 +13,10 @@ md5sums=('c870b9bd5858a0ecb5275c14486d9554')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  ./configure --prefix=/usr --disable-static
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --disable-static
   make
 }
 

@@ -5,8 +5,7 @@ pkgdesc='Userspace tools for the kernel cpufreq subsystem'
 arch=('i686' 'x86_64')
 url='http://www.kernel.org/pub/linux/utils/kernel/cpufreq/cpufrequtils.html'
 license=('GPL')
-depends=
-options=(!libtool)
+options=('!libtool')
 
 build()
 {

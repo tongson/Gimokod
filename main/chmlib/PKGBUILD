@@ -7,13 +7,14 @@ arch=('i686' 'x86_64')
 url="http://morte.jedrea.com/~jedwin/projects/chmlib/"
 options=('!libtool')
 license=('LGPL')
-depends=
 source=("http://morte.jedrea.com/~jedwin/projects/${pkgname}/${pkgname}-${pkgver}.tar.bz2")
 md5sums=('7ea49ed8c335215c1edc6fae83e6b912')
 
 build() {
   cd "${srcdir}"/${pkgname}-${pkgver}
   ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST}  \
               --enable-examples=no
   make
 }

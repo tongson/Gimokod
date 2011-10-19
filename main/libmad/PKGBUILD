@@ -6,10 +6,7 @@ pkgdesc="A high-quality MPEG audio decoder"
 arch=('i686' 'x86_64')
 url="http://www.underbit.com/products/mad/"
 license=('GPL')
-depends=
 makedepends=('autoconf')
-replaces=('mad')
-conflicts=('mad')
 options=('!libtool')
 source=(http://downloads.sourceforge.net/sourceforge/mad/${pkgname}-${pkgver}.tar.gz
         libmad.patch amd64-64bit.diff frame_length.diff optimize.diff)
@@ -27,7 +24,11 @@ build() {
   patch -p1 -i "${srcdir}/optimize.diff"
   CFLAGS="$CFLAGS -ftree-vectorize -ftree-vectorizer-verbose=1"
   autoconf
-  ./configure --prefix=/usr --enable-accuracy --disable-debugging
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --enable-accuracy \
+              --disable-debugging
   make
 }
 

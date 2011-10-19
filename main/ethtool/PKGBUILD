@@ -7,13 +7,15 @@ pkgdesc="Utility for controlling network drivers and hardware"
 arch=('i686' 'x86_64')
 url="http://www.kernel.org/pub/software/network/ethtool/"
 license=('GPL')
-depends=
 source=(http://www.kernel.org/pub/software/network/${pkgname}/${pkgname}-${pkgver}.tar.bz2)
 md5sums=('cb129398cbbf39859901b55ecac101da')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  ./configure --prefix=/usr --mandir=/usr/share/man
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --mandir=/usr/share/man
   make
 }
 

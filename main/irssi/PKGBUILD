@@ -6,7 +6,7 @@ pkgdesc="Modular text mode IRC client with Perl scripting"
 arch=('i686' 'x86_64')
 url="http://irssi.org/"
 license=('GPL')
-depends=('glib2' 'openssl')
+depends=('glib' 'openssl')
 backup=(etc/irssi.conf)
 source=(http://irssi.org/files/${pkgname}-${pkgver}.tar.bz2)
 options=('!libtool')
@@ -16,6 +16,8 @@ build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
 
   ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
               --enable-ipv6 \
               --with-proxy \
               --sysconfdir=/etc \

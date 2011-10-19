@@ -6,7 +6,6 @@ pkgdesc="libjpeg derivative with accelerated baseline JPEG compression and decom
 arch=('i686' 'x86_64')
 url="http://libjpeg-turbo.virtualgl.org/"
 license=('GPL' 'custom')
-depends=
 makedepends=('nasm')
 provides=('libjpeg=8.0.2')
 conflicts=('libjpeg')
@@ -18,7 +17,11 @@ md5sums=('03b9c1406c7bfdc204313c2917ce6962')
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
 
-  ./configure --prefix=/usr --with-jpeg8 --mandir=/usr/share/man
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --with-jpeg8 \
+              --mandir=/usr/share/man
   make
 }
 

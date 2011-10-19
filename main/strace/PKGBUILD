@@ -6,14 +6,15 @@ pkgdesc="A useful diagnositic, instructional, and debugging tool"
 arch=('i686' 'x86_64')
 url="http://sourceforge.net/projects/strace/"
 license=('custom')
-depends=
 source=(http://downloads.sourceforge.net/${pkgname}/${pkgname}-${pkgver}.tar.xz)
 md5sums=('e537b2b1afeec70c0e6e27a0d0fd671e')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   sed -i 's:.TP 12::' strace.1 # mdocml
-  ./configure --prefix=/usr
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST}
   make
 }
 

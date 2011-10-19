@@ -5,7 +5,6 @@ pkgrel=1
 arch=('i686' 'x86_64')
 url="http://flac.sourceforge.net/"
 license=('BSD' 'GPL')
-depends=
 makedepends=('nasm')
 options=('!libtool' '!makeflags')
 source=(http://downloads.sf.net/sourceforge/${pkgbase}/${pkgbase}-${pkgver}.tar.gz 
@@ -19,6 +18,8 @@ build() {
   cd "${srcdir}/${pkgbase}-${pkgver}"
   patch -Np1 -i "${srcdir}/flac-1.2.1-gcc-4.3-includes.patch"
   ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
               --mandir=/usr/share/man \
               --enable-shared \
               --disable-sse \
@@ -33,10 +34,6 @@ build() {
 }
 
 package() {
-  pkgdesc="Free Lossless Audio Codec"
-  optdepends=('xmms: for using the xmms plugin')
-  options=('!libtool' '!docs')
-
   cd "${srcdir}/${pkgbase}-${pkgver}"
   make DESTDIR="${pkgdir}" install
   install -D -m644 COPYING.Xiph "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"

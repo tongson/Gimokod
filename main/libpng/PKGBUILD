@@ -21,7 +21,9 @@ build() {
   # see http://sourceforge.net/projects/libpng-apng/
   patch -p1 -i "${srcdir}/libpng-${_apngver}-apng.patch"
 
-  ./configure --prefix=/usr
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST}
   make
 }
 

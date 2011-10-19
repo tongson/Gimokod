@@ -17,6 +17,8 @@ build() {
   cd "${srcdir}/libtheora-${pkgver}"
   export ac_cv_prog_HAVE_DOXYGEN="false"
   ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
               --enable-shared \
               --disable-static \
               --disable-dependency-tracking \

@@ -22,6 +22,8 @@ build() {
   # make sure we use system libs
   rm -rf libs
   ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
               --disable-static
   make
 }

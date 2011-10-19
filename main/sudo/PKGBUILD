@@ -19,7 +19,7 @@ build() {
   cd "${srcdir}/${pkgname}-$_ver"
 
   ./configure --prefix=/usr \
-              --build=${CHOST} \
+              --build=${CBUILD} \
               --host=${CHOST} \
               --enable-zlib=system \
               --with-pam \
