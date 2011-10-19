@@ -1,21 +1,24 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=libass
-pkgver=0.9.13
+pkgver=0.10.0
 pkgrel=1
 pkgdesc="A portable library for SSA/ASS subtitles rendering"
 arch=('i686' 'x86_64')
 url="http://code.google.com/p/libass/"
 license=('BSD')
 depends=('fontconfig' 'libpng')
-makedepends=('pkgconfig')
+makedepends=('pkg-config')
 options=(!libtool)
 source=("http://libass.googlecode.com/files/${pkgname}-${pkgver}.tar.xz")
-md5sums=('d99381922dcbeb7a766d2e7825cca193')
+md5sums=('1855bddc4c167f96968dddeeda0eb45c')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
 
-  ./configure --prefix=/usr --disable-enca
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --disable-enca
   make
 }
 

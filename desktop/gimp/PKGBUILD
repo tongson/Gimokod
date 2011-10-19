@@ -22,8 +22,9 @@ sha1sums=('2f9d596e727bdbf304fa78257c1731d9faf3934c'
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  patch -p1 < ../uri-backend-libcurl.patch
   ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST}  \
               --sysconfdir=/etc \
               --enable-mp \
               --enable-gimp-console \
