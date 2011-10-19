@@ -8,7 +8,6 @@ url="http://fuse.sourceforge.net/"
 license="GPL2"
 makedepends=('pkg-config')
 backup=(etc/fuse.conf)
-install=fuse.install
 source=(http://downloads.sourceforge.net/${pkgname}/${pkgname}-${pkgver}.tar.gz
         'fuse.conf')
 options=('!libtool')
@@ -17,6 +16,7 @@ sha1sums=('862320b56d6bc4ad5e7be2b1e0b5029166aae09b'
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
+  sed -i '1i#define _GNU_SOURCE' util/fusermount.c
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
@@ -38,7 +38,6 @@ package() {
   # Remove init script in wrong path
   # Don't add our own for now, as fusectl fs oopses on 2.6.18
   rm -rf "${pkgdir}"/etc/init.d
-  #install -D -m755 "${srcdir}"/fuse.rc.d "${pkgdir}"/etc/rc.d/fuse
 
   install -d "${pkgdir}"/lib
   mv "${pkgdir}"/usr/lib/libfuse.so.${pkgver} "${pkgdir}"/lib/
