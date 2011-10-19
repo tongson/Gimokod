@@ -1,5 +1,5 @@
 pkgname=devel-meta
-pkgver=20111016
+pkgver=2011.10
 pkgrel=1
 pkgdesc="base-devel meta package"
 arch=('any')

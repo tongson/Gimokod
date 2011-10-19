@@ -1,5 +1,5 @@
 pkgname=gimokod-keyring
-pkgver=20111015
+pkgver=2011.10
 pkgrel=1
 pkgdesc="Gimokod Linux keyring"
 arch=('any')

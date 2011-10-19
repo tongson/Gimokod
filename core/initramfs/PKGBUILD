@@ -1,5 +1,5 @@
 pkgname=initramfs
-pkgver=20111012
+pkgver=2011.10
 pkgrel=1
 pkgdesc="Gimokod initramfs"
 arch=('i686' 'x86_64')
