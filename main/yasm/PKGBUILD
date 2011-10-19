@@ -1,0 +1,30 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=yasm
+pkgver=1.1.0
+pkgrel=1
+pkgdesc="A rewrite of NASM to allow for multiple syntax supported (NASM, TASM, GAS, etc.)"
+arch=('i686' 'x86_64')
+license=('custom')
+url="http://www.tortall.net/projects/yasm/"
+source=(http://www.tortall.net/projects/yasm/releases/${pkgname}-${pkgver}.tar.gz)
+options=('!libtool')
+md5sums=('8392e5f2235c2c2a981e1a633f2698cb')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --disable-python-bindings \
+              --disable-python \
+              --disable-nls \
+              --disable-dependency-tracking
+
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+  install -Dm644 COPYING "${pkgdir}"/usr/share/licenses/${pkgname}/LICENSE
+}
