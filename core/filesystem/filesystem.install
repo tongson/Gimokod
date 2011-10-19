@@ -1,41 +1,12 @@
 post_install() {
   rm -rf tmp
   rm -rf var/tmp
+  mkdir run/tmp
+  chmod 1777 run/tmp
   ln -s run/tmp tmp
   ln -s run/tmp var/tmp
 }
 
-_addgroup() {
-  if ! bin/grep -q "^$1:" etc/group; then
-      usr/sbin/groupadd ${@} >/dev/null
-  fi
-}
-
-_adduser() {
-  if ! bin/grep -q "^$1:" etc/passwd; then
-      usr/sbin/useradd ${@} >/dev/null
-  fi
-}
-
 post_upgrade() {
   post_install
-
-  _addgroup optical -g 93
-  _addgroup audio   -g 92
-  _addgroup video   -g 91
-  _addgroup floppy  -g 94
-  _addgroup storage -g 95
-  _addgroup log     -g 19
-  _addgroup utmp    -g 20
-  _addgroup power   -g 98
-  _addgroup network -g 90
-  _addgroup games   -g 50
-  _addgroup uucp    -g 14
-  _addgroup http    -g 33
-  _addgroup scanner -g 96
-  _addgroup rfkill  -g 24
-
-  if ! bin/grep -q '^include /etc/ld.so.conf.d/\*.conf$' etc/ld.so.conf; then
-       bin/echo 'include /etc/ld.so.conf.d/*.conf' >> etc/ld.so.conf
-  fi
 }

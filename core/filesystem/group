@@ -16,10 +16,13 @@ uucp:x:14:
 cron:x:16:
 log:x:19:root
 utmp:x:20:
+sshd:x:22:
 nscd:x:28:
 http:x:33:
 shadow:x:42:
+games:x:50:
 crontab:x:49:
+dbus:x:81:
 network:x:90:
 video:x:91:
 audio:x:92:

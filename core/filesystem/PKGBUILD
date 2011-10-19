@@ -27,13 +27,14 @@ install=filesystem.install
 package() {
     cd ${srcdir}
 
-    for d in bin boot dev etc home lib/modules mnt sbin usr var opt sys run; do
+    for d in bin dev etc home lib/modules mnt sbin usr var opt sys run; do
       install -d -m755 "${pkgdir}"/${d}
     done
 
     install -d -m755 "${pkgdir}"/run/.root/etc
     install -d -m555 "${pkgdir}"/proc
     install -d -m0750 "${pkgdir}"/root
+    install -d -m0700 "${pkgdir}"/boot
 
     for d in ld.so.conf.d skel profile.d; do
       install -d -m755 "${pkgdir}"/etc/${d}
@@ -51,8 +52,10 @@ package() {
     install -d -m02710 -o 2 -g 164 "${pkgdir}/etc/tcb/daemon"
     install -d -m02710 -o 8 -g 164 "${pkgdir}/etc/tcb/mail"
     install -d -m02710 -o 14 -g 164 "${pkgdir}/etc/tcb/ftp"
+    install -d -m02710 -o 22 -g 164 "${pkgdir}/etc/tcb/sshd"
     install -d -m02710 -o 28 -g 164 "${pkgdir}/etc/tcb/nscd"
     install -d -m02710 -o 33 -g 164 "${pkgdir}/etc/tcb/http"
+    install -d -m02710 -o 81 -g 164 "${pkgdir}/etc/tcb/dbus"
     install -d -m02710 -o 99 -g 164 "${pkgdir}/etc/tcb/nobody"
     install -d -m02710 -o 160 -g 164 "${pkgdir}/etc/tcb/crond"
     install -d -m02710 -o 180 -g 164 "${pkgdir}/etc/tcb/klogd"
@@ -61,7 +64,7 @@ package() {
     install -d -m02710 -o 188 -g 164 "${pkgdir}/etc/tcb/dhcp"
     install -d -m02710 -o 800 -g 164 "${pkgdir}/etc/tcb/rngd"
 
-    for id in root bin daemon mail ftp nscd http nobody crond klogd syslogd ntpd dhcp rngd; do
+    for id in root bin daemon mail ftp sshd nscd http dbus nobody crond klogd syslogd ntpd dhcp rngd; do
       echo "${id}:!:-1::::::" > "${pkgdir}/etc/tcb/${id}/shadow"
       chmod 0640 "${pkgdir}/etc/tcb/${id}/shadow"
     done
@@ -71,8 +74,10 @@ package() {
     chown 2:164 "${pkgdir}/etc/tcb/daemon/shadow"
     chown 8:164 "${pkgdir}/etc/tcb/mail/shadow"
     chown 14:164 "${pkgdir}/etc/tcb/ftp/shadow"
+    chown 22:164 "${pkgdir}/etc/tcb/sshd/shadow"
     chown 28:164 "${pkgdir}/etc/tcb/nscd/shadow"
     chown 33:164 "${pkgdir}/etc/tcb/http/shadow"
+    chown 81:164 "${pkgdir}/etc/tcb/dbus/shadow"
     chown 99:164 "${pkgdir}/etc/tcb/nobody/shadow"
     chown 160:164 "${pkgdir}/etc/tcb/crond/shadow"
     chown 180:164 "${pkgdir}/etc/tcb/klogd/shadow"
@@ -138,8 +143,8 @@ source=(${source[@]-}
 
 sha256sums=(${sha256sums[@]-}
             '797dbd2f4f22ea9a8f8d1bb4142b66f64dd220888ebd89829adf8e1a456a0432'
-            'be09e6b414c5dca65a8bc44a74b3e27025d4b28e2978bafb83fde297b5c7f119'
-            '9de8dda6a99fa7b25153ef7a7f03066e3b3d3c15ea6773cb4de4300d5c292f93'
+            'a25187352d0131053b04858e9502e85d141a39b0716716c0927e9936168cfbfe'
+            'f624c2cff69ac287c012ec1dafc55b332939a6264dd3def011499b7e87b7fc13'
             'f0709706ce9bf46c58358e040d7eaa96994767438bab274ee5239ac19b0b814b'
             'ab014e33cfd4212e76d000310534b7528f0e2a39ee8e78660a0d9cfcdbac4e4b'
             'e3414c188757954ee34da03cf324fc9864b1758dc472cfe36884ce6415bbdbd3'
@@ -152,7 +157,7 @@ sha256sums=(${sha256sums[@]-}
             'e210afefc512ab81447e21b12fa7389e7df3a2dc7be663a6663f210a4847ef8e'
             'a1e248357083b55d83659ab50f32c94bf1bcf0825470ccb41702dad3cff712c7'
             '99b8059593daf12e7136a3f858daedde1a9c7788ef7447361ffdaea595e89996'
-            'bd7a47bafc318f57c4d76ac193dfdfbe6f15e6381f4590b755535448ecea60a5'
+            '033c4920c3e745822baee6b370fb4379028d7dc293b0a51e126484c187466e20'
             '7f44161b93c5fd74211d7b3be2900568631127110df029ad32ec12ea2d897ac1'
             '9b0d54d258b62c437aefe09e9c3e4e9307051b749e680024bc353f0eb92eb486'
             '845fec1cf9b279b2d94eb7d49f1c117d3c58c3cafa6ae4dec20ed62b91c9fb67'
