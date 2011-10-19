@@ -7,8 +7,8 @@ url="http://flac.sourceforge.net/"
 license=('BSD' 'GPL')
 makedepends=('nasm')
 options=('!libtool' '!makeflags')
-source=(http://downloads.sf.net/sourceforge/${pkgbase}/${pkgbase}-${pkgver}.tar.gz 
-  flac-1.2.1-gcc-4.3-includes.patch)
+source=(http://downloads.sf.net/sourceforge/${pkgname}/${pkgname}-${pkgver}.tar.gz 
+        flac-1.2.1-gcc-4.3-includes.patch)
 md5sums=('153c8b15a54da428d1f0fadc756c22c7'
          'b9d245422bbc547b18a72897366bea77')
 sha1sums=('bd54354900181b59db3089347cc84ad81e410b38'

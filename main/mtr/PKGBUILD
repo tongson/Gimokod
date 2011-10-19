@@ -7,7 +7,7 @@ pkgdesc="Combines the functionality of traceroute and ping into one tool (CLI ve
 license=('GPL')
 depends=('ncurses')
 makedepends=('ncurses')
-source=(ftp://ftp.bitwizard.nl/mtr/${pkgbase}-${pkgver}.tar.gz)
+source=(ftp://ftp.bitwizard.nl/mtr/${pkgname}-${pkgver}.tar.gz)
 url="http://www.bitwizard.nl/mtr/"
 md5sums=('b7a7914f1fc1b5a21ab10bdca44356e1')
 
