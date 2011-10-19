@@ -1,0 +1,20 @@
+pkgname=unscd
+pkgver=0.47
+pkgrel=1
+pkgdesc="Minimal nscd replacement"
+arch=('i686' 'x86_64')
+url="http://busybox.net/~vda/unscd/"
+license=('GPL')
+groups=('base')
+source=(http://busybox.net/~vda/${pkgname}/nscd-${pkgver}.c)
+sha256sums=('b96d6b5d1fb894a4a23c382ddc5c1e807bc45ad984053516fdd3c389fed4c5e7')
+build() {
+  cd "${srcdir}"
+  cc -Wl,--sort-section -Wl,alignment ${CFLAGS} nscd-${pkgver}.c -o nscd
+}
+
+package() {
+  cd "${srcdir}"
+  install -D -m0755 nscd "${pkgdir}/sbin/nscd"
+}
+
