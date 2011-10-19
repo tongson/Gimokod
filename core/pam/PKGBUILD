@@ -38,6 +38,9 @@ package() {
   chmod 4755 "${pkgdir}/sbin/pam_timestamp_check"
   chmod 0755 "${pkgdir}/etc/security/namespace.init"
 
+  rm "${pkgdir}/lib/security/pam_unix.so"
+  rm "${pkgdir}/usr/share/man/man8/pam_unix.8"
+
   # add the realtime permissions for audio users
   sed -i 's|# End of file||' "${pkgdir}"/etc/security/limits.conf
   cat >>${pkgdir}/etc/security/limits.conf <<_EOT
