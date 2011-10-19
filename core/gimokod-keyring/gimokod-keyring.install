@@ -1,12 +1,11 @@
 post_install() {
   [ -d etc/pacman.d ] || mkdir etc/pacman.d
   [ -d etc/pacman.d/gnupg ] || mkdir etc/pacman.d/gnupg
-  rm etc/pacman.d/gnupg/*
+  rm etc/pacman.d/gnupg/* 2>/dev/null
   cp usr/share/pacman/gimokod-keyring.gpg etc/pacman.d/gnupg/pubring.gpg
   cp usr/share/pacman/gimokod-trustdb.gpg etc/pacman.d/gnupg/trustdb.gpg
   cp usr/share/pacman/gpg.conf etc/pacman.d/gnupg/gpg.conf
   touch etc/pacman.d/gnupg/secring.gpg
-  echo "Manually re-add any non-Gimokod public keys if any"
 }
 
 post_upgrade() {
