@@ -2,5 +2,5 @@
 Description=SSH Secure Shell Service
 
 [Service]
-ExecStart=/usr/sbin/sshd -D
+ExecStart=/usr/sbin/sshd -D -oKexAlgorithms=diffie-hellman-group-exchange-sha256
 
