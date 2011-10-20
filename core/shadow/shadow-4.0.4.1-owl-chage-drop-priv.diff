@@ -1,0 +1,40 @@
+diff -urp shadow-4.0.4.1.orig/src/chage.c shadow-4.0.4.1/src/chage.c
+--- shadow-4.0.4.1.orig/src/chage.c	Thu Jun 19 17:57:15 2003
++++ shadow-4.0.4.1/src/chage.c	Fri Nov 26 14:22:43 2004
+@@ -352,7 +352,8 @@ int main (int argc, char **argv)
+ 	const struct spwd *sp;
+ 	struct spwd spwd;
+ 	uid_t ruid;
+-	int amroot, pwrw;
++	gid_t rgid;
++	int amroot;
+ 	const struct passwd *pw;
+ 	struct passwd pwent;
+ 	char name[BUFSIZ];
+@@ -369,6 +370,7 @@ int main (int argc, char **argv)
+ 	textdomain (PACKAGE);
+ 
+ 	ruid = getuid ();
++	rgid = getgid ();
+ 	amroot = (ruid == 0);
+ 
+ 	/*
+@@ -505,8 +507,7 @@ int main (int argc, char **argv)
+ 	 * file entries into memory. Then we get a pointer to the password
+ 	 * file entry for the requested user.
+ 	 */
+-	pwrw = 0;
+-	if (!pw_open (pwrw ? O_RDWR : O_RDONLY)) {
++	if (!pw_open (O_RDONLY)) {
+ 		fprintf (stderr, _("%s: can't open password file\n"),
+ 			 Prog);
+ 		cleanup (1);
+@@ -548,7 +549,7 @@ int main (int argc, char **argv)
+ 		exit (1);
+ 	}
+ 
+-	if (lflg && (setgid (getgid ()) || setuid (ruid))) {
++	if (lflg && (setregid (rgid, rgid) || setreuid (ruid, ruid))) {
+ 		fprintf (stderr, "%s: failed to drop privileges (%s)\n",
+ 			 Prog, strerror (errno));
+ 		exit (1);

@@ -1,0 +1,152 @@
+diff -urp shadow-4.0.4.1.orig/lib/getdef.c shadow-4.0.4.1/lib/getdef.c
+--- shadow-4.0.4.1.orig/lib/getdef.c	Mon May 12 02:40:08 2003
++++ shadow-4.0.4.1/lib/getdef.c	Sat Feb 28 23:10:38 2004
+@@ -62,6 +62,8 @@ static struct itemdef def_table[] = {
+ 	{ "CONSOLE_GROUPS",		NULL },
+ 	{ "CRACKLIB_DICTPATH",		NULL },
+ 	{ "CREATE_HOME",		NULL },
++	{ "CRYPT_PREFIX",		NULL },
++	{ "CRYPT_ROUNDS",		NULL },
+ 	{ "DEFAULT_HOME",		NULL },
+ 	{ "ENVIRON_FILE",		NULL },
+ 	{ "ENV_HZ",			NULL },
+diff -urp shadow-4.0.4.1.orig/libmisc/salt.c shadow-4.0.4.1/libmisc/salt.c
+--- shadow-4.0.4.1.orig/libmisc/salt.c	Tue Apr 22 10:59:22 2003
++++ shadow-4.0.4.1/libmisc/salt.c	Fri Nov 26 13:26:55 2004
+@@ -1,6 +1,77 @@
+ /*
+  * salt.c - generate a random salt string for crypt()
+- *
++ */
++
++#define _OW_SOURCE
++#include <stdio.h>
++#include <string.h>
++#include <fcntl.h>
++#include <stdlib.h>
++#include <unistd.h>
++#include <errno.h>
++#include <crypt.h>
++
++#include "getdef.h"
++
++#define RANDOM_DEVICE			"/dev/urandom"
++
++static int read_loop(int fd, char *buffer, int count)
++{
++	int offset, block;
++
++	offset = 0;
++	while (count > 0) {
++		block = read(fd, &buffer[offset], count);
++
++		if (block < 0) {
++			if (errno == EINTR) continue;
++			return block;
++		}
++		if (!block) return offset;
++
++		offset += block;
++		count -= block;
++	}
++
++	return offset;
++}
++
++char *
++crypt_make_salt(void)
++{
++	int fd;
++	char entropy[16];
++	char *retval;
++
++	fd = open(RANDOM_DEVICE, O_RDONLY);
++	if (fd < 0) {
++		perror("open: " RANDOM_DEVICE);
++		exit(1);
++	}
++
++	if (read_loop(fd, entropy, sizeof(entropy)) != sizeof(entropy)) {
++		close(fd);
++		fprintf(stderr, "Unable to obtain entropy from %s\n",
++			RANDOM_DEVICE);
++		exit(1);
++	}
++
++	close(fd);
++
++	retval = crypt_gensalt(getdef_str("CRYPT_PREFIX") ?: "",
++		getdef_num("CRYPT_ROUNDS", 0), entropy, sizeof(entropy));
++	memset(entropy, 0, sizeof(entropy));
++	if (!retval) {
++		fprintf(stderr, "Unable to generate a salt, "
++			"check your CRYPT_PREFIX and CRYPT_ROUNDS settings.\n");
++		exit(1);
++	}
++
++	return retval;
++}
++
++#if 0
++/*
+  * Written by Marek Michalkiewicz <marekm@i17linuxb.ists.pwr.wroc.pl>,
+  * public domain.
+  */
+@@ -61,4 +132,5 @@ char *crypt_make_salt (void)
+ 	result[2] = '\0';
+ 	return result;
+ }
++#endif
+ #endif
+diff -urp shadow-4.0.4.1.orig/man/login.defs.5 shadow-4.0.4.1/man/login.defs.5
+--- shadow-4.0.4.1.orig/man/login.defs.5	Thu May  1 18:17:39 2003
++++ shadow-4.0.4.1/man/login.defs.5	Sat Feb 28 23:10:38 2004
+@@ -27,7 +27,10 @@
+ .\"
+ .\"	$Id: login.defs.5,v 1.12 2003/05/01 18:17:39 kloczek Exp $
+ .\"
+-.TH LOGIN.DEFS 5
++.\" 2001/11/11 Solar Designer <solar@owl.openwall.com>
++.\" Documented CRYPT_PREFIX and CRYPT_ROUNDS.
++.\"
++.TH LOGIN.DEFS 5 "11 November 2001"
+ .SH NAME
+ /etc/login.defs \- shadow password suite configuration
+ .SH DESCRIPTION
+@@ -72,6 +75,15 @@ installing chfn SUID.
+ This defines whether useradd should create home directories for users by
+ default. This option is OR'ed with the \fI-m\fR flag on useradd command line.
+ .\"
++.IP "CRYPT_PREFIX (string)"
++.IP "CRYPT_ROUNDS (number)"
++The password hashing method and iteration count to use for group passwords
++that may be set with
++.BR gpasswd (1).
++Please refer to
++.BR crypt (3)
++for information on supported password hashing methods.
++.\"
+ .IP "GID_MAX (number)"
+ .IP "GID_MIN (number)"
+ Range of group IDs to choose from for the fBuseradd\fR and \fBgroupadd\fR
+@@ -120,6 +132,8 @@ suite use which parameters.
+ CHFN_AUTH CHFN_RESTRICT
+ .IP chsh 12
+ CHFN_AUTH
++.IP gpasswd 12
++CRYPT_PREFIX CRYPT_ROUNDS
+ .IP groupadd 12
+ GID_MAX GID_MIN
+ .IP newusers 12
+@@ -149,9 +163,11 @@ and
+ .BR su (1).
+ Please refer to the corresponding PAM configuration files instead.
+ .SH SEE ALSO
++.BR gpasswd (1),
+ .BR login (1),
+ .BR passwd (1),
+ .BR su (1),
++.BR crypt (3),
+ .BR passwd (5),
+ .BR shadow (5),
+ .BR pam (8)

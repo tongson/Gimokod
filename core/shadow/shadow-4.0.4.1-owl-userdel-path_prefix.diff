@@ -1,0 +1,12 @@
+diff -uNrp shadow-4.0.4.1.orig/src/userdel.c shadow-4.0.4.1/src/userdel.c
+--- shadow-4.0.4.1.orig/src/userdel.c	Thu Mar 18 12:16:05 2004
++++ shadow-4.0.4.1/src/userdel.c	Thu Mar 18 12:53:56 2004
+@@ -653,7 +653,7 @@ static void user_cancel (const char *use
+ #ifdef EXTRA_CHECK_HOME_DIR
+ static int path_prefix (const char *s1, const char *s2)
+ {
+-	return (strncmp (s2, s1, strlen (s1)) == 0);
++	return (strncmp (s2, s1, strlen (s1)) == 0 && (s2[strlen (s1)] == '\0' || s2[strlen (s1)] == '/'));
+ }
+ #endif
+ 

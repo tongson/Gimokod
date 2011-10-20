@@ -1,0 +1,34 @@
+diff -uprk.orig shadow-4.0.4.1.orig/man/groupadd.8 shadow-4.0.4.1/man/groupadd.8
+--- shadow-4.0.4.1.orig/man/groupadd.8	2004-11-10 21:19:33 +0300
++++ shadow-4.0.4.1/man/groupadd.8	2004-11-10 21:25:20 +0300
+@@ -61,6 +61,11 @@ option too, the group creation will fall
+ specified).
+ .br
+ This is an option added by Red Hat Software.
++.SH NOTES
++Group names must match [a-z_][a-z0-9_-]* regexp pattern.
++.SH CAVEATS
++You may not add a NIS or LDAP group. This must be performed on the
++corresponding server.
+ .SH FILES
+ \fI/etc/group\fR	\- group account information
+ .br
+diff -uprk.orig shadow-4.0.4.1.orig/man/useradd.8 shadow-4.0.4.1/man/useradd.8
+--- shadow-4.0.4.1.orig/man/useradd.8	2004-11-10 21:19:33 +0300
++++ shadow-4.0.4.1/man/useradd.8	2004-11-10 21:24:50 +0300
+@@ -139,11 +139,13 @@ all future new user accounts.
+ If no options are specified, \fBuseradd\fR displays the current default
+ values.
+ .SH NOTES
++User names must match [a-z_][a-z0-9_-]* regexp pattern.
++
+ The system administrator is responsible for placing the default user files
+ in the \fI/etc/skel/\fR directory.
+ .SH CAVEATS
+-You may not add a user to an NIS group. This must be performed on the NIS
+-server.
++You may not add a user to a NIS or LDAP group. This must be performed on the
++corresponding server.
+ .SH FILES
+ \fI/etc/passwd\fR			\- user account information
+ .br

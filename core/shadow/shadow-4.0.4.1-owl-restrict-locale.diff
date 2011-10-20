@@ -1,0 +1,219 @@
+diff -uNrp shadow-4.0.4.1-owl-create-mailbox/libmisc/fields.c shadow-4.0.4.1-owl-restrict-locale/libmisc/fields.c
+--- shadow-4.0.4.1-owl-create-mailbox/libmisc/fields.c	2003-04-22 10:59:22 +0000
++++ shadow-4.0.4.1-owl-restrict-locale/libmisc/fields.c	2004-02-28 15:56:41 +0000
+@@ -35,6 +35,12 @@ RCSID ("$Id: fields.c,v 1.6 2003/04/22 1
+ #include <string.h>
+ #include <stdio.h>
+ #include "prototypes.h"
++
++#define fixed_iscntrl(c) \
++	(((c) & 0x7f) < 0x20 || (c) == 0x7f)
++
++#define MAX_FIELD_SIZE                 0x80
++
+ /*
+  * valid_field - insure that a field contains all legal characters
+  *
+@@ -46,13 +52,14 @@ int valid_field (const char *field, cons
+ {
+ 	const char *cp;
+ 
+-	for (cp = field;
+-	     *cp && isprint (*cp & 0x7F) && !strchr (illegal, *cp); cp++);
++	for (cp = field; *cp; cp++)
++		if (iscntrl(*cp) || fixed_iscntrl(*cp) || strchr(illegal, *cp))
++			return -1;
+ 
+-	if (*cp)
++	if (cp - field > MAX_FIELD_SIZE)
+ 		return -1;
+-	else
+-		return 0;
++
++	return 0;
+ }
+ 
+ /*
+diff -uNrp shadow-4.0.4.1-owl-create-mailbox/src/chage.c shadow-4.0.4.1-owl-restrict-locale/src/chage.c
+--- shadow-4.0.4.1-owl-create-mailbox/src/chage.c	2004-02-28 12:53:58 +0000
++++ shadow-4.0.4.1-owl-restrict-locale/src/chage.c	2004-02-28 15:59:34 +0000
+@@ -369,9 +369,11 @@ int main (int argc, char **argv)
+ #endif
+ 
+ 	sanitize_env ();
+-	setlocale (LC_ALL, "");
+-	bindtextdomain (PACKAGE, LOCALEDIR);
+-	textdomain (PACKAGE);
++	if (getuid() == 0) {
++		setlocale (LC_ALL, "");
++		bindtextdomain (PACKAGE, LOCALEDIR);
++		textdomain (PACKAGE);
++	}
+ 
+ 	ruid = getuid ();
+ 	rgid = getgid ();
+diff -uNrp shadow-4.0.4.1-owl-create-mailbox/src/chfn.c shadow-4.0.4.1-owl-restrict-locale/src/chfn.c
+--- shadow-4.0.4.1-owl-create-mailbox/src/chfn.c	2003-06-19 18:11:01 +0000
++++ shadow-4.0.4.1-owl-restrict-locale/src/chfn.c	2004-02-28 16:00:08 +0000
+@@ -233,9 +233,11 @@ int main (int argc, char **argv)
+ 	char *user;
+ 
+ 	sanitize_env ();
+-	setlocale (LC_ALL, "");
+-	bindtextdomain (PACKAGE, LOCALEDIR);
+-	textdomain (PACKAGE);
++	if (getuid() == 0) {
++		setlocale (LC_ALL, "");
++		bindtextdomain (PACKAGE, LOCALEDIR);
++		textdomain (PACKAGE);
++	}
+ 
+ 	/*
+ 	 * This command behaves different for root and non-root
+diff -uNrp shadow-4.0.4.1-owl-create-mailbox/src/chsh.c shadow-4.0.4.1-owl-restrict-locale/src/chsh.c
+--- shadow-4.0.4.1-owl-create-mailbox/src/chsh.c	2003-06-19 18:11:01 +0000
++++ shadow-4.0.4.1-owl-restrict-locale/src/chsh.c	2004-02-28 16:00:50 +0000
+@@ -125,10 +125,11 @@ int main (int argc, char **argv)
+ 	struct passwd pwent;	/* New password entry                */
+ 
+ 	sanitize_env ();
+-
+-	setlocale (LC_ALL, "");
+-	bindtextdomain (PACKAGE, LOCALEDIR);
+-	textdomain (PACKAGE);
++	if (getuid() == 0) {
++		setlocale (LC_ALL, "");
++		bindtextdomain (PACKAGE, LOCALEDIR);
++		textdomain (PACKAGE);
++	}
+ 
+ 	/*
+ 	 * This command behaves different for root and non-root users.
+diff -uNrp shadow-4.0.4.1-owl-create-mailbox/src/expiry.c shadow-4.0.4.1-owl-restrict-locale/src/expiry.c
+--- shadow-4.0.4.1-owl-create-mailbox/src/expiry.c	2002-01-05 15:41:43 +0000
++++ shadow-4.0.4.1-owl-restrict-locale/src/expiry.c	2004-02-28 16:02:05 +0000
+@@ -77,6 +77,11 @@ int main (int argc, char **argv)
+ 	char *Prog = argv[0];
+ 
+ 	sanitize_env ();
++	if (getuid() == 0) {
++		setlocale (LC_ALL, "");
++		bindtextdomain (PACKAGE, LOCALEDIR);
++		textdomain (PACKAGE);
++	}
+ 
+ 	/* 
+ 	 * Start by disabling all of the keyboard signals.
+@@ -94,10 +99,6 @@ int main (int argc, char **argv)
+ 	 * the usage message.
+ 	 */
+ 
+-	setlocale (LC_ALL, "");
+-	bindtextdomain (PACKAGE, LOCALEDIR);
+-	textdomain (PACKAGE);
+-
+ 	if (argc != 2
+ 	    || (strcmp (argv[1], "-f") && strcmp (argv[1], "-c")))
+ 		usage ();
+diff -uNrp shadow-4.0.4.1-owl-create-mailbox/src/gpasswd.c shadow-4.0.4.1-owl-restrict-locale/src/gpasswd.c
+--- shadow-4.0.4.1-owl-create-mailbox/src/gpasswd.c	2003-06-19 18:11:01 +0000
++++ shadow-4.0.4.1-owl-restrict-locale/src/gpasswd.c	2004-02-28 16:02:45 +0000
+@@ -192,9 +192,11 @@ int main (int argc, char **argv)
+ 	char *members = NULL;
+ 
+ 	sanitize_env ();
+-	setlocale (LC_ALL, "");
+-	bindtextdomain (PACKAGE, LOCALEDIR);
+-	textdomain (PACKAGE);
++	if (getuid() == 0) {
++		setlocale (LC_ALL, "");
++		bindtextdomain (PACKAGE, LOCALEDIR);
++		textdomain (PACKAGE);
++	}
+ 
+ 	/*
+ 	 * Make a note of whether or not this command was invoked by root.
+diff -uNrp shadow-4.0.4.1-owl-create-mailbox/src/login.c shadow-4.0.4.1-owl-restrict-locale/src/login.c
+--- shadow-4.0.4.1-owl-create-mailbox/src/login.c	2003-12-17 12:52:25 +0000
++++ shadow-4.0.4.1-owl-restrict-locale/src/login.c	2004-02-28 16:03:17 +0000
+@@ -438,10 +438,11 @@ int main (int argc, char **argv)
+ 	 */
+ 
+ 	sanitize_env ();
+-
+-	setlocale (LC_ALL, "");
+-	bindtextdomain (PACKAGE, LOCALEDIR);
+-	textdomain (PACKAGE);
++	if (getuid() == 0) {
++		setlocale (LC_ALL, "");
++		bindtextdomain (PACKAGE, LOCALEDIR);
++		textdomain (PACKAGE);
++	}
+ 
+ 	initenv ();
+ 
+diff -uNrp shadow-4.0.4.1-owl-create-mailbox/src/newgrp.c shadow-4.0.4.1-owl-restrict-locale/src/newgrp.c
+--- shadow-4.0.4.1-owl-create-mailbox/src/newgrp.c	2003-07-29 06:16:04 +0000
++++ shadow-4.0.4.1-owl-restrict-locale/src/newgrp.c	2004-02-28 16:03:54 +0000
+@@ -89,9 +89,11 @@ int main (int argc, char **argv)
+ 	struct sgrp *sgrp;
+ #endif
+ 
+-	setlocale (LC_ALL, "");
+-	bindtextdomain (PACKAGE, LOCALEDIR);
+-	textdomain (PACKAGE);
++	if (getuid() == 0) {
++		setlocale (LC_ALL, "");
++		bindtextdomain (PACKAGE, LOCALEDIR);
++		textdomain (PACKAGE);
++	}
+ 
+ 	/*
+ 	 * Save my name for error messages and save my real gid incase of
+diff -uNrp shadow-4.0.4.1-owl-create-mailbox/src/passwd.c shadow-4.0.4.1-owl-restrict-locale/src/passwd.c
+--- shadow-4.0.4.1-owl-create-mailbox/src/passwd.c	2003-12-17 09:43:30 +0000
++++ shadow-4.0.4.1-owl-restrict-locale/src/passwd.c	2004-02-28 16:04:49 +0000
+@@ -681,9 +681,12 @@ int main (int argc, char **argv)
+ #endif
+ #endif
+ 
+-	setlocale (LC_ALL, "");
+-	bindtextdomain (PACKAGE, LOCALEDIR);
+-	textdomain (PACKAGE);
++	sanitize_env ();
++	if (getuid() == 0) {
++		setlocale (LC_ALL, "");
++		bindtextdomain (PACKAGE, LOCALEDIR);
++		textdomain (PACKAGE);
++	}
+ 
+ 	/*
+ 	 * The program behaves differently when executed by root than when
+@@ -697,8 +700,6 @@ int main (int argc, char **argv)
+ 	 */
+ 	Prog = Basename (argv[0]);
+ 
+-	sanitize_env ();
+-
+ 	OPENLOG ("passwd");
+ 
+ 	/*
+diff -uNrp shadow-4.0.4.1-owl-create-mailbox/src/su.c shadow-4.0.4.1-owl-restrict-locale/src/su.c
+--- shadow-4.0.4.1-owl-create-mailbox/src/su.c	2003-06-19 18:11:01 +0000
++++ shadow-4.0.4.1-owl-restrict-locale/src/su.c	2004-02-28 16:05:24 +0000
+@@ -175,10 +175,11 @@ int main (int argc, char **argv)
+ #endif				/* !USE_PAM */
+ 
+ 	sanitize_env ();
+-
+-	setlocale (LC_ALL, "");
+-	bindtextdomain (PACKAGE, LOCALEDIR);
+-	textdomain (PACKAGE);
++	if (getuid() == 0) {
++		setlocale (LC_ALL, "");
++		bindtextdomain (PACKAGE, LOCALEDIR);
++		textdomain (PACKAGE);
++	}
+ 
+ 	/*
+ 	 * Get the program name. The program name is used as a prefix to

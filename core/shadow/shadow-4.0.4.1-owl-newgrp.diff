@@ -1,0 +1,45 @@
+diff -uNrp shadow-4.0.4.1/src/newgrp.c shadow-4.0.4.1.owl-newgrp/src/newgrp.c
+--- shadow-4.0.4.1/src/newgrp.c	2003-07-29 06:16:04 +0000
++++ shadow-4.0.4.1.owl-newgrp/src/newgrp.c	2004-02-28 23:14:51 +0000
+@@ -352,20 +352,11 @@ int main (int argc, char **argv)
+ 		cpasswd = pw_encrypt (cp, grp->gr_passwd);
+ 		strzero (cp);
+ 
+-		if (grp->gr_passwd[0] == '\0') {
+-			/*
+-			 * there is no password, print out "Sorry" and give up
+-			 */
+-			sleep (1);
+-			fputs (_("Sorry.\n"), stderr);
+-			goto failure;
+-		}
+-
+-		if (strcmp (cpasswd, grp->gr_passwd) != 0) {
++		if (grp->gr_passwd[0] == '\0' ||
++		    strcmp (cpasswd, grp->gr_passwd) != 0) {
+ 			SYSLOG ((LOG_INFO,
+ 				 "Invalid password for group `%s' from `%s'",
+ 				 group, name));
+-			sleep (1);
+ 			fputs (_("Sorry.\n"), stderr);
+ 			goto failure;
+ 		}
+@@ -377,10 +368,6 @@ int main (int argc, char **argv)
+ 	 */
+ 
+ #ifdef	USE_SYSLOG
+-	if (getdef_bool ("SYSLOG_SG_ENAB"))
+-		SYSLOG ((LOG_INFO, "user `%s' switched to group `%s'",
+-			 name, group));
+-	if (getdef_bool ("SYSLOG_SG_ENAB")) {
+ 		char *loginname = xstrdup (getlogin ());
+ 		char *tty = xstrdup (ttyname (0));
+ 
+@@ -447,7 +434,6 @@ int main (int argc, char **argv)
+ 			signal (SIGTTOU, SIG_DFL);
+ 		}
+ #endif				/* USE_PAM */
+-	}
+ #endif				/* USE_SYSLOG */
+ 
+ 	gid = grp->gr_gid;

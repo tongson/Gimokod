@@ -1,0 +1,49 @@
+diff -ur shadow-4.0.4.1.orig/configure.in shadow-4.0.4.1/configure.in
+--- shadow-4.0.4.1.orig/configure.in	Wed Jan 14 14:11:25 2004
++++ shadow-4.0.4.1/configure.in	Fri Nov 26 14:11:17 2004
+@@ -13,6 +13,7 @@
+ AM_MAINTAINER_MODE
+ 
+ dnl Checks for programs.
++AC_GNU_SOURCE
+ AC_PROG_CC
+ AC_ISC_POSIX
+ AC_PROG_LN_S
+@@ -32,7 +33,7 @@
+ 	utime.h ulimit.h sys/resource.h gshadow.h shadow.h lastlog.h \
+ 	locale.h rpc/key_prot.h)
+ 
+-AC_CHECK_FUNCS(a64l fchmod fchown fsync getgroups gethostname getspnam \
++AC_CHECK_FUNCS(a64l fchmod fchown fsync getgroups gethostname getspnam setlocale \
+ 	gettimeofday getusershell getutent initgroups lchown lckpwdf lstat \
+ 	memcpy memset mkstemp setgroups sigaction strchr updwtmp updwtmpx)
+ 
+@@ -174,14 +175,7 @@
+ 	fi
+ done
+ 
+-AC_MSG_CHECKING(location of the passwd program)
+-if test -f /usr/bin/passwd; then
+-	passwd_dir=/usr/bin
+-else
+-	passwd_dir=/bin
+-fi
+-AC_DEFINE_UNQUOTED(PASSWD_PROGRAM, "$passwd_dir/passwd")
+-AC_MSG_RESULT($passwd_dir)
++AC_DEFINE_UNQUOTED(PASSWD_PROGRAM, "/usr/bin/passwd")
+ 
+ dnl XXX - quick hack, should disappear before anyone notices :).
+ AC_DEFINE(SHADOWPWD)
+@@ -252,10 +246,10 @@
+ 	AC_CHECK_LIB(pam, pam_start,
+ 		[AC_DEFINE(USE_PAM, 1, [Define to support Pluggable Authentication Modules])
+ 		LIBPAM="-lpam"
+-		AC_CHECK_LIB(pam_misc, main,
++		AC_CHECK_LIB(pam_misc, misc_conv,
+ 			[LIBPAM="$LIBPAM -lpam_misc"],
+ 			AC_MSG_ERROR(libpam_misc is missing)
+-		)]
++		)],
+ 		[AC_MSG_CHECKING(use login access checking if PAM not used)
+ 		AC_DEFINE(LOGIN_ACCESS)
+ 		AC_MSG_RESULT(yes)]

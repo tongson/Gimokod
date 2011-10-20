@@ -1,6 +1,6 @@
-# Based upon Mandriva's shadow-utils.spec
+# Based upon Openwall's shadow-utils.spec
 pkgname=shadow
-pkgver=4.1.4.3
+pkgver=4.0.4.1
 pkgrel=1
 pkgdesc="User and group management related utilities"
 arch=('i686' 'x86_64')
@@ -16,27 +16,46 @@ backup=(etc/login.defs
         etc/default/useradd)
 options=('!libtool')
 install=shadow.install
+source=(http://pkgs.fedoraproject.org/repo/pkgs/shadow-utils/shadow-4.0.4.1.tar.bz2/3a3d17d3d7c630b602baf66ae7434c61/shadow-4.0.4.1.tar.bz2)
+sha256sums=('eddab045a2e51b439ae25cc5cc38182907444276101116ef3a4c4c018720328f')
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
 
-  patch -Np1 -i "${srcdir}/shadow-4.1.4.3-dotinname.patch"
-  patch -Np1 -i "${srcdir}/shadow-4.1.4.3-avx-owl-crypt_gensalt.patch"
-  patch -Np1 -i "${srcdir}/shadow-4.1.4.3-avx-owl-tcb.patch"
-  patch -Np1 -i "${srcdir}/shadow-4.1.4.3-shadow_perms.patch"
-  patch -Np0 -i "${srcdir}/shadow-4.1.4.3-groupmod-username.patch"
-  patch -Np1 -i "${srcdir}/shadow-4.1.4.3-no-gettext.patch"
-  patch -Np1 -i "${srcdir}/shadow-4.1.4.3-add-missing-include.patch"
-  patch -Np1 -i "${srcdir}/shadow-4.1.4.3-strncpy-usage.patch"
-  patch -Np1 -i "${srcdir}/shadow-4.1.4.3-su_no_sanitize_env.patch"
-  patch -Np1 -i "${srcdir}/shadow-4.1.4.3-xstrdup.patch"
+  patch -Np0 -i../shadow-4.0.4.1-cvs-20041008-userdel.diff
+  patch -Np1 -i../shadow-4.0.4.1-owl-check-reads.diff
+  patch -Np1 -i../shadow-4.0.4.1-owl-usermod-unlock.diff
+  patch -Np1 -i../shadow-4.0.4.1-owl-tmp.diff
+  patch -Np1 -i../shadow-4.0.4.1-owl-pam-auth.diff
+  patch -Np1 -i../shadow-4.0.4.1-owl-chage-drop-priv.diff
+  patch -Np1 -i../shadow-4.0.4.1-owl-userdel-path_prefix.diff
+  patch -Np1 -i../shadow-4.0.4.1-owl-pam_chauthtok.diff
+  patch -Np1 -i../shadow-4.0.4.1-owl-usermod-update-lstchg.diff
+  patch -Np1 -i../shadow-4.0.4.1-owl-usergroupname_max.diff
+  patch -Np1 -i../shadow-4.0.4.1-owl-malloc-cast.diff
+  patch -Np1 -i../shadow-4.0.4.1-rh-owl-redhat.diff
+  patch -Np1 -i../shadow-4.0.4.1-owl-man.diff
+  patch -Np1 -i../shadow-4.0.4.1-owl-create-mailbox.diff
+  patch -Np1 -i../shadow-4.0.4.1-owl-restrict-locale.diff
+  patch -Np1 -i../shadow-4.0.4.1-owl-crypt_gensalt.diff
+  patch -Np1 -i../shadow-4.0.4.1-owl-newgrp.diff
+  patch -Np1 -i../shadow-4.0.4.1-owl-tcb.diff
+  patch -Np1 -i../shadow-4.0.4.1-alt-man.diff
+  patch -Np1 -i../shadow-4.0.4.1-alt-configure.diff
+  patch -Np1 -i../shadow-4.0.4.1-owl-name-relaxed.diff
 
   sed -i '/^SUBDIRS/s/pam.d//' etc/Makefile.in
   sed 's/^\(.*\SUBDIRS .*\=.*\)po\(.*\)$/\1\2/' -i $(find . -name Makefile.am -o -name Makefile.in)
 
+ # libtoolize --copy --force
+ # aclocal
+ ## autoconf
+  #automake --add-missing
   libtoolize --copy --force
-  aclocal
+  autopoint -f
+  aclocal -I m4
+  automake -a
+  autoheader
   autoconf
-  automake --add-missing
 
   LDFLAGS="${LDFLAGS} -lcrypt"
   CFLAGS="${CFLAGS} -DSHADOWTCB -DEXTRA_CHECK_HOME_DIR"
@@ -48,13 +67,16 @@ build() {
               --sysconfdir=/etc \
               --without-libcrack \
               --with-libpam \
-              --without-selinux
+              --disable-desrpc
   make
 }
 
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   make DESTDIR="${pkgdir}" install
+  install -p -m644 man/shadow.3 "${pkgdir}/usr/share/man/man3/"
+  unlink "${pkgdir}/bin/sg"
+  mv "${pkgdir}/bin/vigr" "${pkgdir}/usr/sbin/vigr"
 
   for f in usr/bin/passwd bin/login bin/su usr/bin/expiry usr/bin/faillog usr/sbin/logoutd bin/groups; do
     rm "${pkgdir}/${f}"
@@ -67,10 +89,6 @@ package() {
   rm "${pkgdir}/usr/share/man/man8/faillog.8"
   rm "${pkgdir}/usr/share/man/man8/logoutd.8"
   rm "${pkgdir}/usr/share/man/man1/groups.1"
-
-  for f in grpconv.8 grpunconv.8 pwunconv.8; do
-    install -Dm644 "${srcdir}/${f}" "${pkgdir}/usr/share/man/man8/${f}"
-  done
 
   chmod 2711 "${pkgdir}/usr/bin/chage"
   chgrp 42 "${pkgdir}/usr/bin/chage"
@@ -103,44 +121,61 @@ package() {
   popd
 
 }
-source=(http://pkg-shadow.alioth.debian.org/releases/${pkgname}-${pkgver}.tar.bz2
+
+source=(${source[@]-}
         LICENSE
         chage-chfn-chsh
         chpasswd-newusers
-        grpconv.8
-        grpunconv.8
         login.defs
-        pwunconv.8
-        shadow-4.1.4.3-add-missing-include.patch
-        shadow-4.1.4.3-avx-owl-crypt_gensalt.patch
-        shadow-4.1.4.3-avx-owl-tcb.patch
-        shadow-4.1.4.3-dotinname.patch
-        shadow-4.1.4.3-groupmod-username.patch
-        shadow-4.1.4.3-no-gettext.patch
-        shadow-4.1.4.3-shadow_perms.patch
-        shadow-4.1.4.3-strncpy-usage.patch
-        shadow-4.1.4.3-su_no_sanitize_env.patch
-        shadow-4.1.4.3-xstrdup.patch
+        shadow-4.0.4.1-alt-configure.diff
+        shadow-4.0.4.1-alt-man.diff
+        shadow-4.0.4.1-cvs-20041008-userdel.diff
+        shadow-4.0.4.1-owl-chage-drop-priv.diff
+        shadow-4.0.4.1-owl-check-reads.diff
+        shadow-4.0.4.1-owl-create-mailbox.diff
+        shadow-4.0.4.1-owl-crypt_gensalt.diff
+        shadow-4.0.4.1-owl-malloc-cast.diff
+        shadow-4.0.4.1-owl-man.diff
+        shadow-4.0.4.1-owl-name-relaxed.diff
+        shadow-4.0.4.1-owl-newgrp.diff
+        shadow-4.0.4.1-owl-pam-auth.diff
+        shadow-4.0.4.1-owl-pam_chauthtok.diff
+        shadow-4.0.4.1-owl-restrict-locale.diff
+        shadow-4.0.4.1-owl-tcb.diff
+        shadow-4.0.4.1-owl-tmp.diff
+        shadow-4.0.4.1-owl-userdel-path_prefix.diff
+        shadow-4.0.4.1-owl-usergroupname_max.diff
+        shadow-4.0.4.1-owl-usermod-unlock.diff
+        shadow-4.0.4.1-owl-usermod-update-lstchg.diff
+        shadow-4.0.4.1-rh-owl-redhat.diff
         user-group-mod
         useradd.defaults)
 
-sha256sums=('633f5bb4ea0c88c55f3642c97f9d25cbef74f82e0b4cf8d54e7ad6f9f9caa778'
+sha256sums=(${sha256sums[@]-}
             'b085972a9378ecbe6cafee1a2e9baba1082531c77376c0aa14ad6e5c7392814c'
             'd7bc14293ea01957cc3d7c1f764909e979d2a8fe682df09b85fc5d7821a627f0'
             '7ee315a9988865843023c23bc9b2f46ebbe038ee6dfbe960efda7412536c21c2'
-            '0539b1de083c315e22edaaf6e11fe532da5376df7cc7bcf71ec76660be31a990'
-            '0539b1de083c315e22edaaf6e11fe532da5376df7cc7bcf71ec76660be31a990'
-            '0b1e0cbf10d3a2a818d56e9e8a58883227a8c2674aaad55da4535562ca4236a5'
-            '0539b1de083c315e22edaaf6e11fe532da5376df7cc7bcf71ec76660be31a990'
-            '10cd80f6cc0d1df63a7b945b4a2157a0b05b5e210077d9818eb1e9c5e212c3ab'
-            'fcb24f5a4f2536f90c3e6eb0f71aff1aacd391f91da1013f1918b25839232489'
-            'f7b63f7497d76686d1f96a5fa31a85283bad854b0453409f3609f2e63cfd4052'
-            'ab92ca4327928669db3bfa46677908a354a271a27d984ccedb163f4d08566dcf'
-            '9cfa6a3dca3003c81d18e3bbed73ced55de67820660b0e0e78111956c15251ea'
-            '4151a78390b3e41c1cb5b0f39e3a3db71c4c5c2a219f08b29179423b994639a3'
-            '08ddf1450119588e8463622e54de4841884f143c2d9e1f2da4c92bd4f071d313'
-            'bc45f381f8b4ea8dd4b3a8032ef25a414caf58c60de847a9124eb20e93cd72cf'
-            '675098bb3dca4d8ac78e6c1c4ae7f513cb4017583b34b6b4d67611578bff8723'
-            'b7716897579721feb9e2ccbd47639bbd72d2143cf1b9b5dabba5af1bf50bdbf9'
+            '2f30ce47decb4d893cec9c249670740b0f037ba72f4f29cc1e3ffed740764ef1'
+            'b2dde1320a425f6e1929c6fe3de96e2418353eed19a2b99e0f042a29b5e99292'
+            '762756962a2356888b3686029e2b6f6d6eb9c945486462c3e16184724630ad5a'
+            '998c57cd9226bf33075076731eaa57f5cba114f83dc9e1dcc8df8267bd36b403'
+            'faadda0a9c584615267253509ea585e863d7e44fc82372143100022b001b846a'
+            'f4c17a49d02d215f11dd63959b84bf51671d624207f85e59de70b1bd17fc9a92'
+            '2de8fe48534637c240890519ed0ed986940bce2386ac635d5031b3b9acfbfadf'
+            'ae65964e2b4618d1bb3a98c1a373ea9f2cf44f6ae76282c9e024335369be036d'
+            'f19cdfd75a68577006273d1b87dae366f978189e9af7a94debd25aa4a37150d6'
+            '48539b106fbbed95dbb5cc2cd1b54aa022ece0c5ff241c888ba53ad433c45a2e'
+            '91c05b4c0a7f768383ca5ee4e2487ad2757bf1a82442dada5ff6ce53d15beeaa'
+            'ae1554a3c1526a10bdbc49e10be34dcb4fe24b3059cd9374c326bb93e7509a43'
+            '3f645fa15db0a2e468f27ee509f1cee6081b6802a0a4d40f2bfd619b155915e1'
+            '6d31efa1b9270b230c58cde51b10a832e0b49d1b812f977e20e1a4889f1b5c88'
+            'c4a61cc1b56953fc9550851e4c6e69650b3bfd5462565e3a97760dc5406468e2'
+            'c59c837ff2855d2268a33dc2c0b30fa6d1c9a44c1cbddd842d1aa0773d0729a9'
+            '0802e4524aa5d37447fe146cec8bff53b16e935a39a67df90017fc3e88636498'
+            'd38eb46143e68d962c9a37d1c9f5bd3566acc9d3a4ffc92cff0eef2f7c4a87c2'
+            'e69689374d47bfdadafa13e3006104e6a4b6ce4e5e8a5c4fb35f862c4e1442c9'
+            '616a79ed2cc533001b8e7b933a8096d53cc2e94a4d836a577c9d98d1bcc20d01'
+            'b13028320a20221c7410a60d0b0427ab4dadc6b6ba2e293e4c5d19bc6d428c9f'
+            'f9a1462a48401465e49b88a2ec2e5056f0bb920fd1f7f46b8975ea561b1145dd'
             '924798e1e79784d90024991e70e9f6bed2ef813c844bc4a00c7d98c44dafcad5'
             '31aa2cbe4a34a9f7d4d134c1fecd007c9bbf4d40e19d0dcddbcd396f1853b490')

@@ -1,0 +1,153 @@
+diff -urp shadow-4.0.4.1.orig/lib/commonio.c shadow-4.0.4.1/lib/commonio.c
+--- shadow-4.0.4.1.orig/lib/commonio.c	Mon May 12 06:12:06 2003
++++ shadow-4.0.4.1/lib/commonio.c	Sat Feb 28 00:30:24 2004
+@@ -168,12 +168,13 @@ create_backup(const char *backup, FILE *
+ 		return -1;
+ 
+ 	/* TODO: faster copy, not one-char-at-a-time.  --marekm */
+-	rewind(fp);
+-	while ((c = getc(fp)) != EOF) {
+-		if (putc(c, bkfp) == EOF)
+-			break;
+-	}
+-	if (c != EOF || fflush(bkfp)) {
++	c = 0;
++	if (fseek(fp, 0, SEEK_SET) == 0)
++		while ((c = getc(fp)) != EOF) {
++			if (putc(c, bkfp) == EOF)
++				break;
++		}
++	if (c != EOF || ferror(fp) || fflush(bkfp)) {
+ 		fclose(bkfp);
+ 		return -1;
+ 	}
+@@ -408,6 +409,7 @@ commonio_open(struct commonio_db *db, in
+ 	void *eptr;
+ 	int flags = mode;
+ 	int buflen;
++	int saved_errno;
+ 
+ 	mode &= ~O_CREAT;
+ 
+@@ -441,7 +443,7 @@ commonio_open(struct commonio_db *db, in
+ 	buflen = BUFLEN;
+ 	buf = (char *) malloc(buflen);
+ 	if (!buf)
+-		goto cleanup;
++		goto cleanup_ENOMEM;
+ 
+ 	while (db->ops->fgets(buf, buflen, db->fp)) {
+ 		while (!(cp = strrchr(buf, '\n')) && !feof(db->fp)) {
+@@ -480,8 +482,12 @@ commonio_open(struct commonio_db *db, in
+ 		add_one_entry(db, p);
+ 	}
+ 
+-	db->isopen = 1;
+ 	free(buf);
++
++	if (ferror(db->fp))
++		goto cleanup_errno;
++
++	db->isopen = 1;
+ 	return 1;
+ 
+ cleanup_entry:
+@@ -491,11 +497,14 @@ cleanup_line:
+ 	free(line);
+ cleanup_buf:
+ 	free(buf);
+-cleanup:
++cleanup_ENOMEM:
++	errno = ENOMEM;
++cleanup_errno:
++	saved_errno = errno;
+ 	free_linked_list(db);
+ 	fclose(db->fp);
+ 	db->fp = NULL;
+-	errno = ENOMEM;
++	errno = saved_errno;
+ 	return 0;
+ }
+ 
+diff -urp shadow-4.0.4.1.orig/lib/getdef.c shadow-4.0.4.1/lib/getdef.c
+--- shadow-4.0.4.1.orig/lib/getdef.c	Mon May 12 02:40:08 2003
++++ shadow-4.0.4.1/lib/getdef.c	Fri Nov 26 13:24:27 2004
+@@ -35,7 +35,9 @@ RCSID("$Id: getdef.c,v 1.18 2003/05/12 0
+ #include "prototypes.h"
+ #include "defines.h"
+ #include <stdio.h>
++#include <stdlib.h>
+ #include <ctype.h>
++#include <errno.h>
+ #include "getdef.h"
+ 
+ /*
+@@ -339,7 +341,7 @@ def_find(const char *name)
+ static void
+ def_load(void)
+ {
+-	int i;
++	int saved_errno, i;
+ 	FILE *fp;
+ 	char buf[1024], *name, *value, *s;
+ 
+@@ -347,9 +349,14 @@ def_load(void)
+ 	 * Open the configuration definitions file.
+ 	 */
+ 	if ((fp = fopen(def_fname, "r")) == NULL) {
+-		SYSLOG((LOG_CRIT, "cannot open login definitions %s [%m]",
++		saved_errno = errno;
++		fprintf(stderr, _("Cannot open login definitions file %s: %s"
++			" (notify administrator)\n"),
++			def_fname, strerror(saved_errno));
++		errno = saved_errno;
++		SYSLOG((LOG_CRIT, "Cannot open login definitions file %s: %m",
+ 			def_fname));
+-		return;
++		exit(1);
+ 	}
+ 
+ 	/*
+@@ -392,6 +399,18 @@ def_load(void)
+ 		 */
+ 		putdef_str(name, value);
+ 	}
++
++	if (ferror(fp)) {
++		saved_errno = errno;
++		fprintf(stderr, _("Cannot read login definitions file %s: %s"
++			" (notify administrator)\n"),
++			def_fname, strerror(saved_errno));
++		errno = saved_errno;
++		SYSLOG((LOG_CRIT, "Cannot read login definitions file %s: %m",
++			def_fname));
++		exit(1);
++	}
++
+ 	(void) fclose(fp);
+ }
+ 
+diff -urp shadow-4.0.4.1.orig/src/vipw.c shadow-4.0.4.1/src/vipw.c
+--- shadow-4.0.4.1.orig/src/vipw.c	Thu Jun 19 18:11:01 2003
++++ shadow-4.0.4.1/src/vipw.c	Sat Feb 28 00:31:27 2004
+@@ -62,13 +62,13 @@ create_backup_file (FILE * fp, const cha
+ 	if (!bkfp)
+ 		return -1;
+ 
+-	rewind (fp);
+-	while ((c = getc (fp)) != EOF) {
+-		if (putc (c, bkfp) == EOF)
+-			break;
+-	}
+-
+-	if (c != EOF || fflush (bkfp)) {
++	c = 0;
++	if (fseek(fp, 0, SEEK_SET) == 0)
++		while ((c = getc(fp)) != EOF) {
++			if (putc(c, bkfp) == EOF)
++				break;
++		}
++	if (c != EOF || ferror(fp) || fflush(bkfp)) {
+ 		fclose (bkfp);
+ 		unlink (backup);
+ 		return -1;
