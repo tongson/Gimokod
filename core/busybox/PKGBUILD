@@ -6,12 +6,14 @@ arch=('i686' 'x86_64')
 url='http://busybox.net'
 license=('GPL')
 options=('emptydirs')
-provides=('wget' 'sed' 'diffutils' 'findutils' 'awk' 'gzip' 'unzip' 'tar' 'which'
+provides=('wget' 'sed' 'diffutils' 'findutils' 'awk' 'gzip' 'unzip' 'tar' 'which' 'sharutils'
           'run-parts' 'vi' 'procps' 'cpio' 'cron' 'eject' 'runit' 'psmisc' 'bridge-utils'
           'iputils' 'net-tools' 'inetutils' 'man-db' 'logger' 'ntp' 'dhcpcd' 'grep' 'ifenslave')
 groups=('base')
 
-symlinks=(/usr/bin/ip
+symlinks=(/usr/bin/uuencode
+          /usr/bin/uudecode
+          /usr/bin/ip
           /bin/smemcap
           /bin/inotifyd
           /bin/cpio
@@ -144,7 +146,7 @@ sha256sums=(${sha256sums[@]-}
             '98f92c2edbcf61d1bacef783ea8b08cce07051b0a4489ed3f4579296846f89f1'
             '712bce57a9ec1b82caf6e970b1110128da7931adf2e8d9a1483b54937f373f01'
             '733e23d851e68ecd27ed8bb8f4c4b8ea27b0d143069ec49aadb04deeb65dd9f5'
-            'b075d703d695bf10237af8d88647852fdad4e39e39760afe552ac0bdc40c47f1'
+            'd110af340989605cdd5221d45bc65114c2e7d5d95ffc9886e32606853370ae00'
             'bf0092798438c18fd3e7f6d9a8a281d6575cf4258d2457b6320d9c6bc8443eae'
             '3e9a01d07f0d8a6f98bee545aa3009344c9f0d7a4b76b88582f9ca693d789cf7'
             'a70d24036a7ae14f213147fe6727fee4320b2090bc59d8a4ffa609d8fdd14cef'
