@@ -1,0 +1,25 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=libaio
+pkgver=0.3.109
+pkgrel=1
+pkgdesc="The Linux-native asynchronous I/O facility (aio) library"
+arch=('i686' 'x86_64')
+url="http://lse.sourceforge.net/io/aio.html"
+license=('LGPL')
+source=(ftp://ftp.kernel.org/pub/linux/libs/aio/"${pkgname}"-"${pkgver}".tar.bz2
+        libaio-0.3.106-build.patch)
+md5sums=('14f3a22fc14118a48be80ab5ea974f49'
+         'ea1963537edc1ef64b59e2e193737ca5')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  patch -Np0 -i ../libaio-0.3.106-build.patch
+  sed -i -e '/:=.*strip.*shell.*git/s:=.*:=:' src/Makefile Makefile
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make prefix="${pkgdir}/usr" install
+}
+

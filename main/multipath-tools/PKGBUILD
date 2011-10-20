@@ -1,0 +1,39 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=multipath-tools
+pkgver=0.4.9
+pkgrel=1
+pkgdesc="Multipath Tools For Linux"
+arch=('i686' 'x86_64')
+url="http://christophe.varoqui.free.fr/"
+license=('GPL')
+depends=('libaio' 'device-mapper')
+backup=('etc/multipath.conf')
+source=("http://christophe.varoqui.free.fr/multipath-tools/"${pkgname}"-"${pkgver}".tar.bz2")
+sha256sums=('8d44c8815144b5589cc3e604cb3fc16c76a028aef08aa1bec334ff70bf9ac712')
+
+build() {
+  cd "${srcdir}"
+  patch -Np1 -i multipath-tools-0.4.8-kparted-ext-partitions.patch
+  patch -Np1 -i multipath-tools-0.4.9-buffer-overflows.patch
+  patch -Np1 -i multipath-tools-0.4.9-build.patch
+  sed -i '27s:multipathd::' Makefile # multipathd needs readline
+  make
+}
+
+package() {
+  cd "${srcdir}"
+  make DESTDIR="${pkgdir}" install
+  install -D -m 644 "${srcdir}"/multipath.conf "${pkgdir}"/etc/multipath.conf
+}
+
+source=(${source[@]-}
+        multipath-tools-0.4.8-kparted-ext-partitions.patch
+        multipath-tools-0.4.9-buffer-overflows.patch
+        multipath-tools-0.4.9-build.patch
+        multipath.conf)
+
+sha256sums=(${sha256sums[@]-}
+            '4cd2e75782dbaba715b85ef1ececdc130e24d7497897ceea9802c779e79c1c73'
+            '1f9ca1d26fee69dc7d5c1b65a835d23e1b8dd8de6fd3678faf3e7b499611d15d'
+            'b543d2e012b0baedf959e4ccb097d8299bd721a5f543c82f2be01728fa2851a2'
+            '37228b735923c4c13f913644bea739013e45c9e12ae1eb373a2ed27429f744ee')

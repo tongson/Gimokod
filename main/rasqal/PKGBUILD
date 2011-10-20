@@ -18,7 +18,7 @@ build() {
               --build=${CBUILD} \
               --host=${CHOST} \
               --disable-static \
-              --enable-release
+              --enable-release \
               --with-regex-library=posix \
               --with-digest-library=internal \
               --with-decimal=mpfr \

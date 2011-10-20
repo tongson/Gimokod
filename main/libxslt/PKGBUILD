@@ -1,0 +1,42 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=libxslt
+pkgver=1.1.26
+pkgrel=1
+pkgdesc="XML stylesheet transformation library"
+arch=('i686' 'x86_64')
+url="http://xmlsoft.org/XSLT/"
+license=('custom')
+depends=('libxml2')
+options=('!libtool')
+source=(ftp://xmlsoft.org/libxslt/${pkgname}-${pkgver}.tar.gz)
+sha256sums=('55dd52b42861f8a02989d701ef716d6280bfa02971e967c285016f99c66e3db1')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  patch -Np1 -i ../libxslt.m4-libxslt-1.1.26.patch
+  patch -Np1 -i ../libxslt-1.1.26-id-generation.patch
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --without-python \
+              --without-crypto \
+              --without-debug \
+              --without-mem-debug
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+
+  install -d "${pkgdir}/usr/share/licenses/${pkgname}"
+  install -m644 COPYING "${pkgdir}/usr/share/licenses/${pkgname}/"
+}
+
+source=(${source[@]-}
+        libxslt-1.1.26-id-generation.patch
+        libxslt.m4-libxslt-1.1.26.patch)
+
+sha256sums=(${sha256sums[@]-}
+            '19ce8384b8dbe088c7349113e7769c3c735edabe1d54f3182b7f9627eea1532a'
+            'c02cd8437064db0921c08e63245c403dad12410d2997715aa7aa36600bfaa895')

@@ -7,6 +7,8 @@ arch=('i686' 'x86_64')
 url="http://www.tcpdump.org"
 license=('BSD')
 depends=('libpcap' 'openssl')
+options=('emptydirs')
+install=tcpdump.install
 source=("http://www.tcpdump.org/release/${pkgname}-${pkgver}.tar.gz"
         tcpdump_duplicate_executable.patch)
 md5sums=('d0dd58bbd6cd36795e05c6f1f74420b0'
@@ -14,7 +16,7 @@ md5sums=('d0dd58bbd6cd36795e05c6f1f74420b0'
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-
+  sed -i 's:uudecode.*::' Makefile.in
   # do not install tcpdump-4.1.1 executable (FS#23346)
   patch -Np1 -i "${srcdir}/tcpdump_duplicate_executable.patch"
   ./configure --prefix=/usr \
@@ -23,14 +25,23 @@ build() {
               --enable-ipv6 \
               --with-crypto \
               --disable-smb \
+              --with-user=tcpdump \
+              --with-chroot=/var/lib/tcpdump \
               --without-smi
+  export CFLAGS=${CFLAGS/-Os/-O2}
   make
 }
+
+check() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  sed '/^\(espudp1\|eapon1\)/d;' -i tests/TESTLIST
+  make check
+}
+
 
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   make DESTDIR="${pkgdir}" install
-
-  #install the license
+  install -d -m700 -o 801 -g 801 "${pkgdir}/var/lib/tcpdump"
   install -D -m644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }

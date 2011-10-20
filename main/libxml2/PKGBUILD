@@ -30,24 +30,18 @@ build() {
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
-              --includedir=/usr/include/minimal \
-              --libdir=/usr/lib/minimal \
-              --program-suffix=-minimal \
               --enable-ipv6=no \
               --enable-rebuild-docs=no \
               --disable-dependency-tracking \
               --with-threads \
-              --with-minimum \
               --with-output \
-              --without-modules \
               --without-readline \
               --without-history \
               --without-python \
               --without-run-debug \
               --without-icu \
               --without-docbook \
-              --without-ftp \
-              --without-html \
+              --without-ftp
 
   make
 }

@@ -1,0 +1,39 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=libnl
+pkgver=1.1
+pkgrel=1
+pkgdesc="Library for applications dealing with netlink sockets"
+arch=('i686' 'x86_64')
+url="http://www.infradead.org/~tgr/libnl/"
+license=('GPL')
+source=("http://www.infradead.org/~tgr/libnl/files/${pkgname}-${pkgver}.tar.gz")
+sha256sums=('35cea4cfb6cd8af0cafa0f34fff81def5a1f193b8b8384299b4b21883e22edc3')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  patch -Np1 -i ../fix-compilation.patch
+  patch -Np1 -i ../libnl-1.1-flags.patch
+  patch -Np1 -i ../libnl-1.1-minor-leaks.patch
+  patch -Np0 -i ../libnl-1.1-vlan-header.patch
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST}
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}
+
+source=(${source[@]-}
+        fix-compilation.patch
+        libnl-1.1-flags.patch
+        libnl-1.1-minor-leaks.patch
+        libnl-1.1-vlan-header.patch)
+
+sha256sums=(${sha256sums[@]-}
+            '89c542d7aa7c753ef930e60e5fb69868d8a4f87dca9c58e8b09a9a0723a3ea95'
+            '027b7c29cd0176f94cf337508bca0542361b900d262d956b0e3ef00080b0bc2a'
+            'b423657e30be6b2589b9da7fc98507b658028786c4950295138769b0ff0cb171'
+            'c9c7d8bf94ab06884f91ecd98977433be952530555aff37befc335f1f6312619')
