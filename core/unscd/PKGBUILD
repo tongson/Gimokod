@@ -10,6 +10,7 @@ source=(http://busybox.net/~vda/${pkgname}/nscd-${pkgver}.c)
 sha256sums=('b96d6b5d1fb894a4a23c382ddc5c1e807bc45ad984053516fdd3c389fed4c5e7')
 build() {
   cd "${srcdir}"
+  patch -p0 -i nscd-0.47-max-db-size.diff
   cc -Wl,--sort-section -Wl,alignment ${CFLAGS} nscd-${pkgver}.c -o nscd
 }
 
@@ -18,3 +19,7 @@ package() {
   install -D -m0755 nscd "${pkgdir}/sbin/nscd"
 }
 
+source=(${source[@]-}
+        nscd-0.47-max-db-size.diff)
+sha256sums=(${sha256sums[@]-}
+            '9addf4a23312950cae782ebef00aee8e8ff9798d198f6f0fd0771e3a5531fe0b')
