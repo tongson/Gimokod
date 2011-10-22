@@ -7,16 +7,20 @@ arch=(i686 x86_64)
 url="http://xorg.freedesktop.org/"
 license=('custom')
 depends=('zlib')
-makedepends=('pkgconfig' 'xproto>=7.0.18')
+makedepends=('pkg-config' 'xproto')
 options=('!libtool')
 source=(${url}/releases/individual/lib/${pkgname}-${pkgver}.tar.bz2)
 sha1sums=('ba158e4c10a1aff2351ef632def03dec0e0ee11e')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  ./configure --prefix=/usr --sysconfdir=/etc \
-      --localstatedir=/var --disable-static \
-      --with-encodingsdir=/usr/share/fonts/encodings
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --sysconfdir=/etc \
+              --localstatedir=/var \
+              --disable-static \
+              --with-encodingsdir=/usr/share/fonts/encodings
 
   make
 }
