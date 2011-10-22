@@ -5,8 +5,8 @@ pkgrel=1
 pkgdesc="A library for layout and rendering of text"
 arch=('i686' 'x86_64')
 license=('LGPL')
-depends=('glib2' 'cairo' 'libxft' 'freetype2')
-makedepends=('gobject-introspection' 'libxt' 'gtk-doc')
+depends=('glib' 'cairo' 'libxft' 'freetype2')
+makedepends=('libxt')
 options=('!libtool' '!emptydirs')
 install=pango.install
 source=(http://ftp.gnome.org/pub/gnome/sources/${pkgname}/1.28/${pkgname}-${pkgver}.tar.bz2)
@@ -17,6 +17,8 @@ build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
 
   ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
               --sysconfdir=/etc \
               --localstatedir=/var \
               --with-included-modules=basic-fc \
