@@ -21,11 +21,13 @@ build() {
 
   autoreconf --force --install
   ./configure --prefix=/usr \
-      --enable-udev \
-      --enable-intel \
-      --enable-radeon \
-      --enable-libkms \
-      --enable-nouveau-experimental-api
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --enable-udev \
+              --enable-intel \
+              --enable-radeon \
+              --enable-libkms \
+              --enable-nouveau-experimental-api
   make
 }
 
