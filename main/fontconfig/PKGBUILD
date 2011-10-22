@@ -6,7 +6,7 @@ pkgdesc="A library for configuring and customizing font access"
 arch=(i686 x86_64)
 url="http://www.fontconfig.org/release/"
 license=('custom')
-depends=('expat>=2.0.1' 'freetype2>=2.3.11')
+depends=('expat' 'freetype2')
 options=('!libtool')
 install=fontconfig.install
 source=(http://www.fontconfig.org/release/${pkgname}-${pkgver}.tar.gz
@@ -19,14 +19,14 @@ md5sums=('77e15a92006ddc2adbb06f840d591c0e'
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   patch -Np1 -i "${srcdir}/30-urw-aliases.patch" || return 1
-  # enable Position Independent Code for prelinking
   export CFLAGS="${CFLAGS} -fPIC"
   ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
               --sysconfdir=/etc \
               --localstatedir=/var \
               --disable-docs \
-              --disable-docbook \
-              --with-cache-dir=/var/lib/fontconfig
+              --disable-docbook
   make
 }
 
