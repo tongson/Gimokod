@@ -7,14 +7,18 @@ arch=('i686' 'x86_64')
 license=('custom')
 url="http://xorg.freedesktop.org/"
 depends=('fontconfig' 'libxrender')
-makedepends=('pkgconfig')
+makedepends=('pkg-config')
 options=('!libtool')
 source=(${url}/releases/individual/lib/libXft-${pkgver}.tar.bz2)
 sha1sums=('ed29784259f4e26df78141035560ae8a7c62e83f')
 
 build() {
   cd "${srcdir}/libXft-${pkgver}"
-  ./configure --prefix=/usr --sysconfdir=/etc --disable-static
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --sysconfdir=/etc \
+              --disable-static
   make
 }
 

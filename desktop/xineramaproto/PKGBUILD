@@ -6,14 +6,15 @@ pkgdesc="X11 Xinerama extension wire protocol"
 arch=(any)
 url="http://xorg.freedesktop.org/"
 license=('custom')
-depends=
 makedepends=('xorg-util-macros')
 source=(${url}/releases/individual/proto/${pkgname}-${pkgver}.tar.bz2)
 sha1sums=('818bffc16139d6e3de4344c83f00c495d3536753')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  ./configure --prefix=/usr
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST}
   make
 }
 

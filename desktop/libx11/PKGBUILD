@@ -19,6 +19,8 @@ sha1sums=('2d9d38bfd7003ec60eea0b1999ab72cfd5fa3b90'
 build() {
   cd "${srcdir}/libX11-${pkgver}"
   ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
               --disable-static \
               --disable-xf86bigfont \
               --without-fop \

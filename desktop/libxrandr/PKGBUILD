@@ -14,7 +14,10 @@ sha1sums=('0c844a4c5237f96794f0c18a5af16dc5ab7a36ec')
 
 build() {
   cd "${srcdir}/libXrandr-${pkgver}"
-  ./configure --prefix=/usr --sysconfdir=/etc
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --sysconfdir=/etc
   make
 }
 

@@ -6,15 +6,19 @@ pkgdesc="X11 Video Motion Compensation extension library"
 arch=(i686 x86_64)
 url="http://xorg.freedesktop.org/"
 license=('custom')
-depends=('libxv>=1.0.5')
-makedepends=('pkgconfig')
+depends=('libxv')
+makedepends=('pkg-config')
 options=('!libtool')
 source=(${url}/releases/individual/lib/libXvMC-${pkgver}.tar.bz2)
 sha1sums=('4ace7e7ce6b646b5715b2efa561affc89bc87f91')
 
 build() {
   cd "${srcdir}"/libXvMC-${pkgver}
-  ./configure --prefix=/usr --sysconfdir=/etc --disable-static
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --sysconfdir=/etc \
+              --disable-static
   make
 }
 

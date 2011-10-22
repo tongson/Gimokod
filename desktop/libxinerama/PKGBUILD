@@ -14,7 +14,9 @@ sha1sums=('f030b0cfcce15502aac78188524f32a6f29bd0a4')
 
 build() {
   cd "${srcdir}/libXinerama-${pkgver}"
-  ./configure --prefix=/usr
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST}
   make
 }
 

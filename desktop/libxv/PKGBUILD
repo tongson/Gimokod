@@ -7,14 +7,17 @@ arch=(i686 x86_64)
 license=('custom')
 url="http://xorg.freedesktop.org/"
 depends=('libxext' 'videoproto')
-makedepends=('pkgconfig')
+makedepends=('pkg-config')
 options=('!libtool')
 source=(${url}/releases/individual/lib/libXv-${pkgver}.tar.bz2)
 sha1sums=('9ebb6d7936a7b247b9b0f6dc81def39a18e4214c')
 
 build() {
   cd "${srcdir}/libXv-${pkgver}"
-  ./configure --prefix=/usr --disable-static 
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --disable-static
   make
 }
 

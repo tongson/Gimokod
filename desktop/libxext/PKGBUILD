@@ -14,7 +14,14 @@ sha1sums=('0bf3708177b9320091ebc069e905c042c31d859d')
 
 build() {
   cd "${srcdir}/libXext-${pkgver}"
-  ./configure --prefix=/usr --sysconfdir=/etc --disable-static --without-fop --without-xmlto --disable-specs
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --sysconfdir=/etc \
+              --disable-static \
+              --without-fop \
+              --without-xmlto \
+              --disable-specs
   make
 }
 

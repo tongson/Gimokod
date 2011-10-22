@@ -6,7 +6,7 @@ pkgdesc="X11 Input extension library"
 arch=('i686' 'x86_64')
 url="http://xorg.freedesktop.org"
 depends=('libxext' 'inputproto')
-makedepends=('pkgconfig' 'xorg-util-macros')
+makedepends=('pkg-config' 'xorg-util-macros')
 options=(!libtool)
 license=('custom')
 source=(${url}/releases/individual/lib/libXi-${pkgver}.tar.bz2)
@@ -15,6 +15,8 @@ sha1sums=('c66cfdee74e8d169a7992b5f257395e653ca761b')
 build() {
   cd "${srcdir}/libXi-${pkgver}"
   ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
               --sysconfdir=/etc \
               --disable-static \
               --disable-specs \

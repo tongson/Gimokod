@@ -5,8 +5,8 @@ pkgrel=1
 pkgdesc="X11 client-side library"
 arch=(i686 x86_64)
 url="http://xcb.freedesktop.org/"
-depends=('xcb-proto>=1.6' 'libxdmcp' 'libxau')
-makedepends=('pkgconfig' 'libxslt' 'python2')
+depends=('xcb-proto' 'libxdmcp' 'libxau')
+makedepends=('pkg-config' 'libxslt' 'python')
 conflicts=('libx11<1.1.99.2')
 options=('!libtool')
 license=('custom')
@@ -25,7 +25,12 @@ build() {
   aclocal
   autoconf
   automake --add-missing
-  PYTHON=python2 ./configure --prefix=/usr --enable-xinput --disable-build-docs --disable-selinux
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --enable-xinput \
+              --disable-build-docs \
+              --disable-selinux
   make
 }
 

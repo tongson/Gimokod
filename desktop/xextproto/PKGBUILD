@@ -5,7 +5,6 @@ pkgrel=1
 pkgdesc="X11 various extension wire protocol"
 arch=('any')
 license=('custom')
-depends=
 makedepends=('xorg-util-macros')
 url="http://xorg.freedesktop.org/"
 source=(${url}/releases/individual/proto/${pkgname}-${pkgver}.tar.bz2)
@@ -13,7 +12,11 @@ sha1sums=('a117fb9d7fdebee7af3f9e79efe9812e39e650a5')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  ./configure --prefix=/usr --without-fop --without-xmlto
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --without-fop \
+              --without-xmlto
   make
 }
 

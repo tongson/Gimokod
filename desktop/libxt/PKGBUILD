@@ -14,7 +14,11 @@ sha1sums=('a29a97f8521bdc7a95364e163f0ce474de572ae5')
 
 build() {
   cd "${srcdir}/libXt-${pkgver}"
-  ./configure --prefix=/usr --sysconfdir=/etc --disable-static
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --sysconfdir=/etc \
+              --disable-static
   make
 }
 

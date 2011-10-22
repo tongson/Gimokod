@@ -15,7 +15,9 @@ sha1sums=('9c76823c7cfcb43f097963d0c930dcc4e38807a8')
 
 build() {
   cd "${srcdir}/libXp-${pkgver}"
-  ./configure --prefix=/usr
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST}
   make
 }
 

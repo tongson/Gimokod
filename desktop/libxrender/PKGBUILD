@@ -7,14 +7,17 @@ arch=(i686 x86_64)
 url="http://xorg.freedesktop.org/"
 license=('custom')
 depends=('libx11>=1.3.4' 'renderproto')
-makedepends=('pkgconfig')
+makedepends=('pkg-config')
 options=('!libtool')
 source=(${url}/releases/individual/lib/libXrender-${pkgver}.tar.bz2)
 sha1sums=('65bd96dc17da6b064f95109da02d9c9d14cb06dc')
 
 build() {
   cd "${srcdir}/libXrender-${pkgver}"
-  ./configure --prefix=/usr --disable-static
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --disable-static
   make
 }
 

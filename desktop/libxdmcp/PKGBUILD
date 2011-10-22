@@ -14,7 +14,14 @@ sha1sums=('28132db24727552f77e998e6a6798a5b9b30789f')
 
 build() {
   cd "${srcdir}/libXdmcp-${pkgver}"
-  ./configure --prefix=/usr --sysconfdir=/etc --disable-static --disable-docs --without-xmlto --without-fop
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --sysconfdir=/etc \
+              --disable-static \
+              --disable-docs \
+              --without-xmlto \
+              --without-fop
   make
 }
 

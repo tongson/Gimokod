@@ -7,14 +7,18 @@ arch=(i686 x86_64)
 license=('custom')
 url="http://xorg.freedesktop.org/"
 depends=('libxt' 'libxext')
-makedepends=('xorg-util-macros')
+makedepends=('xorg-util-macros' 'gettext')
 options=('!libtool')
 source=(${url}/releases/individual/lib/libXpm-${pkgver}.tar.bz2)
 sha1sums=('38258a1d589d3f157e0338d0fd13eec11bc4a39b')
 
 build() {
   cd "${srcdir}/libXpm-${pkgver}"
-  ./configure --prefix=/usr --sysconfdir=/etc --disable-static
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --sysconfdir=/etc \
+              --disable-static
   make
 }
 

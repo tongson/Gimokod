@@ -5,7 +5,6 @@ pkgrel=1
 pkgdesc="X11 RandR extension wire protocol"
 arch=('any')
 license=('custom')
-depends=
 url="http://xorg.freedesktop.org/"
 makedepends=('xorg-util-macros')
 source=(${url}/releases/individual/proto/${pkgname}-${pkgver}.tar.bz2)
@@ -13,7 +12,9 @@ sha1sums=('55d4b1a09fc8e645d9674a452ae151988caabad1')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  ./configure --prefix=/usr
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST}
   make
 }
 

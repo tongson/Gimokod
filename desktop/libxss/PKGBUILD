@@ -14,7 +14,10 @@ sha1sums=('3c29e2222fd68e26e408234c51c6d8b2edf6ab19')
 
 build() {
   cd "${srcdir}/libXScrnSaver-${pkgver}"
-  ./configure --prefix=/usr --sysconfdir=/etc
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --sysconfdir=/etc
   make
 }
 

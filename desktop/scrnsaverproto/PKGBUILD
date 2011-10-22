@@ -12,7 +12,12 @@ sha1sums=('94758e81ac20469c5b586b6cef924c8ab9a32e0f')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  ./configure --prefix=/usr --without-fop --without-xmlto --disable-specs
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --without-fop \
+              --without-xmlto \
+              --disable-specs
   make
 }
 

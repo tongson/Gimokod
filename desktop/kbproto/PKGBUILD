@@ -3,16 +3,17 @@ pkgname=kbproto
 pkgver=1.0.5
 pkgrel=1
 pkgdesc="X11 XKB extension wire protocol"
-arch=(any)
+arch=('any')
 url="http://xorg.freedesktop.org/"
 license=('custom')
-depends=
 source=(${url}/releases/individual/proto/${pkgname}-${pkgver}.tar.bz2)
 sha1sums=('d95fada09399568c434729b436e1a09503e15b7a')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  ./configure --prefix=/usr
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST}
   make
 }
 

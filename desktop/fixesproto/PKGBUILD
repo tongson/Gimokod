@@ -13,7 +13,9 @@ sha1sums=('ab605af5da8c98c0c2f8b2c578fed7c864ee996a')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  ./configure --prefix=/usr
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST}
   make
   make DESTDIR="${pkgdir}" install
   install -m755 -d "${pkgdir}/usr/share/licenses/${pkgname}"

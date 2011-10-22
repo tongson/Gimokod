@@ -14,11 +14,16 @@ sha1sums=('081b26b556d55e20d7956c80a2ea2854962aecec')
 
 build() {
   cd "${srcdir}/libXcomposite-${pkgver}"
-  ./configure --prefix=/usr --sysconfdir=/etc --disable-static --without-xmlto
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --sysconfdir=/etc \
+              --disable-static \
+              --without-xmlto
   make
 }
 
-package {
+package() {
   cd "${srcdir}/libXcomposite-${pkgver}"
   make DESTDIR="${pkgdir}" install
 
