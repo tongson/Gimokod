@@ -7,9 +7,6 @@ arch=('i686' 'x86_64')
 url="http://freeglut.sourceforge.net/"
 license=('MIT')
 depends=('libxxf86vm' 'mesa' 'libxi')
-replaces=('glut')
-provides=('glut')
-conflicts=('glut')
 options=('!libtool')
 source=(http://downloads.sourceforge.net/freeglut/${pkgname}-${pkgver}.tar.gz \
         2.6.0-GFX_radeon.patch)
@@ -18,9 +15,11 @@ sha1sums=('68306c4486c13d005a4e4d54035e0c0b1bdc220b' '2e392c7d0b60016ec89e6a5edf
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  patch -p0 -i "${srcdir}/2.6.0-GFX_radeon.patch" || return 1
+  patch -p0 -i "${srcdir}/2.6.0-GFX_radeon.patch"
 
   ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
               --disable-warnings \
               --disable-warnings-as-errors \
               --enable-replace-glut \
