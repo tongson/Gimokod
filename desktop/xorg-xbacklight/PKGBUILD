@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=xorg-xbacklight
 pkgver=1.1.2
-pkgrel=2
+pkgrel=1
 pkgdesc="RandR-based backlight control application"
 arch=(i686 x86_64)
 url="http://xorg.freedesktop.org/"
@@ -14,7 +14,9 @@ sha1sums=('e297b359ab83f3844ca5ea1c23280b2f8bb71cfd')
 
 build() {
   cd "${srcdir}/xbacklight-${pkgver}"
-  ./configure --prefix=/usr
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST}
   make
 }
 

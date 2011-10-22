@@ -13,7 +13,9 @@ sha1sums=('922ddf89acd0781156e9ccdf191a3e0c6376415a')
 
 build() {
   cd "${srcdir}/xclipboard-${pkgver}"
-  ./configure --prefix=/usr
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST}
   make
 }
 

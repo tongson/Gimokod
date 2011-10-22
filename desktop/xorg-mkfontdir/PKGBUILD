@@ -1,9 +1,9 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=xorg-mkfontdir
 pkgver=1.0.6
-pkgrel=2
+pkgrel=1
 pkgdesc="Create an index of X font files in a directory"
-arch=(any)
+arch=('any')
 url="http://xorg.freedesktop.org/"
 license=('custom')
 depends=('xorg-mkfontscale')
@@ -14,7 +14,9 @@ sha1sums=('c2b504f5a019777f2f0d3c2fc635b114c7924804')
 
 build() {
   cd "${srcdir}/mkfontdir-${pkgver}"
-  ./configure --prefix=/usr
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST}
   make
 }
 

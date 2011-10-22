@@ -14,7 +14,9 @@ sha1sums=('ef45925d5b0e72c73d21798d65a41d476fdb0d3f')
 
 build() {
   cd "${srcdir}/xrandr-${pkgver}"
-  ./configure --prefix=/usr
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST}
   make
 }
 

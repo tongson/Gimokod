@@ -14,7 +14,9 @@ sha1sums=('77dcbdaa2046db56f31936f921843bd05df2255f')
 
 build() {
   cd "${srcdir}/xev-${pkgver}"
-  ./configure --prefix=/usr
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST}
   make
 }
 

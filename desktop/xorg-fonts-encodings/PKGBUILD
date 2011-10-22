@@ -3,10 +3,9 @@ pkgname=xorg-fonts-encodings
 pkgver=1.0.4
 pkgrel=1
 pkgdesc="X.org font encoding files"
-arch=(any)
+arch=('any')
 url="http://xorg.freedesktop.org/"
 license=('custom')
-depends=
 makedepends=('xorg-mkfontscale' 'xorg-util-macros' 'xorg-font-util')
 groups=('xorg-fonts' 'xorg')
 source=(${url}/releases/individual/font/encodings-${pkgver}.tar.bz2)
@@ -15,7 +14,9 @@ sha1sums=('24ace2470403f85a0d393769204029bd8247992a')
 build() {
   cd "${srcdir}/encodings-${pkgver}"
   autoreconf
-  ./configure --prefix=/usr
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST}
   make
 }
 

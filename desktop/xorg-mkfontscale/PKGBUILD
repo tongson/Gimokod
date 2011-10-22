@@ -14,7 +14,9 @@ sha1sums=(''5a8ac438d6d6694dcf1314b74c4d9f029da4f486)
 
 build() {
   cd "${srcdir}/mkfontscale-${pkgver}"
-  ./configure --prefix=/usr
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST}
   make
 }
 

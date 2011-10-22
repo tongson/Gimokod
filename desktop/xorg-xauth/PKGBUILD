@@ -14,7 +14,9 @@ sha1sums=('10a68367ecc60a641b9aa89e6f24f7ca71f23874')
 
 build() {
   cd "${srcdir}/xauth-${pkgver}"
-  ./configure --prefix=/usr
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST}
   make
 }
 
