@@ -38,6 +38,7 @@ build() {
               --enable-cmdlib \
               --enable-applib \
               --with-udevdir=/lib/udev/rules.d/ \
+              --with-default-locking-dir=/run \
               --enable-udev_sync \
               --enable-udev_rules
   make
