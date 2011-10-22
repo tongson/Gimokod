@@ -16,8 +16,11 @@ build() {
 
   # Configure and Build
   ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
               --sysconfdir=/etc/imlib2 \
-              --x-libraries=/usr/lib --without-id3
+              --x-libraries=/usr/lib \
+              --without-id3
   make
 }
 
