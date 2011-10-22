@@ -1,29 +1,26 @@
-# $Id: PKGBUILD 34365 2010-12-06 15:14:05Z bluewind $
-# Maintainer: Sergej Pupykin <pupykin.s+arch@gmail.com>
-# Contributor: Sebastian A. Liem <sebastian at liem dot se>
-
+# Based upon the PKGBUILD from Arch Linux
 pkgname=slock
 pkgver=0.9
-# Fix FS#21738
-_pkgver="4d3769ac5d02"
+_pkgver="d8975fb0640f"
 pkgrel=6
 pkgdesc="A simple screen locker for X"
 arch=('i686' 'x86_64')
 url="http://tools.suckless.org/slock"
 license=('MIT')
 depends=('libxext')
-#http://dl.suckless.org/tools/$pkgname-$pkgver.tar.gz
-source=("slock-$pkgver.tar.bz2::http://hg.suckless.org/slock/archive/$_pkgver.tar.bz2")
-md5sums=('81ca629668cc81f41022fbd094bee3ee')
+source=("slock-"${pkgver}".tar.bz2::http://hg.suckless.org/slock/archive/$_pkgver.tar.gz")
+md5sums=('ae427719120dcd336dbff4cd152cbcb4')
 
 build() {
-  cd "$srcdir/slock-$_pkgver"
+  cd "${srcdir}/slock-${_pkgver}"
+  sed -i -e "s/CFLAGS = -std=c99 -pedantic -Wall -Os/CFLAGS += -std=c99 -pedantic -Wall -g/" \
+         -e "s/LDFLAGS = -s/LDFLAGS += -g/" config.mk
   make X11INC=/usr/include/X11 X11LIB=/usr/lib/X11
 }
 
 package() {
-  cd "$srcdir/slock-$_pkgver"
+  cd "${srcdir}/slock-${_pkgver}"
 
-  make PREFIX=/usr DESTDIR="$pkgdir" install
-  install -m644 -D LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  make PREFIX=/usr DESTDIR="${pkgdir}" install
+  install -m644 -D LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }
