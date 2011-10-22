@@ -21,6 +21,7 @@ nss
 libgcrypt
 gnupg
 libevent
+libarchive
 
 Misc features:
 /etc/tcb support
