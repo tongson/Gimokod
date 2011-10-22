@@ -6,7 +6,7 @@ pkgdesc="X11 Inter-Client Exchange library"
 arch=(i686 x86_64)
 url="http://xorg.freedesktop.org/"
 depends=('xproto>=7.0.18')
-makedepends=('pkgconfig' 'xtrans>=1.2.5')
+makedepends=('pkg-config' 'xtrans')
 options=('!libtool')
 source=(${url}/releases/individual/lib/libICE-${pkgver}.tar.bz2)
 license=('custom')
@@ -15,6 +15,8 @@ sha1sums=('c7d0f4c5b0e999385445b8be1bc89aec4e5de71d')
 build() {
   cd "${srcdir}/libICE-${pkgver}"
   ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
               --sysconfdir=/etc \
               --enable-ipv6 \
               --disable-docs \
@@ -25,6 +27,7 @@ build() {
 }
 
 package() {
+  cd "${srcdir}/libICE-${pkgver}"
   make DESTDIR="${pkgdir}" install
   install -d "${pkgdir}/usr/share/licenses/${pkgname}"
   install -m644 COPYING "${pkgdir}/usr/share/licenses/${pkgname}/"
