@@ -1,61 +1,69 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgbase=gtk2
 pkgname=('gtk2' 'gtk-update-icon-cache')
-pkgver=2.24.6
+pkgver=2.24.7
 pkgrel=1
 arch=('i686' 'x86_64')
 url="http://www.gtk.org/"
-makedepends=('atk' 'pango' 'libxcursor' 'libxinerama' 'libxrandr' 'libxi' 'libxcomposite' 'libxdamage'
-             'shared-mime-info' 'cairo' 'gdk-pixbuf2')
+makedepends=('glib' 'pkg-config' 'fontconfig' 'atk' 'pango' 'libxcursor' 'libxinerama' 'libxrandr' 'libxi'
+             'libxcomposite' 'libxdamage' 'shared-mime-info' 'cairo' 'gdk-pixbuf')
 options=('!libtool' '!docs')
 license=('LGPL')
 source=(http://ftp.gnome.org/pub/gnome/sources/gtk+/2.24/gtk+-${pkgver}.tar.xz
-        xid-collision-debug.patch
-        gtk2-dont-ellipsize-filters.diff)
-sha256sums=('8a026b545dc1fa0c1a69b395232ad7c8ee8fa260be5f7d9a2f2ffcd799efefca'
-            'd758bb93e59df15a4ea7732cf984d1c3c19dff67c94b957575efea132b8fe558'
-            '90a9d50c1407ab87f6fa9ae131c2663477540419955b0ba39520a18882afceb8')
+        xid-collision-debug.patch)
+sha256sums=('1fdc7605501bd2932ef9a3c4c3c9a406e505f18667aea9e73af650da28fff994'
+            'd758bb93e59df15a4ea7732cf984d1c3c19dff67c94b957575efea132b8fe558')
+
+_strip_builddir() {
+  local rule=$1
+  shift
+  local directory=$1
+  shift
+  sed -e "s/^\(${rule} =.*\)${directory}\(.*\)$/\1\2/" -i $@
+}
 
 build() {
-    cd "${srcdir}/gtk+-${pkgver}"
-    patch -Np1 -i "${srcdir}/xid-collision-debug.patch"
-    #https://bugzilla.gnome.org/show_bug.cgi?id=657949
-    patch -Np1 -i "${srcdir}/gtk2-dont-ellipsize-filters.diff"
+  cd "${srcdir}/gtk+-${pkgver}"
+  patch -Np1 -i "${srcdir}/xid-collision-debug.patch"
+  # Stop trying to build unmaintained docs, tests and demos. From Gentoo.
+  _strip_builddir SUBDIRS tutorial docs/Makefile.am docs/Makefile.in
+  _strip_builddir SUBDIRS faq docs/Makefile.am docs/Makefile.in
+  _strip_builddir SRC_SUBDIRS tests Makefile.am Makefile.in
+  _strip_builddir SRC_SUBDIRS demos Makefile.am Makefile.in
 
-    CXX=/bin/false ./configure --prefix=/usr \
-        --sysconfdir=/etc \
-        --localstatedir=/var \
-        --with-xinput=yes \
-        --disable-papi \
-        --enable-introspection=no \
-        --enable-gtk-doc-html=no \
-        --with-gdktarget=x11
+  CXX=/bin/false ./configure --prefix=/usr \
+      --build=${CBUILD} \
+      --host=${CHOST} \
+      --sysconfdir=/etc \
+      --localstatedir=/var \
+      --with-xinput=yes \
+      --disable-cups \
+      --disable-papi \
+      --enable-introspection=no \
+      --enable-gtk-doc-html=no \
+      --with-gdktarget=x11
 
-    #https://bugzilla.gnome.org/show_bug.cgi?id=655517
-    sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
+  #https://bugzilla.gnome.org/show_bug.cgi?id=655517
+  sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
 
-    make
+  make
 }
 
 package_gtk2() {
-    pkgdesc="The GTK+ Toolkit (v2)"
-    install=gtk2.install
-    depends=('atk' 'pango' 'libxcursor' 'libxinerama' 'libxrandr' 'libxi' 'libxcomposite' 'libxdamage' 'shared-mime-info' 'cairo' 'libcups' 'gtk-update-icon-cache')
-    backup=(etc/gtk-2.0/gtkrc)
-
-    cd "${srcdir}/gtk+-${pkgver}"
-
-    make DESTDIR="${pkgdir}" install
-    sed -i "s#env python#env python2#" "${pkgdir}"/usr/bin/gtk-builder-convert
-    echo 'gtk-fallback-icon-theme = "gnome"' > "${pkgdir}/etc/gtk-2.0/gtkrc"
-    #split this out to use with gtk3 too
-    rm "${pkgdir}"/usr/bin/gtk-update-icon-cache
+  pkgdesc="The GTK+ Toolkit (v2)"
+  install=gtk2.install
+  depends=('glib' 'fontconfig' 'atk' 'pango' 'libxcursor' 'libxinerama' 'libxrandr' 'libxi' 'libxcomposite'
+           'libxdamage' 'shared-mime-info' 'cairo' 'gtk-update-icon-cache')
+  backup=(etc/gtk-2.0/gtkrc)
+  cd "${srcdir}/gtk+-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+  echo 'gtk-fallback-icon-theme = "gnome"' > "${pkgdir}/etc/gtk-2.0/gtkrc"
+  rm "${pkgdir}"/usr/bin/gtk-update-icon-cache # split package for gtk3
 }
 package_gtk-update-icon-cache() {
-    pkgdesc="The GTK+ update icon cache tool"
-    depends=('gdk-pixbuf2')
+  pkgdesc="The GTK+ update icon cache tool"
+  depends=('gdk-pixbuf')
 
-    cd "${srcdir}/gtk+-${pkgver}/gtk"
-
-    install -D -m755 gtk-update-icon-cache "${pkgdir}"/usr/bin/gtk-update-icon-cache
+  cd "${srcdir}/gtk+-${pkgver}/gtk"
+  install -D -m755 gtk-update-icon-cache "${pkgdir}"/usr/bin/gtk-update-icon-cache
 }
