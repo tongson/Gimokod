@@ -13,9 +13,8 @@ makedepends=( 'libxxf86vm' 'libmad' 'libcdio' 'libxinerama' 'lame' 'libtheora' '
 license=('GPL')
 url="http://www.mplayerhq.hu/"
 options=('!buildflags' '!emptydirs')
-source=(ftp://ftp.archlinux.org/other/${pkgname}/${pkgname}-${pkgver}.tar.xz mplayer.desktop)
-md5sums=('2dbff62a9af24bce8a6964a1ce949d10'
-         'c0d6ef795cf6de48e3b87ff7c23f0319')
+source=(ftp://ftp.archlinux.org/other/${pkgname}/${pkgname}-${pkgver}.tar.xz)
+md5sums=('2dbff62a9af24bce8a6964a1ce949d10')
 
 build() {
     cd "${srcdir}/${pkgname}"
@@ -74,8 +73,6 @@ build() {
                 --disable-nemesi \
                 --disable-sdl \
                 --prefix=/usr \
-                --build=${CBUILD} \
-                --host=${CHOST}  \
                 --disable-gui \
                 --disable-arts \
                 --disable-liblzo \
@@ -94,11 +91,5 @@ package() {
     cd "${srcdir}/${pkgname}"
     make DESTDIR="${pkgdir}" install-mplayer install-mplayer-man
     install -Dm644 etc/{codecs.conf,input.conf,example.conf} "${pkgdir}"/etc/mplayer/
-    install -dm755 "${pkgdir}"/usr/share/mplayer/
-    ln -s /usr/share/fonts/TTF/DejaVuSans.ttf "${pkgdir}"/usr/share/mplayer/subfont.ttf
-    rm -rf "${pkgdir}"/usr/share/mplayer/font
-    #desktop file  FS#14770
-    install -Dm644 "${srcdir}"/mplayer.desktop "${pkgdir}"/usr/share/applications/mplayer.desktop
-    install -Dm644 etc/mplayer.png "${pkgdir}"/usr/share/pixmaps/mplayer.png
 }
 
