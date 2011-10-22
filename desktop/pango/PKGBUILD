@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=pango
-pkgver=1.28.4
+pkgver=1.29.4
 pkgrel=1
 pkgdesc="A library for layout and rendering of text"
 arch=('i686' 'x86_64')
@@ -9,9 +9,9 @@ depends=('glib' 'cairo' 'libxft' 'freetype2')
 makedepends=('libxt')
 options=('!libtool' '!emptydirs')
 install=pango.install
-source=(http://ftp.gnome.org/pub/gnome/sources/${pkgname}/1.28/${pkgname}-${pkgver}.tar.bz2)
+source=(http://ftp.gnome.org/pub/gnome/sources/${pkgname}/1.29/${pkgname}-${pkgver}.tar.bz2)
 url="http://www.pango.org/"
-sha256sums=('7eb035bcc10dd01569a214d5e2bc3437de95d9ac1cfa9f50035a687c45f05a9f')
+sha256sums=('f15deecaecf1e9dcb7db0e4947d12b5bcff112586434f8d30a5afd750747ff2b')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
