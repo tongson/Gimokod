@@ -23,7 +23,11 @@ build() {
   patch -Np1 -i "${srcdir}/freetype-2.3.0-enable-spr.patch"
   patch -Np1 -i "${srcdir}/freetype-2.2.1-enable-valid.patch"
 
-  ./configure --prefix=/usr --mandir=/usr/share/man --disable-static
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --mandir=/usr/share/man \
+              --disable-static
   make
 }
 
