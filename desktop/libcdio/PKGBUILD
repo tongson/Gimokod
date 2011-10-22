@@ -14,6 +14,8 @@ md5sums=('1c29b18e01ab2b966162bc727bf3c360')
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
               --disable-vcd-info \
               --disable-example-progs \
               --disable-cpp-progs \
