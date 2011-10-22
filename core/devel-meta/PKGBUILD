@@ -18,12 +18,10 @@ depends=(
   flex
   gawk
   gcc
-  gettext
   glib
   gnuconfig
   gperf
   guile
-  intltool
   libtool
   linux-api-headers
   m4
