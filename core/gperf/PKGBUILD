@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=gperf
 pkgver=3.0.4
-pkgrel=3
+pkgrel=1
 pkgdesc="Perfect hash function generator"
 arch=('x86_64' 'i686')
 url="http://www.gnu.org/software/gperf/"
