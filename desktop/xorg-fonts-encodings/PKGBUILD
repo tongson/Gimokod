@@ -3,7 +3,7 @@ pkgname=xorg-fonts-encodings
 pkgver=1.0.4
 pkgrel=1
 pkgdesc="X.org font encoding files"
-arch=('any')
+arch=(any)
 url="http://xorg.freedesktop.org/"
 license=('custom')
 makedepends=('xorg-mkfontscale' 'xorg-util-macros' 'xorg-font-util')
@@ -19,7 +19,6 @@ build() {
               --host=${CHOST}
   make
 }
-
 package() {
   cd "${srcdir}/encodings-${pkgver}"
   make DESTDIR="${pkgdir}" install
