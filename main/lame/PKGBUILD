@@ -1,16 +1,16 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=lame
-pkgver=3.98.4
+pkgver=3.99
 pkgrel=1
-pkgdesc="An MP3 encoder and graphical frame analyzer"
+pkgdesc="A high-quality MP3 encoder"
 arch=('i686' 'x86_64')
 url="http://lame.sourceforge.net/"
 depends=('ncurses')
 makedepends=('nasm')
 license=('LGPL')
 options=('!libtool')
-source=(http://downloads.sourceforge.net/sourceforge/${pkgname}/${pkgname}-${pkgver}.tar.gz)
-md5sums=('8e9866ad6b570c6c95c8cba48060473f')
+source=(http://downloads.sourceforge.net/${pkgname}/${pkgname}-${pkgver}.tar.gz)
+md5sums=('7abacd1d0a65a63733335786015626db')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
