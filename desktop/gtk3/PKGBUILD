@@ -1,47 +1,62 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=gtk3
-pkgver=3.0.12
+pkgver=3.2.1
 pkgrel=1
 pkgdesc="The GTK+ Toolkit (v3)"
 arch=('i686' 'x86_64')
 url="http://www.gtk.org/"
 install=gtk3.install
-depends=('atk' 'cairo' 'gtk-update-icon-cache' 'libxfixes' 'libxcursor' 'libxinerama' 'libxrandr' 'libxi' 'libxcomposite' 'libxdamage' 'pango' 'shared-mime-info')
-makedepends=('gobject-introspection')
+depends=('glib' 'atk' 'cairo' 'gtk-update-icon-cache' 'libxfixes' 'libxcursor' 'libxinerama' 'libxrandr'
+         'fontconfig' 'libxi' 'libxcomposite' 'libxdamage' 'pango' 'shared-mime-info')
 options=('!libtool' '!docs')
 backup=(etc/gtk-3.0/settings.ini)
 license=('LGPL')
-source=(http://ftp.gnome.org/pub/gnome/sources/gtk+/3.0/gtk+-${pkgver}.tar.xz
+source=(http://ftp.gnome.org/pub/gnome/sources/gtk+/3.2/gtk+-${pkgver}.tar.xz
         settings.ini)
-sha256sums=('219fdea120897981840e909fac40d4d433fe061a37b12b9402e215c819ebeae9'
+sha256sums=('f1989f183700cd5f46681cfabc2253e2f526b19b56e4b631dcee2594dddb0ef3'
             'c214d3dcdcadda3d642112287524ab3e526ad592b70895c9f3e3733c23701621')
 
+_strip_builddir() {
+  local rule=$1
+  shift
+  local directory=$1
+  shift
+  sed -e "s/^\(${rule} =.*\)${directory}\(.*\)$/\1\2/" -i $@
+}
+
+
 build() {
-    cd "${srcdir}/gtk+-${pkgver}"
-    CXX=/bin/false ./configure --prefix=/usr \
-        --sysconfdir=/etc \
-        --localstatedir=/var \
-        --enable-gtk2-dependency \
-        --disable-schemas-compile \
-        --enable-xinput \
-        --enable-xrandr \
-        --enable-xfixes \
-        --enable-xcomposite \
-        --enable-xdamage \
-        --with-gdktarget=x11 \
-        --enable-xinerama \
-        --disable-packagekit \
-        --disable-papi \
-        --enable-gtk-doc-html=no \
-        --enable-introspection=no
+  cd "${srcdir}/gtk+-${pkgver}"
+  _strip_builddir SRC_SUBDIRS tests Makefile.am
+  _strip_builddir SRC_SUBDIRS tests Makefile.in
+  _strip_builddir SRC_SUBDIRS demos Makefile.am
+  _strip_builddir SRC_SUBDIRS demos Makefile.in
+
+  CXX=/bin/false ./configure --prefix=/usr \
+    --build=${CBUILD} \
+    --host=${CHOST} \
+    --sysconfdir=/etc \
+    --localstatedir=/var \
+    --enable-gtk2-dependency \
+    --disable-schemas-compile \
+    --enable-xinput \
+    --enable-xrandr \
+    --enable-xfixes \
+    --enable-xcomposite \
+    --enable-xdamage \
+    --enable-xinerama \
+    --disable-packagekit \
+    --disable-papi \
+    --disable-cups \
+    --enable-gtk-doc-html=no \
+    --enable-introspection=no
     #https://bugzilla.gnome.org/show_bug.cgi?id=655517
     sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
     make
 }
 
 package() {
-    cd "${srcdir}/gtk+-${pkgver}"
-    make DESTDIR="${pkgdir}" install
-
-    install -Dm644 "${srcdir}/settings.ini" "${pkgdir}/etc/gtk-3.0/settings.ini"
+  cd "${srcdir}/gtk+-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+  install -Dm644 "${srcdir}/settings.ini" "${pkgdir}/etc/gtk-3.0/settings.ini"
 }
