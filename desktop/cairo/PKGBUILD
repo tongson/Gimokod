@@ -6,8 +6,8 @@ pkgdesc="Cairo vector graphics library"
 arch=(i686 x86_64)
 license=('LGPL' 'MPL')
 url="http://cairographics.org/"
-depends=('libpng>=1.4.0' 'libxrender' 'fontconfig>=2.8.0' 'pixman>=0.18.4' 'glib2>=2.24.0' 'libgl' 'libegl')
-makedepends=('pkgconfig')
+depends=('libpng' 'libxrender' 'fontconfig' 'pixman' 'glib' 'libgl' 'libegl')
+makedepends=('pkg-config' 'mesa')
 options=('!libtool')
 source=(http://cairographics.org/releases/${pkgname}-${pkgver}.tar.gz
         cairo-1.10.0-buggy_gradients.patch)
@@ -18,6 +18,8 @@ build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   patch -Np1 -i "${srcdir}/cairo-1.10.0-buggy_gradients.patch"
   ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
               --sysconfdir=/etc \
               --localstatedir=/var \
               --disable-static \
