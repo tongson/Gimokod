@@ -1,0 +1,37 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=wireless_tools
+pkgver=29
+pkgrel=1
+pkgdesc="Wireless Tools"
+arch=('i686' 'x86_64')
+url="http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/Tools.html"
+license=('GPL')
+source=("http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/wireless_tools.${pkgver}.tar.gz")
+sha256sums=('6fb80935fe208538131ce2c4178221bab1078a1656306bce8909c19887e2e5a1')
+
+build() {
+  cd "${srcdir}"/wireless_tools.${pkgver}
+  patch -Np1 -i ../wireless-tools-29-asneeded.patch
+  patch -Np1 -i ../wireless-tools-29-inline-fix.patch
+  sed -i  -e "s:^\(CFLAGS=-Os\):#\1:" \
+          -e "s:\(@\$(LDCONFIG).*\):#\1:" \
+          -e '/\$(CC)/s:-Wl,-s\>::' \
+          Makefile
+  make
+}
+
+package() {
+  cd "${srcdir}"/wireless_tools.${pkgver}
+  make INSTALL_DIR="${pkgdir}/usr/sbin" \
+    INSTALL_LIB="${pkgdir}/usr/lib" \
+    INSTALL_INC="${pkgdir}/usr/include" \
+    INSTALL_MAN="${pkgdir}/usr/share/man" install
+}
+
+source=(${source[@]-}
+        wireless-tools-29-asneeded.patch
+        wireless-tools-29-inline-fix.patch)
+
+sha256sums=(${sha256sums[@]-}
+            '41ab166672833cc030a292160b4e0d13b86fe12b6dbe79f7e8537ae76d402c56'
+            '8fe74ae2857f073c9e2fd294b373573391129205dc403c1ef1e4fcf2a77c6677')
