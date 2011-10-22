@@ -6,7 +6,7 @@ pkgdesc="Freedesktop.org Shared MIME Info"
 arch=('i686' 'x86_64')
 license=('GPL')
 depends=('libxml2' 'glib')
-makedepends=('pkg-config')
+makedepends=('pkg-config' 'intltool' 'gettext')
 install=shared-mime-info.install
 url="http://freedesktop.org/Software/shared-mime-info"
 source=(http://freedesktop.org/~hadess/${pkgname}-${pkgver}.tar.xz
@@ -21,7 +21,8 @@ build() {
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
-              --disable-update-mimedb
+              --disable-update-mimedb \
+              --disable-nls
   make
 }
 
