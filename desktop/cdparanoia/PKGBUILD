@@ -6,7 +6,6 @@ pkgdesc="Compact Disc Digital Audio extraction tool"
 arch=('i686' 'x86_64')
 url="http://www.xiph.org/paranoia/"
 license=('GPL')
-depends=
 options=('!makeflags')
 source=("http://downloads.xiph.org/releases/cdparanoia/cdparanoia-III-${pkgver}.src.tgz"
         'gcc.patch')
@@ -16,7 +15,10 @@ md5sums=('b304bbe8ab63373924a744eac9ebc652'
 build() {
   cd "${srcdir}/${pkgname}-III-${pkgver}"
   patch -p0 -i "${srcdir}"/gcc.patch
-  ./configure --prefix=/usr --mandir=/usr/share/man
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --mandir=/usr/share/man
   make
 }
 
