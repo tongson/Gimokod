@@ -6,9 +6,9 @@ pkgdesc="A portable library for SSA/ASS subtitles rendering"
 arch=('i686' 'x86_64')
 url="http://code.google.com/p/libass/"
 license=('BSD')
-depends=('fontconfig' 'libpng')
+depends=('fontconfig' 'libpng' 'fribidi')
 makedepends=('pkg-config')
-options=(!libtool)
+options=('!libtool')
 source=("http://libass.googlecode.com/files/${pkgname}-${pkgver}.tar.xz")
 md5sums=('1855bddc4c167f96968dddeeda0eb45c')
 
