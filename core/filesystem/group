@@ -20,8 +20,9 @@ sshd:x:22:
 nscd:x:28:
 http:x:33:
 shadow:x:42:
-games:x:50:
 crontab:x:49:
+games:x:50:
+lock:x:54:
 dbus:x:81:
 network:x:90:
 video:x:91:

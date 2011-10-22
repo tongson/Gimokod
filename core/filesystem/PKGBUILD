@@ -104,6 +104,7 @@ package() {
       install -d -m755 "${pkgdir}"/usr/local/${d}
     done
 
+    ln -s ../usr/share/zoneinfo/UTC "${pkgdir}/etc/localtime"
     ln -s ../man "${pkgdir}"/usr/local/share/man
     ln -s /proc/self/mounts "${pkgdir}"/etc/mtab
     ln -s /run/.root/var/lock "${pkgdir}"/var/lock
@@ -117,6 +118,7 @@ package() {
     install -D -m0644 layout.conf "${pkgdir}"/etc/tmpfiles.d/layout.conf
     install -D -m0644 net "${pkgdir}"/etc/conf.d/net
 }
+
 source=(${source[@]-}
         fstab
         group
@@ -143,8 +145,8 @@ source=(${source[@]-}
 
 sha256sums=(${sha256sums[@]-}
             '797dbd2f4f22ea9a8f8d1bb4142b66f64dd220888ebd89829adf8e1a456a0432'
-            'a25187352d0131053b04858e9502e85d141a39b0716716c0927e9936168cfbfe'
-            'f624c2cff69ac287c012ec1dafc55b332939a6264dd3def011499b7e87b7fc13'
+            '91412d24e52467d9a3ce4ca3a0a345e17244a2e308c84cde500333b35723a754'
+            'a61c3909666b8db0dc0ca71738cdedc79b3850a81cf21fb07c02460c39357a22'
             'f0709706ce9bf46c58358e040d7eaa96994767438bab274ee5239ac19b0b814b'
             'ab014e33cfd4212e76d000310534b7528f0e2a39ee8e78660a0d9cfcdbac4e4b'
             'e3414c188757954ee34da03cf324fc9864b1758dc472cfe36884ce6415bbdbd3'
