@@ -5,7 +5,7 @@ pkgrel=1
 pkgdesc="XML parsing library, version 2"
 arch=(i686 x86_64)
 license=('custom')
-depends=('zlib' 'ncurses')
+depends=('zlib' 'ncurses' 'icu')
 options=('!libtool')
 makedepends=('python')
 url="http://www.xmlsoft.org/"
@@ -26,7 +26,9 @@ build() {
   patch -Np0 -i ../libxml2-2.7.8-disable_static_modules.patch
   patch -Np1 -i ../libxml2-2.7.8-hardening-xpath.patch
   patch -Np1 -i ../libxml2-2.7.8-error-xpath.patch
-
+  tar -xf ../xmlts20080205.tar.gz
+  sed -i '95s:iso-8859-1:ISO-8859-1:' python/tests/serialize.py
+  sed -i '99s:iso-8859-1:ISO-8859-1:' python/tests/serialize.py
   autoreconf -fi
   ./configure --prefix=/usr \
               --build=${CBUILD} \
@@ -40,11 +42,16 @@ build() {
               --without-history \
               --with-python=/usr/bin/python2.7 \
               --without-run-debug \
-              --without-icu \
+              --with-icu \
               --without-docbook \
               --without-ftp
 
   make
+}
+
+check() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make -j1 check
 }
 
 package() {
@@ -64,7 +71,8 @@ source=(${source[@]-}
         libxml2-2.7.8-xpath-freeing.patch
         libxml2-2.7.8-xpath-freeing2.patch
         libxml2-2.7.8-xpath-memory.patch
-        shared_library_versionning.patch)
+        shared_library_versionning.patch
+        xmlts20080205.tar.gz)
 
 sha256sums=(${sha256sums[@]-}
             '7ccd86fc493af76244e655b0f8a0c4b2df0bc5ef15856b07903f409f52bb0cde'
@@ -75,4 +83,5 @@ sha256sums=(${sha256sums[@]-}
             '655a1cd96df3bcbd02e3a7fe9b812ee7e116dea036a9a5bfb529be714f288e87'
             '112e93fb8c4f76e74b705d709ae741f33228cad82ba3bd2f55524af2fd863bfd'
             '919a7dd27fd22cd30d8301d3ca8a8f8a8f971d4494c9914f7f8e6531216be5a1'
-            '379102cf7547c47fdcc94daecb310e55b80bd157ea5280d72194eedf9ad371de')
+            '379102cf7547c47fdcc94daecb310e55b80bd157ea5280d72194eedf9ad371de'
+            '39ffe4a61be4187aac4b64b8fd34aa01bb004387527a1ec5dc9c8dd794a2562e')
