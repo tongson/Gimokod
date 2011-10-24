@@ -98,6 +98,7 @@ build() {
   patch -Np1 -i ../busybox-1.19.2-man.patch
   patch -Np1 -i ../busybox-1.19.2-syslogd.patch
   patch -Np1 -i ../busybox-1.19.2-tftp.patch
+  patch -Np1 -i ../busybox-1.19.2-patch.patch
 
   sed -i -r \
     -e 's:[[:space:]]?-(Werror|Os|falign-(functions|jumps|loops|labels)=1|fomit-frame-pointer)\>::g' \
@@ -129,6 +130,14 @@ package() {
   install -D -m0755 "${srcdir}"/runsvdir-log "${pkgdir}"/sbin/runsvdir-log
   install -D -m0755 "${srcdir}"/udhcpc-script "${pkgdir}"/sbin/udhcpc-script
   install -D -m0644 LICENSE "${pkgdir}"/usr/share/licenses/${pkgname}/LICENSE
+
+  if [[ ${CARCH} == "x86_64" ]]; then
+    echo "kernel.shmmax = 0xffffffffffffffff" >> "${pkgdir}/etc/sysctl.conf"
+    echo "kernel.shmall = 0x0fffffffffffff00" >> "${pkgdir}/etc/sysctl.conf"
+  else
+    echo "kernel.shmmax = 0xffffffff" >> "${pkgdir}/etc/sysctl.conf"
+    echo "kernel.shmall = 0x0fffffff" >> "${pkgdir}/etc/sysctl.conf"
+  fi
 }
 
 source=(${url}/downloads/${pkgname}-${pkgver}.tar.bz2)
@@ -137,6 +146,7 @@ sha256sums=('ea7ec9b6df70b8c528f4a2b6300e9913431c7223308fb08dfafa7508d75a0cb9')
 source=(${source[@]-}
         busybox-1.19.2-bb.patch
         busybox-1.19.2-man.patch
+        busybox-1.19.2-patch.patch
         busybox-1.19.2-syslogd.patch
         busybox-1.19.2-tftp.patch
         config
@@ -149,6 +159,7 @@ source=(${source[@]-}
 sha256sums=(${sha256sums[@]-}
             '98f92c2edbcf61d1bacef783ea8b08cce07051b0a4489ed3f4579296846f89f1'
             '733e23d851e68ecd27ed8bb8f4c4b8ea27b0d143069ec49aadb04deeb65dd9f5'
+            'eb992c2fb254de4f3b2225130643e929a88252001dafab86887fa051995a027f'
             'e772510323fb85e59005b80c7fa63072a6fbdb94216f425b14b742f1730b0472'
             'a9796f35e00ea24824e9ea678a68f2df11ac976d405c458a4c563a285b17db10'
             'd110af340989605cdd5221d45bc65114c2e7d5d95ffc9886e32606853370ae00'
