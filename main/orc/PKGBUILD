@@ -1,0 +1,26 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=orc
+pkgver=0.4.14
+pkgrel=1
+pkgdesc="The Oild Runtime Compiler"
+arch=('i686' 'x86_64')
+license=('BSD')
+url="http://code.entropywave.com/projects/orc/"
+options=('!libtool')
+source=(http://code.entropywave.com/download/${pkgname}/${pkgname}-${pkgver}.tar.gz)
+md5sums=('6b3ff209e9763ebe40e152538884bd71')
+
+build () {
+    cd "${srcdir}/${pkgname}-${pkgver}"
+    ./configure --prefix=/usr \
+                --build=${CBUILD} \
+                --host=${CHOST} \
+                --disable-static \
+                --disable-dependency-tracking
+    make
+}
+package() {
+    cd "${srcdir}/${pkgname}-${pkgver}"
+    make DESTDIR="${pkgdir}" install
+    install -Dm644 COPYING "${pkgdir}/usr/share/licenses/${pkgname}/COPYING"
+}
