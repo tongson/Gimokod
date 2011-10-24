@@ -1,31 +1,34 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=chromium
-pkgver=14.0.835.186
+pkgver=14.0.835.202
 pkgrel=1
 pkgdesc="The open-source project behind Google Chrome browser"
 arch=('i686' 'x86_64')
 url="http://www.chromium.org/"
 license=('BSD')
-depends=('gtk2' 'dbus-glib' 'nss' 'alsa-lib' 'xdg-utils' 'bzip2' 'libevent'
-         'libxss' 'libgcrypt' 'ttf-dejavu' 'desktop-file-utils'
-         'hicolor-icon-theme' 'libwebp' 'flac' 'libpng' 'libjpeg')
-makedepends=('python2' 'perl' 'gperf' 'yasm' 'mesa' 'libgnome-keyring')
-provides=('chromium-browser')
-conflicts=('chromium-browser')
+depends=('zlib' 'gtk2' 'dbus-glib' 'nss' 'alsa-lib' 'xdg-utils' 'bzip2' 'libevent'
+         'libxss' 'libgcrypt' 'ttf-dejavu' 'desktop-file-utils' 'libxml2' 'icu'
+         'hicolor-icon-theme' 'libwebp' 'flac' 'libpng' 'libjpeg' 'speex')
+makedepends=('python' 'perl' 'gperf' 'yasm' 'mesa')
 install=chromium.install
 source=(http://build.chromium.org/official/chromium-${pkgver}.tar.bz2
-        chromium.desktop
+        chromium-icu-compatibility-r0.patch
+        chromium-system-libevent-r0.patch
         chromium.sh
         gcc-4.6.patch
         webrtc-r240-r242-make-pulseaudio-optional.patch)
-sha1sums=('898ac584fd5b50705864e84afa80aa407f25609b'
-          '7d97535ec0ed124e95888de84b2c6a3654a27d4a'
+sha1sums=('e1c2d7cacaa256b1d343ee012d07170dbb3beb2f'
+          '517155769d0f421a4a81bffbcac39d17fa099956'
+          'f6127a903eeb4ce13a4f8fc75dda0102e68d759a'
           '427ecf06cae11f28f59b1912d659ad5541391682'
           '39999918746524fff30e73dc656754733df5c2c2'
           'db66921c9801ad5930920faf87bd5c313a3fc702')
 
 build() {
   cd "${srcdir}/chromium-${pkgver}"
+
+  patch -Np0 -i ../chromium-icu-compatibility-r0.patch
+  patch -Np0 -i ../chromium-system-libevent-r0.patch
 
   # Fix build with gcc 4.6
   # http://code.google.com/p/chromium/issues/detail?id=80071
@@ -39,26 +42,64 @@ build() {
   patch -d third_party/webrtc -Np1 -i \
     "${srcdir}/webrtc-r240-r242-make-pulseaudio-optional.patch"
 
-  # Use Python 2
-  find . -type f -exec sed -i -r \
-    -e 's|/usr/bin/python$|&2|g' \
-    -e 's|(/usr/bin/python2)\.4$|\1|g' \
-    {} +
-  # There are still a lot of relative calls which need a workaround
-  mkdir "${srcdir}/python2-path"
-  ln -s /usr/bin/python2 "${srcdir}/python2-path/python"
-  export PATH="${srcdir}/python2-path:$PATH"
+  mkdir "${srcdir}/python-path"
+  ln -s /usr/bin/python "${srcdir}/python-path/python"
+  export PATH="${srcdir}/python-path:${PATH}"
 
   # We need to disable system_ssl until "next protocol negotiation" support is
   # available in our nss package.
   # (See https://bugzilla.mozilla.org/show_bug.cgi?id=547312)
 
-  build/gyp_chromium -f make build/all.gyp --depth=. \
+  sed -i '1i#define OF(x) x' \
+          third_party/zlib/contrib/minizip/{ioapi,{,un}zip}.c \
+          chrome/common/zip.cc
+
+  find third_party -type f \! -iname '*.gyp*' \
+                \! -path 'third_party/WebKit/*' \
+                \! -path 'third_party/angle/*' \
+                \! -path 'third_party/cacheinvalidation/*' \
+                \! -path 'third_party/cld/*' \
+                \! -path 'third_party/expat/*' \
+                \! -path 'third_party/ffmpeg/*' \
+                \! -path 'third_party/flac/flac.h' \
+                \! -path 'third_party/gpsd/*' \
+                \! -path 'third_party/harfbuzz/*' \
+                \! -path 'third_party/hunspell/*' \
+                \! -path 'third_party/iccjpeg/*' \
+                \! -path 'third_party/launchpad_translations/*' \
+                \! -path 'third_party/leveldb/*' \
+                \! -path 'third_party/libjingle/*' \
+                \! -path 'third_party/libphonenumber/*' \
+                \! -path 'third_party/libvpx/*' \
+                \! -path 'third_party/mesa/*' \
+                \! -path 'third_party/modp_b64/*' \
+                \! -path 'third_party/npapi/*' \
+                \! -path 'third_party/openmax/*' \
+                \! -path 'third_party/ots/*' \
+                \! -path 'third_party/protobuf/*' \
+                \! -path 'third_party/sfntly/*' \
+                \! -path 'third_party/skia/*' \
+                \! -path 'third_party/speex/speex.h' \
+                \! -path 'third_party/sqlite/*' \
+                \! -path 'third_party/tcmalloc/*' \
+                \! -path 'third_party/tlslite/*' \
+                \! -path 'third_party/undoview/*' \
+                \! -path 'third_party/webgl_conformance/*' \
+                \! -path 'third_party/webrtc/*' \
+                \! -path 'third_party/yasm/*' \
+                \! -path 'third_party/zlib/contrib/minizip/*' \
+                -delete
+  export CXXFLAGS="${CXXFLAGS/-Os/-O2}"
+  export CFLAGS="${CFLAGS/-Os/-O2}"
+  export CXX="/usr/bin/x86_64-pc-linux-gnu-g++"
+  export CC="/usr/bin/x86_64-pc-linux-gnu-gcc"
+  build/gyp_chromium --depth=. \
     -Dno_strict_aliasing=1 \
     -Dwerror= \
     -Dlinux_sandbox_path=/usr/lib/chromium/chromium-sandbox \
+    -Dlinux_sandbox_chrome_path=/usr/lib/chromium/chromium \
     -Dlinux_strip_binary=1 \
-    -Drelease_extra_cflags="$CFLAGS" \
+    -Drelease_extra_cflags="${CFLAGS}" \
     -Dffmpeg_branding=Chromium \
     -Dproprietary_codecs=0 \
     -Duse_system_bzip2=1 \
@@ -66,10 +107,13 @@ build() {
     -Duse_system_libevent=1 \
     -Duse_system_libjpeg=1 \
     -Duse_system_libpng=1 \
-    -Duse_system_libxml=0 \
+    -Duse_system_libxml=1 \
+    -Duse_system_icu=1 \
     -Duse_system_ssl=0 \
     -Duse_system_yasm=1 \
     -Duse_system_zlib=1 \
+    -Duse_system_speex=1 \
+    -Duse_system_xdg_utils=1 \
     -Duse_gconf=0 \
     -Ddisable_nacl=1 \
     -Duse_cups=0 \
@@ -83,10 +127,10 @@ build() {
     -Duse_system_vpx=0 \
     -Duse_system_libpng=1 \
     -Duse_system_libjpeg=1 \
-    -Duse_system_flac=1
-    $([[ $CARCH == i686 ]] && echo '-Ddisable_sse2=1')
+    -Ddisable_sse2=1 \
+    -Duse_system_flac=1 $([[ $CARCH == i686 ]] && echo '-Dtarget_arch=ia32') $([[ $CARCH == x86_64 ]] && echo '-Dtarget_arch=x64')
 
-  make chrome chrome_sandbox BUILDTYPE=Release
+  make chrome chrome_sandbox BUILDTYPE=Release V=1
 }
 
 package() {
@@ -112,9 +156,6 @@ package() {
   find "${pkgdir}/usr/lib/chromium/" -name '*.d' -type f -delete
 
   install -Dm644 out/Release/chrome.1 "${pkgdir}/usr/share/man/man1/chromium.1"
-
-  install -Dm644 "${srcdir}/chromium.desktop" \
-    "${pkgdir}/usr/share/applications/chromium.desktop"
 
   for size in 16 22 24 32 48 64 128 256; do
     install -Dm644 "chrome/app/theme/chromium/product_logo_$size.png" \
