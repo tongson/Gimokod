@@ -1,0 +1,25 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=tamsyn-font
+pkgver=1.6
+pkgrel=1
+pkgdesc="A monospaced bitmap font for the console and X11"
+arch=('any')
+url="http://www.fial.com/~scott/tamsyn-font"
+license=('custom')
+makedepends=('xorg-mkfontdir' 'xorg-mkfontscale')
+source=(http://www.fial.com/~scott/"${pkgname}"/download/"${pkgname}"-"${pkgver}".tar.gz)
+md5sums=('e6defc76bdcf5ee1c4d4575b2a182a8e')
+
+package () {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+
+  install -d "${pkgdir}/usr/share/fonts/tamsyn-font"
+  install -d "${pkgdir}/usr/share/kbd/consolefonts"
+
+  install -m644 *.pcf README.Tamsyn "${pkgdir}/usr/share/fonts/tamsyn-font"
+  gzip -9 "${pkgdir}"/usr/share/fonts/tamsyn-font/*.pcf
+  mkfontscale "${pkgdir}/usr/share/fonts/tamsyn-font"
+  mkfontdir "${pkgdir}/usr/share/fonts/tamsyn-font"
+  install -m644 *.psf "${pkgdir}/usr/share/kbd/consolefonts/"
+  install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
