@@ -1,36 +1,36 @@
 # Based upon the PKGBUILD from Arch Linux
-pkgbase=poppler
 pkgname=('poppler' 'poppler-glib')
+pkgbase='poppler'
 pkgver=0.18.0
 pkgrel=1
 arch=('i686' 'x86_64')
 license=('GPL')
-makedepends=('libjpeg' 'libpng' 'gcc-libs' 'fontconfig' 'openjpeg' 'pkg-config' 'lcms')
+makedepends=('glib' 'cairo' 'libjpeg' 'libpng' 'gcc-libs' 'fontconfig' 'openjpeg' 'pkg-config' 'lcms')
 options=('!libtool')
 url="http://poppler.freedesktop.org/"
-source=(http://poppler.freedesktop.org/${pkgbase}-${pkgver}.tar.gz)
-md5sums=('4cd3bf2a0a13fa8eaf00d31368915f77')
+source=(http://poppler.freedesktop.org/${pkgbase}-${pkgver}.tar.gz
+        poppler-0.18.0-poppler_page_get_image-crash.patch)
+md5sums=('4cd3bf2a0a13fa8eaf00d31368915f77'
+         '969ace9d6e7378c3de8366e61dccecaf')
 
 build() {
   cd "${srcdir}/${pkgbase}-${pkgver}"
-  sed -i -e '/AC_PATH_XTRA/d' configure.ac
-  autoreconf
-  ./configure
-              -DBUILD_GTK_TESTS=OFF
-              -DBUILD_QT4_TESTS=OFF
-              -DBUILD_CPP_TESTS=OFF
+#  sed -i -e '/AC_PATH_XTRA/d' configure.ac
+#  autoreconf
+  patch -Np1 -i ../poppler-0.18.0-poppler_page_get_image-crash.patch
+  ./configure \
               --enable-libpng \
               --enable-introspection=no \
-              --disable-abiword-output \
               --disable-gtk-test \
-              --disable-poppler-qt \
               --disable-gtk-doc-html \
               --disable-libcurl \
               --prefix=/usr \
+              --host=${CHOST} \
+              --build=${CBUILD} \
               --sysconfdir=/etc \
               --localstatedir=/var \
               --disable-static \
-              --disable-cairo-output \
+              --enable-cairo-output \
               --enable-xpdf-headers \
               --enable-libjpeg \
               --enable-zlib \
@@ -53,7 +53,7 @@ package_poppler() {
 
 package_poppler-glib() {
   pkgdesc="Poppler glib bindings"
-  depends=("poppler=${pkgver}" 'glib')
+  depends=("poppler=${pkgver}" 'glib' 'cairo')
 
   cd "${srcdir}/${pkgbase}-${pkgver}/poppler"
   make DESTDIR="${pkgdir}" install-libLTLIBRARIES
