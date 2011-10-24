@@ -31,7 +31,7 @@ source=(${source[@]-}
 
 sha256sums=(${sha256sums[@]-}
             '9c0c3947546b4a7773bd90ce0be75af38fc709d78aa352ce708d5790e939a35a'
-            '7f282b619f1b62c068cc4deea9344c70b9a55cecd600b61b10bdd8bab8cce1a8'
+            '786ece8ceb6ec872ab04bdda2f7fd005d679fc1d1fb459c730522a874facc9bc'
             '835bd763261c671af6f83f057d688ac1578fdaf996f68c11bad2a4d55589bc24'
             '8b3c185ed435b6a7965ce804ca9cf81118fba6d1ecba830faa24c9f8f5ee31be'
             '5a2b1359a26ded65eee2dc91e26de124cc8e4970a94416e1324818a273ee97a9'
