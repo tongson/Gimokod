@@ -1,4 +1,4 @@
-# Based upon the PKGBUILD from Arch Linux
+# Based upon the PKGBUILD from Arch Linux and the expat ebuild from Gentoo
 pkgname=expat
 pkgver=2.0.1
 pkgrel=1
@@ -9,25 +9,49 @@ license=('custom')
 groups=('base')
 options=('!libtool')
 source=(http://downloads.sourceforge.net/sourceforge/expat/${pkgname}-${pkgver}.tar.gz
+        expat-2.0.1-check_stopped_parser.patch
         CVE-2009-3560.patch
         CVE-2009-3720.patch)
 md5sums=('ee8b492592568805593f81f8cdf2a04c'
+         '8a04001d5239be2f628a90f28e86868f'
          '50603cac0f03aabc7087415251f592be'
          'f3eeb796f28945899216b815e5901996')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  patch -Np1 -i "${srcdir}"/CVE-2009-3560.patch
-  patch -Np1 -i "${srcdir}"/CVE-2009-3720.patch
-  ./configure --prefix=/usr \
-              --build=${CBUILD} \
-              --host=${CHOST} \
-              --mandir=/usr/share/man
+  patch -Np1 -i ../CVE-2009-3560.patch
+  patch -Np1 -i ../CVE-2009-3720.patch
+  patch -Np0 -i ../expat-2.0.1-check_stopped_parser.patch
+  mkdir "${srcdir}"-build{,u,w}
+
+  local d
+  for d in build buildu buildw; do
+    pushd "${srcdir}"-${d}
+      [[ ${d} == buildu ]] && export _CPPFLAGS="-UXML_UNICODE"
+      [[ ${d} == buildw ]] && export _CPPFLAGS="-UXML_UNICODE -DXML_UNICODE_WCHAR_T"
+      CPPFLAGS="${CPPFLAGS} ${_CPPFLAGS}" ${srcdir}/${pkgname}-${pkgver}/configure \
+                                            --prefix=/usr \
+                                            --build=${CBUILD} \
+                                            --host=${CHOST} \
+                                            --mandir=/usr/share/man
+    popd
+  done
+
+  cd "${srcdir}"-build
   make
+  cd "${srcdir}"-buildu
+  make buildlib LIBRARY=libexpatu.la
+  cd "${srcdir}"-buildw
+  make buildlib LIBRARY=libexpatw.la
 }
 
 package() {
-  cd "${srcdir}/${pkgname}-${pkgver}"
+  cd "${srcdir}"-build
   make DESTDIR="${pkgdir}" install
+  cd "${srcdir}"-buildu
+  make installlib DESTDIR="${pkgdir}" LIBRARY=libexpatu.la
+  cd "${srcdir}"-buildw
+  make installlib DESTDIR="${pkgdir}" LIBRARY=libexpatw.la
+  cd "${srcdir}/${pkgname}-${pkgver}"
   install -Dm644 COPYING "${pkgdir}/usr/share/licenses/${pkgname}/COPYING"
 }
