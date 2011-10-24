@@ -1,0 +1,26 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=rtmpdump
+pkgver=2.4
+pkgrel=1
+pkgdesc="A tool to download rtmp streams"
+arch=('i686' 'x86_64')
+url="http://rtmpdump.mplayerhq.hu/"
+license=('GPL2' 'LGPL2')
+depends=('openssl')
+source=(ftp://ftp.archlinux.org/other/${pkgname}/${pkgname}-${pkgver}.tar.xz)
+sha256sums=('2c3b76d46d56180176ef099b8ad50a1608bef1dac35d8cb0b21ceac31b5c0656')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  sed -i 's/\$(MAKEFLAGS)//g' Makefile
+  sed -i -e 's:OPT=:&-fPIC :' \
+         -e 's:OPT:OPTS:' \
+         -e 's:CFLAGS=.*:& $(OPT):' librtmp/Makefile
+  make OPT="${CFLAGS}" XLDFLAGS="${LDFLAGS}" CRYPTO="OPENSSL" SYS=posix
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  install -d -m755 "${pkgdir}/usr/lib"
+  make prefix=/usr mandir=/usr/share/man DESTDIR="${pkgdir}" CRYPTO="OPENSSL" install
+}
