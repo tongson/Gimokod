@@ -1,0 +1,28 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=libcroco
+pkgver=0.6.2
+pkgrel=1
+pkgdesc="GNOME CSS2 parsing and manipulation toolkit"
+arch=('x86_64' 'i686')
+depends=('glib' 'libxml2')
+makedepends=('pkg-config')
+license=('LGPL')
+options=('!libtool')
+source=("http://ftp.gnome.org/pub/gnome/sources/${pkgname}/0.6/${pkgname}-${pkgver}.tar.bz2")
+url="http://www.gnome.org"
+md5sums=('1429c597aa4b75fc610ab3a542c99209')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  sed 's/^\(SUBDIRS .*\=.*\)tests\(.*\)$/\1\2/' -i Makefile.am Makefile.in
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --disable-static
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}
