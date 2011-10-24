@@ -1,27 +1,29 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=gimp
 pkgver=2.6.11
-pkgrel=6
+pkgrel=1
 pkgdesc="GNU Image Manipulation Program"
 arch=('i686' 'x86_64')
 url="http://www.gimp.org/"
 license=('GPL' 'LGPL')
-depends=('lcms' 'libxpm' 'libxmu' 'librsvg' 'dbus-glib' \
-         'libexif' 'gegl' 'desktop-file-utils' 'hicolor-icon-theme')
+depends=('aalib' 'poppler-glib' 'lcms' 'libxpm' 'libxmu' 'librsvg' 'dbus-glib'
+         'libexif' 'gegl' 'hicolor-icon-theme')
+makedepends=('intltool' 'gettext')
 options=('!libtool' '!makeflags')
-conflicts=('gimp-devel')
 install=gimp.install
-source=(ftp://ftp.gimp.org/pub/gimp/v${pkgver%.*}/${pkgname}-${pkgver}.tar.bz2 linux.gpl 
-        uri-backend-libcurl.patch)
+source=(ftp://ftp.gimp.org/pub/gimp/v${pkgver%.*}/${pkgname}-${pkgver}.tar.bz2
+        gimp-poppler-0.18.patch
+        linux.gpl)
 md5sums=('bb2939fe13e54fc7255cef5d097bb5dd'
-         'bb27bc214261d36484093e857f015f38'
-         'e894f4b2ffa92c71448fdd350e9b78c6')
+         'bfc73f80e911ed7a7d500d80973469f1'
+         'bb27bc214261d36484093e857f015f38')
 sha1sums=('2f9d596e727bdbf304fa78257c1731d9faf3934c'
-          '110ce9798173b19a662d086ed7b882b4729f06cf'
-          'a65b0ee6cd1b4345065b7b98c07f2fed15f844f4')
+          '1479a6d80be7adf74f66a3b88057a5029fe892e8'
+          '110ce9798173b19a662d086ed7b882b4729f06cf')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
+  patch -Np1 < ../gimp-poppler-0.18.patch
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST}  \
@@ -30,20 +32,19 @@ build() {
               --enable-gimp-console \
               --enable-gimp-remote \
               --disable-python \
+              --disable-nls \
+              --enable-gtk-doc-html=no \
               --with-gif-compression=lzw \
               --without-libcurl \
-              --without-aa \
+              --with-aa \
               --without-hal \
               --without-gvfs \
               --without-gnomevfs \
               --without-alsa \
               --without-wmf \
               --without-webkit \
-              --without-libjasper \
               --without-libmng \
-              --without-poppler \
-              --with-libxpm \
-              --without-xvfb-run \
+              --with-poppler \
               --with-libpng \
               --with-librsvg \
               --with-libjpeg \
