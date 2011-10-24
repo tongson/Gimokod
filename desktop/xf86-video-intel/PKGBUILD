@@ -1,0 +1,33 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=xf86-video-intel
+pkgver=2.16.0
+pkgrel=1
+pkgdesc="X.org Intel i810/i830/i915/945G/G965+ video drivers"
+arch=('i686' 'x86_64')
+url="http://xorg.freedesktop.org/"
+license=('custom')
+depends=(intel-dri libxvmc libpciaccess libdrm xcb-util libxfixes udev)
+makedepends=('xorg-server-devel' 'libx11' 'libdrm' 'xf86driproto' 'glproto' 'mesa' 'libxvmc' 'xcb-util' 'libxrender')
+options=('!libtool')
+groups=('xorg-drivers' 'xorg')
+source=(${url}/releases/individual/driver/${pkgname}-${pkgver}.tar.bz2)
+sha1sums=('53441ea4d4335b501d32809b6b92593cbb1f79cf')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --enable-dri \
+              --enable-sna \
+              --enable-xvmc
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+  install -m755 -d "${pkgdir}/usr/share/licenses/${pkgname}"
+  install -m644 COPYING "${pkgdir}/usr/share/licenses/${pkgname}/"
+}
