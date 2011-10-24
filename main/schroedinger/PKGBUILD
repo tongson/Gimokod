@@ -1,0 +1,33 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=schroedinger
+pkgver=1.0.10
+pkgrel=1
+pkgdesc="An implemenation of the Dirac video codec in ANSI C code"
+arch=('i686' 'x86_64')
+url="http://www.diracvideo.org/"
+license=('GPL2' 'LGPL2' 'MPL' 'MIT')
+depends=('orc')
+options=('!libtool')
+source=(http://www.diracvideo.org/download/schroedinger/${pkgname}-${pkgver}.tar.gz
+        schroedinger-1.0.10-orc-symbols.patch)
+md5sums=('9de088ccc314bb9e766cb3aa6510a0ef'
+         '65264d3691c3f760695fde7e5f123236')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  patch -p1 < ../schroedinger-1.0.10-orc-symbols.patch
+  sed -i -e '/AS_COMPILER_FLAG(-O3/d' configure.ac
+  autoreconf -I m4 -fi
+  ./configure --prefix=/usr \
+              --disable-gtk-doc \
+              --build=${CBUILD} \
+              --host=${CHOST}
+
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+  install -m644 -D COPYING.MIT "${pkgdir}"/usr/share/licenses/${pkgname}/COPYING.MIT
+}
