@@ -14,7 +14,7 @@ sha256sums=('67c11d3aa40441c1cea42c365bf2d6a9a9dd52fae2d359a707ad5e8abb4d28a7')
 
 build() {
   cd "${srcdir}/gdk-pixbuf-${pkgver}"
-
+  sed -i 's:po docs tests::' Makefile.{in,am}
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
