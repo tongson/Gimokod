@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=('gcc' 'gcc-libs')
 pkgver=4.6.1
-pkgrel=1
+pkgrel=2
 pkgdesc="The GNU Compiler Collection"
 arch=('i686' 'x86_64')
 license=('GPL' 'LGPL' 'FDL' 'custom')
@@ -29,8 +29,8 @@ build() {
   if [ "${CARCH}" = "x86_64" ]; then
     patch -Np1 -i "${srcdir}"/gcc_pure64.patch
   fi
-  patch -Np0 -i ../gcc-4.6.1-test-stack-limit.patch
-  patch -Np1 -i ../gcc-4.6.1-pr48195-lto.patch
+  patch -Np0 -i ../pr49756.diff
+  patch -Np1 -i ../pr48195-requires-lto.patch
   patch -Np0 -i ../gcc-hash-style-both.patch
   patch -Np0 -i ../pr33763.diff
   patch -Np1 -i ../amd-save-the-initial-options-after-checking-vzeroupper.patch
@@ -39,6 +39,7 @@ build() {
   patch -Np1 -i ../pr49279.diff
   patch -Np1 -i ../pr49539.diff
   patch -Np1 -i ../pr49651.diff
+  patch -Np1 -i ../pr49911.diff
 
   echo ${pkgver} > gcc/BASE-VER
 
@@ -47,6 +48,8 @@ build() {
   CFLAGS=${CFLAGS/-Os/-O2}
   CXXFLAGS=${CXXFLAGS/-pipe/}
   CXXFLAGS=${CXXFLAGS/-Os/-O2}
+
+  rm -rf ${_basedir}/intl
 
   ${_basedir}/configure --prefix=/usr \
       --build=${CBUILD} --host=${CHOST} \
@@ -164,23 +167,25 @@ EOF
 source=(${source[@]-}
         amd-ix86_reorg-run-move_or_dele.patch
         amd-save-the-initial-options-after-checking-vzeroupper.patch
-        gcc-4.6.1-pr48195-lto.patch
-        gcc-4.6.1-test-stack-limit.patch
         gcc-hash-style-both.patch
         gcc_pure64.patch
         pr33763.diff
+        pr48195-requires-lto.patch
         pr49279.diff
         pr49539.diff
-        pr49651.diff)
+        pr49651.diff
+        pr49756.diff
+        pr49911.diff)
 
 sha256sums=(${sha256sums[@]-}
             'e2f9d6b971e0e7d44a3d1ca2cab60948789b2d74dcfbe2ce5c6b275f2904fdea'
             'ab4479c3a3cca2cfc1cbafb16574f2a0b0fae93eb62f18413c89420f8be5f181'
-            '60f37ce439053a5c5d4f7659edc380a32f993f462c622bba272d99b9309fd754'
-            'd8ccc639f5c2472b4ab53beada7c8552343ae960565f685c5cc8979fb28a74d1'
             '3492332fa78b545ff46c2b5293d17c63c122be6f8f6fa4798864b7d4572b0024'
             '2d369cf93c6e15c3559c3560bce581e0ae5f1f34dc86bca013ac67ef1c1a9ff9'
             'd7a0a02d59e1403261bffd04579638de0c2f7faf830ff76ee5b85ce6f3c60c08'
+            '60f37ce439053a5c5d4f7659edc380a32f993f462c622bba272d99b9309fd754'
             'b27c8e6d0746dfbc607d5f14d498c37e4e75b6efcffb25afa7317ed1c9623deb'
             '8f936332ed13679061922c8b7b6d4f102b46fdb4c3b858b4778aed84edbf5cf4'
-            'baba61c8d496c46270f18da38ff3c12ee3fb87df85499e8c1e935a8118803588')
+            'baba61c8d496c46270f18da38ff3c12ee3fb87df85499e8c1e935a8118803588'
+            'd8ccc639f5c2472b4ab53beada7c8552343ae960565f685c5cc8979fb28a74d1'
+            '1f47c156aa0aee2949c5b0224027a387ef25561ee6005f2174982a27dff5dfbd')
