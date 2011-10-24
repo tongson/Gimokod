@@ -1,0 +1,32 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=speex
+pkgver=1.2rc1
+pkgrel=1
+pkgdesc="A free codec for free speech"
+arch=('i686' 'x86_64')
+url="http://www.speex.org/"
+license=('BSD')
+depends=('libogg')
+makedepends=('pkg-config')
+options=('!libtool')
+source=(http://downloads.us.xiph.org/releases/"${pkgname}"/"${pkgname}"-"${pkgver}".tar.gz)
+md5sums=('c4438b22c08e5811ff10e2b06ee9b9ae')
+
+build() {
+  cd "${srcdir}"/speex-"${pkgver}"
+  sed -i '21673s: -O3 -msse::' configure
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --enable-sse \
+              --sysconfdir=/etc \
+              --localstatedir=/var
+  make
+}
+
+package() {
+  cd "${srcdir}"/speex-"${pkgver}"
+  make DESTDIR="${pkgdir}" install
+
+  install -D -m644 COPYING "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
