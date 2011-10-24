@@ -22,6 +22,8 @@ libgcrypt
 gnupg
 libevent
 libarchive
+icu
+libxml2
 
 Misc features:
 /etc/tcb support
