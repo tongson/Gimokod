@@ -1,0 +1,69 @@
+# HG changeset patch
+# User Mike Hommey <mh+mozilla@glandium.org>
+# Date 1311666778 -7200
+# Node ID 767b0b274561803d97ad3f2accb153da4a0544b0
+# Parent  820b809453428f161fce5cdb737a896e6a619df6
+Bug 673681 - Properly support --enable-system-ffi with static js (original patch by ojab). r=ted
+
+diff --git a/configure.in b/configure.in
+--- a/configure.in
++++ b/configure.in
+@@ -4771,16 +4771,34 @@ MOZ_ARG_ENABLE_BOOL(system-hunspell,
+ 
+ if test -n "$SYSTEM_HUNSPELL"; then
+     PKG_CHECK_MODULES(MOZ_HUNSPELL, hunspell)
+ fi
+ 
+ AC_SUBST(SYSTEM_HUNSPELL)
+ 
+ dnl ========================================================
++dnl system libffi Support
++dnl ========================================================
++MOZ_ARG_ENABLE_BOOL(system-ffi,
++[  --enable-system-ffi       Use system libffi (located with pkgconfig)],
++    MOZ_NATIVE_FFI=1 )
++
++if test -n "$MOZ_NATIVE_FFI"; then
++    # Vanilla libffi 3.0.9 needs a few patches from upcoming version 3.0.10
++    # for non-GCC compilers.
++    if test -z "$GNU_CC"; then
++        PKG_CHECK_MODULES(MOZ_FFI, libffi > 3.0.9)
++    else
++        PKG_CHECK_MODULES(MOZ_FFI, libffi >= 3.0.9)
++    fi
++    MOZ_JS_STATIC_LIBS="$MOZ_JS_STATIC_LIBS $MOZ_FFI_LIBS"
++fi
++
++dnl ========================================================
+ dnl Java SDK support
+ dnl ========================================================
+ 
+ JAVA_BIN_PATH=
+ MOZ_ARG_WITH_STRING(java-bin-path,
+ [  --with-java-bin-path=dir
+                           Location of Java binaries (java, javac, jar)],
+     JAVA_BIN_PATH=$withval)
+@@ -8309,19 +8327,19 @@ fi
+ MOZ_ARG_ENABLE_BOOL(shared-js,
+ [  --enable-shared-js
+                           Create a shared JavaScript library.],
+     ENABLE_SHARED_JS=1,
+     ENABLE_SHARED_JS=)
+ 
+ if test -n "$ENABLE_SHARED_JS"; then
+   JS_SHARED_LIBRARY=1
+-  MOZ_JS_LIBS=$MOZ_JS_SHARED_LIBS
++  MOZ_JS_LIBS="$MOZ_JS_SHARED_LIBS"
+ else
+-  MOZ_JS_LIBS=$MOZ_JS_STATIC_LIBS
++  MOZ_JS_LIBS="$MOZ_JS_STATIC_LIBS"
+   AC_DEFINE(MOZ_STATIC_JS)
+ fi
+ AC_SUBST(JS_SHARED_LIBRARY)
+ 
+ AC_SUBST(LIBXUL_LIBS)
+ XPCOM_LIBS="$LIBXUL_LIBS"
+ 
+ dnl ========================================================
+
+

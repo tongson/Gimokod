@@ -1,0 +1,69 @@
+From: Steve Fink <sfink@mozilla.com>
+Date: Fri, 1 Jul 2011 15:53:41 -0700
+Subject: Bug 668906 - Do not call openUnsharedDatabase with a null file
+ (r=sdwilsh)
+
+---
+ storage/src/mozStorageService.cpp                  |    2 ++
+ storage/test/unit/test_storage_service.js          |   13 +++++++++++++
+ .../tests/unit/test_database_replaceOnStartup.js   |    3 ++-
+ 3 files changed, 17 insertions(+), 1 deletions(-)
+
+diff --git a/storage/src/mozStorageService.cpp b/storage/src/mozStorageService.cpp
+index 611267d..a74004b 100644
+--- a/storage/src/mozStorageService.cpp
++++ b/storage/src/mozStorageService.cpp
+@@ -477,6 +477,8 @@ NS_IMETHODIMP
+ Service::OpenUnsharedDatabase(nsIFile *aDatabaseFile,
+                               mozIStorageConnection **_connection)
+ {
++  NS_ENSURE_ARG(aDatabaseFile);
++
+ #ifdef NS_FUNCTION_TIMER
+   nsCString leafname;
+   (void)aDatabaseFile->GetNativeLeafName(leafname);
+diff --git a/storage/test/unit/test_storage_service.js b/storage/test/unit/test_storage_service.js
+index 7fa705b..9bc1a1b 100644
+--- a/storage/test/unit/test_storage_service.js
++++ b/storage/test/unit/test_storage_service.js
+@@ -64,6 +64,18 @@ function test_openDatabase_null_file()
+   }
+ }
+ 
++function test_openUnsharedDatabase_null_file()
++{
++  try {
++    getService().openUnsharedDatabase(null);
++    do_throw("We should not get here!");
++  } catch (e) {
++    print(e);
++    print("e.result is " + e.result);
++    do_check_eq(Cr.NS_ERROR_INVALID_ARG, e.result);
++  }
++}
++
+ function test_openDatabase_file_DNE()
+ {
+   // the file should be created after calling
+@@ -131,6 +143,7 @@ function test_backup_new_folder()
+ var tests = [
+   test_openSpecialDatabase_invalid_arg,
+   test_openDatabase_null_file,
++  test_openUnsharedDatabase_null_file,
+   test_openDatabase_file_DNE,
+   test_openDatabase_file_exists,
+   test_corrupt_db_throws_with_openDatabase,
+diff --git a/toolkit/components/places/tests/unit/test_database_replaceOnStartup.js b/toolkit/components/places/tests/unit/test_database_replaceOnStartup.js
+index 1f3a95d..1b9e258 100644
+--- a/toolkit/components/places/tests/unit/test_database_replaceOnStartup.js
++++ b/toolkit/components/places/tests/unit/test_database_replaceOnStartup.js
+@@ -17,7 +17,8 @@ function run_test() {
+ 
+   let file = do_get_file("default.sqlite");
+   file.copyToFollowingLinks(gProfD, "places.sqlite");
+-  file = gProfD.clone().append("places.sqlite");
++  file = gProfD.clone();
++  file.append("places.sqlite");
+ 
+   // Create some unique stuff to check later.
+   let db = Services.storage.openUnsharedDatabase(file);
