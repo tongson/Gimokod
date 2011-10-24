@@ -6,7 +6,7 @@ pkgdesc="Freedesktop.org Shared MIME Info"
 arch=('i686' 'x86_64')
 license=('GPL')
 depends=('libxml2' 'glib')
-makedepends=('pkg-config' 'intltool' 'gettext')
+makedepends=('pkg-config')
 install=shared-mime-info.install
 url="http://freedesktop.org/Software/shared-mime-info"
 source=(http://freedesktop.org/~hadess/${pkgname}-${pkgver}.tar.xz
@@ -18,6 +18,8 @@ options=('!makeflags')
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   patch -p1 -i "${srcdir}/pbm.patch"
+  sed -i '284s:po::' Makefile.in
+  sed -i '1s:po::' Makefile.am
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
