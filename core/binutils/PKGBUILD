@@ -15,6 +15,7 @@ build() {
   patch -Np0 -i ../08_all_binutils-RPATH_ENVVAR-smack.patch
   patch -Np0 -i ../20_all_ld-sysroot.patch
   patch -Np1 -i ../40_all_binutils-ld-gcc-4.6-tests.patch
+
   # Debian
   patch -Np1 -i ../128_build_id.patch
   patch -Np1 -i ../131_ld_bootstrap_testsuite.patch
@@ -82,13 +83,15 @@ package() {
   echo "INPUT ( /usr/lib/libopcodes.a -lbfd )" >"${pkgdir}"/usr/lib/libopcodes.so
 }
 source=(ftp://gcc.gnu.org/pub/binutils/snapshots/$pkgname-$pkgver.tar.bz2)
-sha256sums=('f769b64350a02fbee009e1582cc12b6ed43b41985de65effb741e258e075dd05')
+sha256sums=('cdecfa69f02aa7b05fbcdf678e33137151f361313b2f3e48aba925f64eabf654')
+
 source=(${source[@]-}
         08_all_binutils-RPATH_ENVVAR-smack.patch
         128_build_id.patch
         131_ld_bootstrap_testsuite.patch
         20_all_ld-sysroot.patch
         40_all_binutils-ld-gcc-4.6-tests.patch
+        binutils-2.21.1-claimfile-fix.patch
         pr12654.patch
         pr12851a.patch
         pr12851b.patch
@@ -96,8 +99,7 @@ source=(${source[@]-}
         pr12975.patch
         pr13195.patch
         pr13201.patch
-        pr13233.patch
-        binutils-2.21.1-claimfile-fix.patch)
+        pr13233.patch)
 
 sha256sums=(${sha256sums[@]-}
             'e6ad9a2161a635fdcbeff180b5e36c76d283be80e9b8de7ae3c1e79335ba3680'
@@ -105,6 +107,7 @@ sha256sums=(${sha256sums[@]-}
             '854856477128b2bc3ae70db123aaa0e9cb5072d5f3ed26cf8014c40a2688310c'
             'b85eab89949d47314e10795256938198ae114b8c9a65cba18488790a2b3298a1'
             '55688e1aa077ca81d687859c3e0b3306c8495a1cdcf57138c25669ab766dc2fc'
+            'e76c3e6df52edf5cd97f518d115d84b01525a8a0f40c826622b9ef086b06ea49'
             '59ae2528b805b94c26f06484e5059060ce7f5c26b2b88696af808dfa99421d60'
             '4565570ee901a60a547af445f85c88d631d6c54e20517a463ff5b1d6e338989f'
             '22c9ffe4af24f9863e599479a47549505ab2eea757c30ab72c6554bdfc3bfe77'
@@ -112,6 +115,4 @@ sha256sums=(${sha256sums[@]-}
             'a4c67e646742d1f6068faa91ad36fb136e9271bffff365aa41646b4152a1f6ad'
             '5127df32122f849ad9957acc42627cb8c4472b152d00deaba67a1c65e462fe64'
             'ca9aba8c1804254a45f470cde24930964c6bc34dcb1af6a45bad6baa97d07080'
-            '4de3477ccba1d31509446ac1ad1bf440aae1d185f11175b181f34e82d3a6028e'
-            'e76c3e6df52edf5cd97f518d115d84b01525a8a0f40c826622b9ef086b06ea49')
-
+            '4de3477ccba1d31509446ac1ad1bf440aae1d185f11175b181f34e82d3a6028e')
