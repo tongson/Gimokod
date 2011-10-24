@@ -1,0 +1,17 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=ebdftopcf
+pkgver=2
+pkgrel=1
+pkgdesc="BDF to PCF generator"
+arch=('i686' 'x86_64')
+url="http://gentoo.org/"
+license=('custom')
+depends=('xorg-bdftopcf')
+source=(http://gentoo.org/${pkgname}-${pkgver}.tar.bz2)
+sha256sums=('3e832710bb69955b2496da5f619066189b3c990e7087130c5faa2ed7741e9a10')
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  install -D -m644 Makefile.ebdftopcf "${pkgdir}/usr/share/ebdftopcf/Makefile.ebdftopcf"
+  install -D -m644 COPYING "${pkgdir}/usr/share/licenses/${pkgname}/COPYING"
+}
