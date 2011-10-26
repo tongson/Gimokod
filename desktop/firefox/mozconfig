@@ -28,7 +28,6 @@ ac_add_options --enable-canvas3d
 ac_add_options --enable-places
 ac_add_options --enable-url-classifier
 
-ac_add_options --enable-optimize=-Os
 ac_add_options --enable-strip
 ac_add_options --enable-install-strip
 ac_add_options --enable-jemalloc
@@ -56,7 +55,6 @@ ac_add_options --disable-necko-wifi
 ac_add_options --enable-crypto
 ac_add_options --disable-mailnews
 ac_add_options --enable-system-ffi
-ac_add_options --target="x86_64-pc-linux-gnu"
 
 export BUILD_OFFICIAL=0
 export MOZILLA_OFFICIAL=0

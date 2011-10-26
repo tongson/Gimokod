@@ -7,7 +7,7 @@ arch=('i686' 'x86_64')
 license=('MPL' 'GPL' 'LGPL')
 depends=('gtk2' 'mozilla-common' 'nss' 'libxt' 'hunspell' 'startup-notification' 'mime-types'
          'dbus-glib' 'alsa-lib' 'sqlite' 'libnotify' 'desktop-file-utils' 'libvpx' 'libevent'
-         'hicolor-icon-theme' 'libffi' 'bzip2' 'zlib' 'nspr' 'libpng' 'libjpeg')
+         'hicolor-icon-theme' 'libffi' 'bzip2' 'zlib' 'nspr' 'libpng' 'libjpeg' 'libidl')
 makedepends=('unzip' 'zip' 'pkg-config' 'yasm' 'mesa' 'autoconf21')
 url="http://www.mozilla.org/projects/firefox"
 install=firefox.install
@@ -39,9 +39,14 @@ build() {
   sed -i -e "s:gnomevfs::" browser/confvars.sh \
          -e "s:gnomevfs::" xulrunner/confvars.sh
 
-  autoreconf -fi
+  libtoolize -n --install
+  autoconf-2.13
+  patch -p0 --no-backup-if-mismatch ipc/chromium/src/third_party/libevent/ltmain.sh "${srcdir}/as-needed_1_5_26.patch"
+  patch -p0 --no-backup-if-mismatch modules/freetype2/builds/unix/ltmain.sh "${srcdir}/as-needed_2_2_6.patch"
   cd js/src
-  autoreconf -fi
+  libtoolize -n --install
+  autoconf-2.13
+  patch -p0 --no-backup-if-mismatch ctypes/libffi/ltmain.sh "${srcdir}/as-needed_2_2_6.patch"
   cd ../..
 
   cp "${srcdir}/mozconfig" .mozconfig
@@ -54,8 +59,8 @@ build() {
 
   echo 'LDFLAGS += -lX11 -lXrender' >> layout/build/Makefile.in
 
-  export CFLAGS="${CFLAGS/-O?//}"
-  export CXXLAGS="${CXXFLAGS/-O?//}"
+  export CXX="/usr/bin/x86_64-pc-linux-gnu-g++"
+  export CC="/usr/bin/x86_64-pc-linux-gnu-gcc"
 
   make -j1 -f client.mk MOZ_MAKE_FLAGS="$MAKEFLAGS"
 }
@@ -64,10 +69,16 @@ package() {
   cd "${srcdir}/mozilla-release"
   make -j1 -f client.mk DESTDIR="${pkgdir}" install
 
-  for i in 16x16 22x22 24x24 32x32 48x48 256x256; do
-      install -Dm644 browser/branding/unofficial/default${i/x*/}.png \
-        "${pkgdir}/usr/share/icons/hicolor/${i}/apps/firefox.png"
+  for i in 16 32 48; do
+      install -Dm644 browser/branding/unofficial/default${i}.png \
+        "${pkgdir}/usr/share/icons/hicolor/${i}x${i}/apps/tumucumaque.png"
   done
+
+  install -Dm644 browser/branding/unofficial/mozicon128.png \
+    "${pkgdir}/usr/share/icons/hicolor/128x128/apps/tumucumaque.png"
+
+  install -Dm644 browser/branding/unofficial/content/icon48.png \
+    "${pkgdir}/usr/share/pixmaps/tumucumaque.png"
 
   rm -rf "${pkgdir}"/usr/lib/firefox-7.0/{dictionaries,hyphenation}
   ln -sf /usr/share/hunspell "${pkgdir}/usr/lib/firefox-7.0/dictionaries"
@@ -97,6 +108,8 @@ source=(${source[@]-}
         5011_build_fix_for_ENABLE_YARR_JIT-0.patch
         5017_enable_system_ffi.patch
         5018_enable_system_ffi_part2.patch
+        as-needed_1_5_26.patch
+        as-needed_2_2_6.patch
         firefox-version.patch
         mozconfig
         mozilla-firefox-1.0-lang.patch)
@@ -117,6 +130,8 @@ sha256sums=(${sha256sums[@]-}
             '81a81cc6e87c2045c09f491eb14ddea4a862fb19ae1989fe5b0f09e225086cef'
             '3cfab44624b68af8e5f95bba264a4b47789e7d1ee45a49b2a87a4d25b8f0d8dc'
             '7ef8882e509a7296ef19316aca31304ef8a993ad875c06c7169923dc820a1126'
+            '3060597dcc5801273a2c36ad534a4da76518769c80637803048d041873aa1d28'
+            '76e379383f80a463201fe864c1e35c3cd4858b71f26c55b3a5dcb2648e383258'
             '4658a0f0e8502e443d395c4713730f902c2a35897d5fc9144b3b132506d62596'
-            '2f7b967fe3cd1ca8af53baa83e2b5ef1232f79cdf5c77e97845940ef66efef1a'
+            'd1efda1fc9f6ce9daac2deb0a73bbca574c4d00e2f4e450cd9fbec793d0603fe'
             '0ca095ff2af57297f615877a7e79ddc84d1a3f62509a8af6ca50aad7a8671f6a')
