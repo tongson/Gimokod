@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=freetype2
-pkgver=2.4.6
+pkgver=2.4.7
 pkgrel=1
 pkgdesc="TrueType font rendering library"
 arch=(i686 x86_64)
@@ -12,7 +12,7 @@ source=(http://downloads.sourceforge.net/sourceforge/freetype/freetype-${pkgver}
         freetype-2.4.6-memcpy-fix.patch
         freetype-2.3.0-enable-spr.patch
         freetype-2.2.1-enable-valid.patch)
-md5sums=('5e6510613f612809d2d7862592b92ab7'
+md5sums=('dbadce8f0c5e70a0b7c51eadf2dd9394'
          '822951cf86a01494929c357a7e15504a'
          '816dc8619a6904a7385769433c0a8653'
          '214119610444c9b02766ccee5e220680')
