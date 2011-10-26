@@ -1,0 +1,166 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=chromium
+pkgver=15.0.874.102
+pkgrel=1
+pkgdesc="The open-source project behind Google Chrome browser"
+arch=('i686' 'x86_64')
+url="http://www.chromium.org/"
+license=('BSD')
+depends=('zlib' 'gtk2' 'dbus-glib' 'nss' 'alsa-lib' 'xdg-utils' 'bzip2' 'libevent'
+         'libxss' 'libgcrypt' 'ttf-dejavu' 'desktop-file-utils' 'libxml2' 'icu'
+         'hicolor-icon-theme' 'libwebp' 'flac' 'libpng' 'libjpeg' 'speex')
+makedepends=('python' 'perl' 'gperf' 'yasm' 'mesa')
+install=chromium.install
+source=(http://build.chromium.org/official/chromium-${pkgver}.tar.bz2
+        nacl.gypi
+        chromium.sh
+        gcc-4.6.patch)
+sha1sums=('d8dd8c5f57099ee879e8bd3ab53419f10339762c'
+          'df4cee39e1d49e10f9c075f5e6e9db28e8260926'
+          '427ecf06cae11f28f59b1912d659ad5541391682'
+          '39999918746524fff30e73dc656754733df5c2c2')
+
+build() {
+  cd "${srcdir}/chromium-${pkgver}"
+
+  # NaCL build remains faily
+  cp "${srcdir}/nacl.gypi" chrome/
+
+  # Fix build with gcc 4.6
+  # http://code.google.com/p/chromium/issues/detail?id=80071
+  patch -Np0 -i "${srcdir}/gcc-4.6.patch"
+
+  # Fix build with CUPS 1.5
+  sed -i '/#include <cups\/cups.h>/ a #include <cups/ppd.h>' \
+    chrome/browser/ui/webui/print_preview_handler.cc
+
+  #mkdir "${srcdir}/python-path"
+  ##ln -s /usr/bin/python "${srcdir}/python-path/python"
+  #export PATH="${srcdir}/python-path:${PATH}"
+
+  # We need to disable system_ssl until "next protocol negotiation" support is
+  # available in our nss package.
+  # (See https://bugzilla.mozilla.org/show_bug.cgi?id=547312)
+
+  sed -i '1i#define OF(x) x' \
+          third_party/zlib/contrib/minizip/{ioapi,{,un}zip}.c \
+          chrome/common/zip.cc
+
+  find third_party -type f \! -iname '*.gyp*' \
+                \! -path 'third_party/WebKit/*' \
+                \! -path 'third_party/angle/*' \
+                \! -path 'third_party/cacheinvalidation/*' \
+                \! -path 'third_party/cld/*' \
+                \! -path 'third_party/expat/*' \
+                \! -path 'third_party/ffmpeg/*' \
+                \! -path 'third_party/flac/flac.h' \
+                \! -path 'third_party/gpsd/*' \
+                \! -path 'third_party/harfbuzz/*' \
+                \! -path 'third_party/hunspell/*' \
+                \! -path 'third_party/iccjpeg/*' \
+                \! -path 'third_party/launchpad_translations/*' \
+                \! -path 'third_party/leveldb/*' \
+                \! -path 'third_party/libjingle/*' \
+                \! -path 'third_party/libphonenumber/*' \
+                \! -path 'third_party/libvpx/*' \
+                \! -path 'third_party/mesa/*' \
+                \! -path 'third_party/modp_b64/*' \
+                \! -path 'third_party/npapi/*' \
+                \! -path 'third_party/openmax/*' \
+                \! -path 'third_party/ots/*' \
+                \! -path 'third_party/protobuf/*' \
+                \! -path 'third_party/sfntly/*' \
+                \! -path 'third_party/skia/*' \
+                \! -path 'third_party/speex/speex.h' \
+                \! -path 'third_party/sqlite/*' \
+                \! -path 'third_party/tcmalloc/*' \
+                \! -path 'third_party/tlslite/*' \
+                \! -path 'third_party/undoview/*' \
+                \! -path 'third_party/webgl_conformance/*' \
+                \! -path 'third_party/webrtc/*' \
+                \! -path 'third_party/yasm/*' \
+                \! -path 'third_party/zlib/contrib/minizip/*' \
+                \! -path 'third_party/leveldatabase/*' \
+                \! -path 'third_party/mongoose/*' \
+                \! -path 'third_party/smhasher/*' \
+                \! -path 'third_party/v8-i18n/*' \
+                \! -path 'third_party/webdriver/*' \
+                -delete
+  export CXXFLAGS="${CXXFLAGS/-Os/-O2}"
+  export CFLAGS="${CFLAGS/-Os/-O2}"
+  export CXX="/usr/bin/x86_64-pc-linux-gnu-g++"
+  export CC="/usr/bin/x86_64-pc-linux-gnu-gcc"
+  build/gyp_chromium --depth=. \
+    -Dno_strict_aliasing=1 \
+    -Dwerror= \
+    -Dlinux_sandbox_path=/usr/lib/chromium/chromium-sandbox \
+    -Dlinux_sandbox_chrome_path=/usr/lib/chromium/chromium \
+    -Dlinux_strip_binary=1 \
+    -Drelease_extra_cflags="${CFLAGS}" \
+    -Dffmpeg_branding=Chromium \
+    -Dproprietary_codecs=0 \
+    -Duse_system_bzip2=1 \
+    -Duse_system_ffmpeg=0 \
+    -Duse_system_libevent=1 \
+    -Duse_system_libjpeg=1 \
+    -Duse_system_libpng=1 \
+    -Duse_system_libxml=1 \
+    -Duse_system_icu=1 \
+    -Duse_system_ssl=0 \
+    -Duse_system_yasm=1 \
+    -Duse_system_zlib=1 \
+    -Duse_system_speex=1 \
+    -Duse_system_xdg_utils=1 \
+    -Duse_gconf=0 \
+    -Ddisable_nacl=1 \
+    -Duse_cups=0 \
+    -Duse_gconf=0 \
+    -Duse_gnome_keyring=0 \
+    -Dlinux_link_gnome_keyring=0 \
+    -Duse_kerberos=0 \
+    -Duse_pulseaudio=0 \
+    -Denable_webrtc=1 \
+    -Duse_system_libwebp=1 \
+    -Duse_system_vpx=0 \
+    -Duse_system_libpng=1 \
+    -Duse_system_libjpeg=1 \
+    -Ddisable_sse2=1 \
+    -Duse_system_flac=1 $([[ $CARCH == i686 ]] && echo '-Dtarget_arch=ia32') $([[ $CARCH == x86_64 ]] && echo '-Dtarget_arch=x64')
+
+  make chrome chrome_sandbox BUILDTYPE=Release V=1
+}
+
+package() {
+  cd "${srcdir}/chromium-${pkgver}"
+
+  install -D out/Release/chrome "${pkgdir}"/usr/lib/chromium/chromium
+
+  install -Dm4755 -o root -g root out/Release/chrome_sandbox \
+    "${pkgdir}/usr/lib/chromium/chromium-sandbox"
+
+  # Add out/Release/{libppGoogleNaClPluginChrome.so,nacl_irt_x86_*.nexe} again
+  # when NaCl build is fixed
+  cp out/Release/{{chrome,resources}.pak,libffmpegsumo.so} \
+    "${pkgdir}/usr/lib/chromium/"
+
+  # These links are only needed when building with system ffmpeg
+  #ln -s /usr/lib/libavcodec.so.52 "${pkgdir}"/usr/lib/chromium/
+  #ln -s /usr/lib/libavformat.so.52 "${pkgdir}"/usr/lib/chromium/
+  #ln -s /usr/lib/libavutil.so.50 "${pkgdir}"/usr/lib/chromium/
+
+  cp -a out/Release/locales out/Release/resources "${pkgdir}/usr/lib/chromium/"
+
+  find "${pkgdir}/usr/lib/chromium/" -name '*.d' -type f -delete
+
+  install -Dm644 out/Release/chrome.1 "${pkgdir}/usr/share/man/man1/chromium.1"
+
+  for size in 16 22 24 32 48 64 128 256; do
+    install -Dm644 "chrome/app/theme/chromium/product_logo_$size.png" \
+      "${pkgdir}/usr/share/icons/hicolor/${size}x${size}/apps/chromium.png"
+  done
+
+  install -D "${srcdir}/chromium.sh" "${pkgdir}/usr/bin/chromium"
+
+  install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/chromium/LICENSE"
+}
+
