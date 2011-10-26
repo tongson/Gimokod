@@ -2,20 +2,20 @@
 pkgname=openssh
 pkgver=5.9p1
 pkgrel=1
-pkgdesc='Free version of the SSH connectivity tools'
+pkgdesc='The OpenSSH implementation of SSH protocol versions 1 and 2'
 arch=('i686' 'x86_64')
 license=('custom:BSD')
 groups=('base')
 url='http://www.openssh.org/portable.html'
 backup=('etc/ssh/ssh_config' 'etc/ssh/sshd_config' 'etc/pam.d/sshd' 'etc/conf.d/sshd')
-depends=('openssl')
+depends=('openssl' 'pam' 'pam_userpass' 'pam_mktemp')
 install=openssh.install
 source=("ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/${pkgname}-${pkgver}.tar.gz"
         'sshd.confd'
         'sshd.pam')
 sha1sums=('ac4e0055421e9543f0af5da607a72cf5922dcc56'
           'ec102deb69cad7d14f406289d2fc11fee6eddbdd'
-          '07fecd5880b1c4fdd8c94ddb2e89ddce88effdc1')
+          '807049143a94c28a39b19de2cc867ff038828939')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"

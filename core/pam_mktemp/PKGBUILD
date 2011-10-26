@@ -1,0 +1,31 @@
+pkgname=pam_mktemp
+pkgver=1.1.1
+pkgrel=1
+pkgdesc="Pluggable private /tmp space support for interactive (shell) sessions"
+arch=('i686' 'x86_64')
+url="http://www.openwall.com/pam/"
+license=('BSD')
+groups=('base')
+depends=('pam')
+makedepends=('e2fsprogs')
+options=('emptydirs')
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+  CFLAGS="${CFLAGS} -fPIC"
+  LDFLAGS="${LDFLAGS} -lpam -s --shared -Wl,--version-script,pam_mktemp.map"
+  make CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}"
+}
+
+package() {
+  cd "$srcdir/$pkgname-$pkgver"
+  install -d -m 0755 "${pkgdir}/tmp/.private"
+  make install DESTDIR="${pkgdir}"
+  install -Dm644 "${srcdir}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
+
+source=(ftp://ftp.openwall.com/pub/projects/pam/modules/${pkgname}/${pkgname}-${pkgver}.tar.gz{,.sign}
+        LICENSE)
+
+sha256sums=('66cf80c18439ca3456db96402f2eeac14b1a0503cc1d1be7f2b16d5f079f3f3d'
+            '552ea45a0cf7badc055f654fe161209d0cc3f248c96996ebaa4a4be8c75da595'
+            'ae5f90169fe4f23135b9745002bd68f606dd10b25ebf2f1bc39e593ce643e12a')
