@@ -20,8 +20,9 @@ package() {
   install -Dm644 "${srcdir}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }
 
-source=(ftp://ftp.openwall.com/pub/projects/pam/modules/${pkgname}/${pkgname}-${pkgver}.tar.gz
+source=(ftp://ftp.openwall.com/pub/projects/pam/modules/${pkgname}/${pkgname}-${pkgver}.tar.gz{,.sign}
         LICENSE)
 
 sha256sums=('aad0667bff13fd84dfe71859ef41aec60e19d86e41a83cd718fdc2113f08f235'
+            'fe8e9d0fe1704786aea9fcaac9901aa0bd84be423fe234826ef1ddec0dc9d222'
             '968a3db1f63d166bd82b5c44a2c6c4a2e2069fa418483586f17ef3f848b9ef04')
