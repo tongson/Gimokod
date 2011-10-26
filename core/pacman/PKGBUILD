@@ -18,8 +18,8 @@ PKGEXT='.pkg.tar.gz'
 
 build() {
   cd "${srcdir}"/"${pkgname}"-"${pkgver}"
-  patch -Np1 -i ../pacman-4.0.0-dload_h.patch
-  patch -Np1 -i ../pacman-4.0.0-makepkg.patch
+  Patch pacman-4.0.0-dload_h.patch
+  Patch pacman-4.0.0-makepkg.patch
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
@@ -71,14 +71,12 @@ source=(${source[@]-}
         makepkg.conf
         pacman-4.0.0-dload_h.patch
         pacman-4.0.0-makepkg.patch
-        pacman-4.0.0.tar.gz
         pacman.conf
         pacman.conf.x86_64)
 
 sha256sums=(${sha256sums[@]-}
             '049491c1e3749cffb8033f7c757866490af836697fc5ce7bfbeb66596b9b0bc9'
             '8e84d5873b8891cd4fe2b5bdfcb65c6bad4072fa4e488732cc45d12630464def'
-            '33b26bf71b41f21edc370a5abe4643f40f294ffb01fa8f44c2f6eb54d553a707'
-            'c83bbb8d386b492f9d00a6944c8bcaf84a4372a5f1111d3014638af02abed23e'
+            '058c9d1dafebadf4e579b84bbf4a79193d9677df987f124a8cdb42558b63cd63'
             '2f3916158d489f567670bb54de932419244d368fc33b0eefa3587ca8316904f3'
             '17cda5f057d2137427437afe13544ed88c51a52dd8725fbb0bc707c38d786569')

@@ -1,6 +1,5 @@
-diff -Naur pacman-4.0.0-//scripts/makepkg.sh.in pacman-4.0.0/scripts/makepkg.sh.in
---- pacman-4.0.0-//scripts/makepkg.sh.in	2011-10-11 00:18:37.000000000 +0000
-+++ pacman-4.0.0/scripts/makepkg.sh.in	2011-10-16 20:20:15.069384298 +0000
+--- pacman-4.0.0/scripts/makepkg.sh.in
++++ pacman-4.0.0/scripts/makepkg.sh.in
 @@ -43,7 +43,7 @@
  startdir="$PWD"
  
@@ -10,7 +9,37 @@ diff -Naur pacman-4.0.0-//scripts/makepkg.sh.in pacman-4.0.0/scripts/makepkg.sh.
  splitpkg_overrides=('pkgver' 'pkgrel' 'epoch' 'pkgdesc' 'arch' 'license' \
                      'groups' 'depends' 'optdepends' 'provides' 'conflicts' \
                      'replaces' 'backup' 'options' 'install' 'changelog')
-@@ -844,6 +844,13 @@
+@@ -110,6 +110,20 @@
+ 	printf "${RED}==> $(gettext "ERROR:")${ALL_OFF}${BOLD} ${mesg}${ALL_OFF}\n" "$@" >&2
+ }
+ 
++Patch() {                                                         
++        local count=0                                             
++        local diff=$1                                            
++        while [[ ${count} -lt 5 ]] ; do         
++                if (patch -p${count} --dry-run -f < "${srcdir}/${diff}")>/dev/null ; then
++                        patch -p${count} -f < "${srcdir}/${diff}"        
++                        return 0                                         
++                else                      
++                        : $(( count++ ))        
++                fi                                                          
++        done                                                                    
++        error "${diff} did not apply!"                                              
++        return 1                                                                  
++}
+ 
+ ##
+ # Special exit call for traps, Don't print any error messages when inside,
+@@ -343,7 +357,7 @@
+ source_has_signatures(){
+ 	local file
+ 	for file in "${source[@]}"; do
+-		if [[ $file = *.@(sig|asc) ]]; then
++		if [[ $file = *.@(sig|asc|sign) ]]; then
+ 			return 0
+ 		fi
+ 	done
+@@ -844,6 +858,13 @@
  		fi
  	done
  
@@ -24,7 +53,7 @@ diff -Naur pacman-4.0.0-//scripts/makepkg.sh.in pacman-4.0.0/scripts/makepkg.sh.
  	if (( EUID == 0 )); then
  		# change perms of all source files to root user & root group
  		chown -R 0:0 "$srcdir"
-@@ -960,6 +967,80 @@
+@@ -960,6 +981,80 @@
  tidy_install() {
  	cd "$pkgdir"
  	msg "$(gettext "Tidying install...")"
@@ -105,7 +134,7 @@ diff -Naur pacman-4.0.0-//scripts/makepkg.sh.in pacman-4.0.0/scripts/makepkg.sh.
  
  	if [[ $(check_option docs) = "n" && -n ${DOC_DIRS[*]} ]]; then
  		msg2 "$(gettext "Removing doc files...")"
-@@ -1038,7 +1119,9 @@
+@@ -1038,7 +1133,9 @@
  
  	if [[ $(check_option emptydirs) = "n" ]]; then
  		msg2 "$(gettext "Removing empty directories...")"
@@ -116,7 +145,7 @@ diff -Naur pacman-4.0.0-//scripts/makepkg.sh.in pacman-4.0.0/scripts/makepkg.sh.
  	fi
  
  	if [[ $(check_option upx) = "y" ]]; then
-@@ -1203,10 +1286,10 @@
+@@ -1203,10 +1300,10 @@
  	done
  
  	# check for references to the build and package directory
@@ -129,12 +158,12 @@ diff -Naur pacman-4.0.0-//scripts/makepkg.sh.in pacman-4.0.0/scripts/makepkg.sh.
  		warning "$(gettext "Package contains reference to %s")" "\$pkgdir"
  	fi
  
-@@ -1271,7 +1354,7 @@
+@@ -1271,7 +1368,7 @@
  	# bsdtar's gzip compression always saves the time stamp, making one
  	# archive created using the same command line distinct from another.
  	# Disable bsdtar compression and use gzip -n for now.
 -	bsdtar -cf - $comp_files * |
-+	LANG="en_US.UTF-8" bsdtar -cf - $comp_files * |
++	LC_ALL=C bsdtar -cf - $comp_files * |
  	case "$PKGEXT" in
  		*tar.gz)  gzip -c -f -n ;;
  		*tar.bz2) bzip2 -c -f ;;
