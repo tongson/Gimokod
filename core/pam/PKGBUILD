@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=pam
-pkgver=1.1.4
+pkgver=1.1.5
 pkgrel=1
 pkgdesc="PAM (Pluggable Authentication Modules) library"
 arch=('i686' 'x86_64')
@@ -13,7 +13,7 @@ options=('!libtool' '!emptydirs')
 
 build() {
   cd "${srcdir}"/Linux-PAM-${pkgver}
-  patch -Np1 -i ../pam-1.1.4-disable-po-tests.patch
+  Patch pam-1.1.4-disable-po-tests.patch
   ./configure --sysconfdir=/etc \
               --build=${CBUILD} \
               --host=${CHOST} \
@@ -26,6 +26,11 @@ build() {
               --disable-regenerate-docu \
               --disable-cracklib
   make
+}
+
+check() {
+  cd "${srcdir}"/Linux-PAM-${pkgver}
+  make check
 }
 
 package() {
@@ -52,13 +57,15 @@ package() {
 _EOT
 }
 
-source=(http://www.kernel.org/pub/linux/libs/pam/library/Linux-PAM-${pkgver}.tar.bz2
+source=(http://gimokod.org/distfiles/Linux-PAM-${pkgver}.tar.bz2)
+sha256sums=('65def4df04254dc4c5156859d36c34ad6d7afbcf3adbf2780530ebc4dbf2a116')
+source=(${source[@]-}
         config-util
         other
         pam-1.1.4-disable-po-tests.patch
         system-auth)
 
-sha256sums=('ccd89331914390b1e9e99c954471d65f19b660d81e15a46eeb96cee125d44056'
+sha256sums=(${sha256sums[@]-}
             'e6843769d7c7d43a87a9bbcd774f693632436b0eeb7a44b0bf1c10ed6044ac8f'
             'c5c2a7c1f8dfbefa5df66cd32a7b754266d6375471d43cea06b8bea937d24b40'
             '482f71d1d6c15030494508145e9dc3e2eab391a7df2056c0d4d651ed8af6cbb4'
