@@ -1,0 +1,81 @@
+For details see:
+http://sourceware.org/bugzilla/show_bug.cgi?id=5379
+
+
+Index: sunrpc/clnt_udp.c
+===================================================================
+--- sunrpc/clnt_udp.c.orig
++++ sunrpc/clnt_udp.c
+@@ -301,6 +301,7 @@ clntudp_call (cl, proc, xargs, argsp, xr
+   XDR *xdrs;
+   int outlen = 0;
+   int inlen;
++  int pollresult;
+   socklen_t fromlen;
+   struct pollfd fd;
+   int milliseconds = (cu->cu_wait.tv_sec * 1000) +
+@@ -371,37 +372,36 @@ send_again:
+   anyup = 0;
+   for (;;)
+     {
+-      switch (__poll (&fd, 1, milliseconds))
++      switch (pollresult = __poll (&fd, 1, milliseconds))
+ 	{
+-
+ 	case 0:
+-	  if (anyup == 0)
+-	    {
+-	      anyup = is_network_up (cu->cu_sock);
+-	      if (!anyup)
+-		return (cu->cu_error.re_status = RPC_CANTRECV);
+-	    }
+-
+-	  time_waited.tv_sec += cu->cu_wait.tv_sec;
+-	  time_waited.tv_usec += cu->cu_wait.tv_usec;
+-	  while (time_waited.tv_usec >= 1000000)
+-	    {
+-	      time_waited.tv_sec++;
+-	      time_waited.tv_usec -= 1000000;
+-	    }
+-	  if ((time_waited.tv_sec < timeout.tv_sec) ||
+-	      ((time_waited.tv_sec == timeout.tv_sec) &&
+-	       (time_waited.tv_usec < timeout.tv_usec)))
+-	    goto send_again;
+-	  return (cu->cu_error.re_status = RPC_TIMEDOUT);
+-
+-	  /*
+-	   * buggy in other cases because time_waited is not being
+-	   * updated.
+-	   */
+ 	case -1:
+-	  if (errno == EINTR)
+-	    continue;
++	  if (pollresult == 0 || errno == EINTR) {
++	    if (anyup == 0)
++	      {
++		anyup = is_network_up (cu->cu_sock);
++		if (!anyup)
++		  return (cu->cu_error.re_status = RPC_CANTRECV);
++	      }
++
++	    time_waited.tv_sec += cu->cu_wait.tv_sec;
++	    time_waited.tv_usec += cu->cu_wait.tv_usec;
++	    while (time_waited.tv_usec >= 1000000)
++	      {
++		time_waited.tv_sec++;
++		time_waited.tv_usec -= 1000000;
++	      }
++	    if ((time_waited.tv_sec < timeout.tv_sec) ||
++		((time_waited.tv_sec == timeout.tv_sec) &&
++		 (time_waited.tv_usec < timeout.tv_usec)))
++	      if (pollresult == 0)
++		goto send_again;
++	      else
++		continue;
++	    return (cu->cu_error.re_status = RPC_TIMEDOUT);
++	  }
++
++	  /* errno != EINTR */
+ 	  cu->cu_error.re_errno = errno;
+ 	  return (cu->cu_error.re_status = RPC_CANTRECV);
+ 	}

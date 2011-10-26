@@ -1,0 +1,26 @@
+Index: bits/sched.h
+===================================================================
+--- bits/sched.h.orig
++++ bits/sched.h
+@@ -54,7 +54,7 @@ struct __sched_param
+ #if defined _SCHED_H && !defined __cpu_set_t_defined
+ # define __cpu_set_t_defined
+ /* Size definition for CPU sets.  */
+-# define __CPU_SETSIZE	1024
++# define __CPU_SETSIZE	4096
+ # define __NCPUBITS	(8 * sizeof (__cpu_mask))
+ 
+ /* Type for array elements in 'cpu_set_t'.  */
+Index: sysdeps/unix/sysv/linux/bits/sched.h
+===================================================================
+--- sysdeps/unix/sysv/linux/bits/sched.h.orig
++++ sysdeps/unix/sysv/linux/bits/sched.h
+@@ -113,7 +113,7 @@ struct __sched_param
+ #if defined _SCHED_H && !defined __cpu_set_t_defined
+ # define __cpu_set_t_defined
+ /* Size definition for CPU sets.  */
+-# define __CPU_SETSIZE	1024
++# define __CPU_SETSIZE	4096
+ # define __NCPUBITS	(8 * sizeof (__cpu_mask))
+ 
+ /* Type for array elements in 'cpu_set_t'.  */
