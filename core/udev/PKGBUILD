@@ -1,26 +1,24 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=udev
-pkgver=173
+pkgver=174
 pkgrel=1
 arch=(i686 x86_64)
 url="http://www.kernel.org/pub/linux/utils/kernel/hotplug/udev.html"
 license=('GPL')
 groups=('base')
-options=(!makeflags !libtool)
-install=udev.install
+options=('!makeflags' '!libtool')
 backup=(etc/udev/udev.conf)
-makedepends=('pciutils' 'libusb-compat' 'glib')
-source=(http://www.kernel.org/pub/linux/utils/kernel/hotplug/$pkgname-${pkgver}.tar.bz2
-        udev-173-no-docs.patch
-        bluetooth.patch
-        81-arch.rules)
+depends=('util-linux' 'libusb-compat' 'glib' 'pciutils')
+makedepends=('gperf')
+source=(http://people.freedesktop.org/~kay/$pkgname-$pkgver.tar.bz2
+        udev-173-no-docs.patch)
+
+md5sums=('3b84706046a33d7a7e00491a1136804d'
+         '9033a9ea911f471b3278dbaf288cd0b3')
 
 build() {
   cd "${srcdir}/$pkgbase-${pkgver}"
-
   patch -Np1 -i "${srcdir}"/udev-173-no-docs.patch
-  # fix https://bugs.archlinux.org/task/25356 (submitted upstream)
-  patch -Np1 -i ../bluetooth.patch
   ./configure --build=${CBUILD} \
               --host=${CHOST} \
               --sysconfdir=/etc \
@@ -45,8 +43,6 @@ build() {
 package() {
   cd "${srcdir}/$pkgbase-${pkgver}"
   make DESTDIR="${pkgdir}" install
-  # Install our rule for permissions and symlinks
-  install -D -m644 "${srcdir}"/81-arch.rules "${pkgdir}"/lib/udev/rules.d/81-arch.rules
 
   # Replace dialout/tape/cdrom group in rules with uucp/storage/optical group
   for i in "${pkgdir}"/lib/udev/rules.d/*.rules; do
@@ -56,7 +52,3 @@ package() {
   done
 }
 
-md5sums=('91a88a359b60bbd074b024883cc0dbde'
-         '9033a9ea911f471b3278dbaf288cd0b3'
-         '36cb9bfb55a8d931b7498d2e46730745'
-         'ec529eb1ddaabb70c61b38f80bb8462a')
