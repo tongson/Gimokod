@@ -43,9 +43,6 @@ build() {
 package() {
   cd "${srcdir}/$pkgbase-${pkgver}"
   make DESTDIR="${pkgdir}" install
-  mkdir "${pkgdir}/usr/lib/pkgconfig"
-  mv "${pkgdir}/usr/share/pkgconfig/udev.pc" "${pkgdir}/usr/lib/pkgconfig/udev.pc"
-  rmdir "${pkgdir}/usr/share/pkgconfig"
 
   # Replace dialout/tape/cdrom group in rules with uucp/storage/optical group
   for i in "${pkgdir}"/lib/udev/rules.d/*.rules; do
