@@ -21,7 +21,7 @@ build() {
 }
 
 package_libtool() {
-  depends=("libltdl=${pkgver}" 'gcc=4.6.1')
+  depends=("libltdl=${pkgver}" 'gcc=4.6.2')
   groups=('base-devel')
 
   cd "${srcdir}"/${pkgbase}-${pkgver}
@@ -33,6 +33,7 @@ package_libtool() {
 
 package_libltdl() {
   pkgdesc="A system independent dlopen wrapper for GNU libtool"
+  groups=('base-devel')
 
   cd "${srcdir}"/${pkgbase}-${pkgver}
   make DESTDIR="${pkgdir}" install-libLTLIBRARIES install-includeHEADERS \
