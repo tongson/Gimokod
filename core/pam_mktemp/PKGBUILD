@@ -18,6 +18,7 @@ build() {
 
 package() {
   cd "$srcdir/$pkgname-$pkgver"
+  install -d -m 1777 "${pkgdir}/tmp"
   install -d -m 0755 "${pkgdir}/tmp/.private"
   make install DESTDIR="${pkgdir}"
   install -Dm644 "${srcdir}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
