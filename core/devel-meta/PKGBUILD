@@ -11,7 +11,9 @@ depends=(
   autogen
   automake
   bison
+  bc
   dejagnu
+  dietlibc
   expect
   fakeroot
   file
@@ -23,9 +25,10 @@ depends=(
   gperf
   guile
   libtool
-  linux-api-headers
+  linux-headers
   m4
   make
+  musl
   patch
   pax-utils
   perl-xml-parser
