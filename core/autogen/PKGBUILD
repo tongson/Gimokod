@@ -25,4 +25,7 @@ build() {
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   make DESTDIR="${pkgdir}" install
+  mkdir "${pkgdir}/usr/lib/pkgconfig"
+  mv "${pkgdir}/usr/share/pkgconfig/autoopts.pc" "${pkgdir}/usr/lib/pkgconfig/autoopts.pc"
+  rmdir "${pkgdir}/usr/share/pkgconfig"
 }
