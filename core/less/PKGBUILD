@@ -1,6 +1,5 @@
-# Based upon the PKGBUILD from Arch Linux
 pkgname=less
-pkgver=444
+pkgver=445
 pkgrel=1
 pkgdesc="A terminal based program for viewing text files"
 license=('GPL3')
@@ -9,7 +8,7 @@ url="http://www.greenwoodsoftware.com/less"
 groups=('base')
 depends=('ncurses')
 source=(http://www.greenwoodsoftware.com/${pkgname}/${pkgname}-${pkgver}.tar.gz)
-md5sums=('56f9f76ffe13f70155f47f6b3c87d421')
+sha256sums=('66254dbd8142a90821968df249b4e268f53997cb12755d2a7116174b1a35a8bd')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
