@@ -122,7 +122,9 @@ noextract=(185d60944ea767075d27247c3162b3bc-unowinreg.dll
   b7b2d0e04e142f26dd96119c80757d1f-oooblogger_0.1.oxt
   90401bca927835b6fbae4a707ed187c8-nlpsolver-0.9.tar.bz2
   f02578f5218f217a9f20e9c30e119c6a-boost_1_44_0.tar.bz2
-  0625a7d661f899a8ce263fc8a9879108-graphite2-0.9.2.tgz)
+  0625a7d661f899a8ce263fc8a9879108-graphite2-0.9.2.tgz
+  71474203939fafbe271e1263e61d083e-nss-3.12.8-with-nspr-4.8.6.tar.gz
+  bd30e9cf5523cdfc019b94f5e1d7fd19-cppunit-1.12.1.tar.gz)
 md5sums=('7c2e73f1197d169519f86efe422e5df9'
          '823956297a7e0b7603c585c49bd9fd4e'
          '465b3be0e30f88e1139c45d2e2217927'
@@ -286,7 +288,7 @@ build() {
               --with-num-cpus=1 \
               --with-x \
               --with-external-tar="${srcdir}/ext_sources" \
-               --prefix=/usr \
+              --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
               --exec-prefix=/usr \
@@ -334,6 +336,7 @@ build() {
               --disable-ext-scripting-beanshell \
               --disable-ext-scripting-javascript \
               --disable-ext-scripting-python \
+              --disable-ext-nlpsolver \
               --enable-ext-typo \
               --disable-ext-validator \
               --disable-ext-watch-window \
@@ -343,6 +346,7 @@ build() {
               --without-ppds \
               --without-system-libwps \
               --without-system-mdds \
+              --without-system-lucene \
               --without-myspell-dicts \
               --with-system-dicts \
               --with-external-dict-dir=/usr/share/hunspell \
@@ -364,8 +368,9 @@ build() {
               --with-system-mythes \
               --with-system-xrender-headers \
               --with-system-headers \
+              --without-system-beanshell \
+              --without-system-odbc \
               --with-alloc=system
-    $EXTRAOPTS
 
   touch src.downloaded
   #./download
