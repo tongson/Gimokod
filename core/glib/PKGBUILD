@@ -8,7 +8,7 @@ arch=(i686 x86_64)
 license=('LGPL')
 depends=('zlib' 'libffi')
 groups=('base-devel')
-makedepends=('zlib' 'libffi')
+makedepends=('zlib' 'libffi' 'gettext')
 options=('!libtool' '!docs')
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
