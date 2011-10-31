@@ -8,12 +8,7 @@ url='http://pkg-shadow.alioth.debian.org/'
 license=('BSD')
 groups=('base')
 depends=('pam' 'acl' 'pam_userpass' 'tcb')
-makedepends=('pam' 'acl' 'tcb')
-backup=(etc/login.defs
-        etc/pam.d/chage-chfn-chsh
-        etc/pam.d/chpasswd-newusers
-        etc/pam.d/user-group-mod
-        etc/default/useradd)
+makedepends=('pam' 'acl' 'tcb' 'gettext')
 options=('!libtool')
 install=shadow.install
 source=(http://pkgs.fedoraproject.org/repo/pkgs/shadow-utils/shadow-4.0.4.1.tar.bz2/3a3d17d3d7c630b602baf66ae7434c61/shadow-4.0.4.1.tar.bz2)
