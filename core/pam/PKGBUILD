@@ -7,13 +7,12 @@ arch=('i686' 'x86_64')
 license=('GPL2')
 groups=('base')
 url="http://www.kernel.org/pub/linux/libs/pam/"
-backup=(etc/security/{access.conf,group.conf,limits.conf,namespace.conf,namespace.init,pam_env.conf,time.conf}
-        etc/environment)
+install=pam.install
 options=('!libtool' '!emptydirs')
 
 build() {
   cd "${srcdir}"/Linux-PAM-${pkgver}
-  Patch pam-1.1.4-disable-po-tests.patch
+  Patch pam-1.1.4-disable-po-tests.diff
   ./configure --sysconfdir=/etc \
               --build=${CBUILD} \
               --host=${CHOST} \
@@ -59,10 +58,11 @@ _EOT
 
 source=(http://gimokod.org/distfiles/Linux-PAM-${pkgver}.tar.bz2)
 sha256sums=('65def4df04254dc4c5156859d36c34ad6d7afbcf3adbf2780530ebc4dbf2a116')
+
 source=(${source[@]-}
         config-util
         other
-        pam-1.1.4-disable-po-tests.patch
+        pam-1.1.4-disable-po-tests.diff
         system-auth)
 
 sha256sums=(${sha256sums[@]-}
