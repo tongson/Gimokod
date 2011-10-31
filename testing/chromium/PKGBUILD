@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=chromium
-pkgver=15.0.874.102
+pkgver=15.0.874.106
 pkgrel=1
 pkgdesc="The open-source project behind Google Chrome browser"
 arch=('i686' 'x86_64')
@@ -15,7 +15,7 @@ source=(http://build.chromium.org/official/chromium-${pkgver}.tar.bz2
         nacl.gypi
         chromium.sh
         gcc-4.6.patch)
-sha1sums=('d8dd8c5f57099ee879e8bd3ab53419f10339762c'
+sha1sums=('ddf41ebb6f4a050e2dafc97d7b333675fced8d68'
           'df4cee39e1d49e10f9c075f5e6e9db28e8260926'
           '427ecf06cae11f28f59b1912d659ad5541391682'
           '39999918746524fff30e73dc656754733df5c2c2')
