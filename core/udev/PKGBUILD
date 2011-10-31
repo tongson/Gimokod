@@ -7,7 +7,7 @@ url="http://www.kernel.org/pub/linux/utils/kernel/hotplug/udev.html"
 license=('GPL')
 groups=('base')
 options=('!makeflags' '!libtool')
-backup=(etc/udev/udev.conf)
+install=udev.install
 depends=('util-linux' 'libusb-compat' 'glib' 'pciutils')
 makedepends=('gperf')
 source=(http://people.freedesktop.org/~kay/$pkgname-$pkgver.tar.bz2
@@ -43,6 +43,9 @@ build() {
 package() {
   cd "${srcdir}/$pkgbase-${pkgver}"
   make DESTDIR="${pkgdir}" install
+  mkdir "${pkgdir}/usr/lib/pkgconfig"
+  mv "${pkgdir}/usr/share/pkgconfig/udev.pc" "${pkgdir}/usr/lib/pkgconfig/udev.pc"
+  rmdir "${pkgdir}/usr/share/pkgconfig"
 
   # Replace dialout/tape/cdrom group in rules with uucp/storage/optical group
   for i in "${pkgdir}"/lib/udev/rules.d/*.rules; do
