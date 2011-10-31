@@ -10,7 +10,7 @@ groups=('base')
 source=("http://downloads.sourceforge.net/sourceforge/${pkgname}/${pkgname}-${pkgver}.tar.gz"
         'e2fsprogs-1.41.14-no-docs-test-translations.patch'
         'MIT-LICENSE')
-backup=('etc/mke2fs.conf')
+install=e2fsprogs.install
 sha1sums=('24f9364fa3d4c0d7d00cb627b819d0e51055d6c5'
           '1b895c34f9a251ffc23ff2173feb63b078d97edd'
           'f4a0d5b0cdb980e3fedd6f5e7dde0b0ffb7bbdfb')
