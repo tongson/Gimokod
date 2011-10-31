@@ -1,0 +1,34 @@
+pkgname=fsl
+_pkgname=fossil
+pkgver=20111021125253
+pkgrel=1
+pkgdesc="Simple, high-reliability, distributed SCM (installed as fsl)"
+arch=('i686' 'x86_64')
+license=('BSD')
+groups=('base')
+url="http://www.fossil-scm.org/"
+makedepends=('dietlibc' 'zlib')
+install=fsl.install
+source=("http://www.fossil-scm.org/download/fossil-src-${pkgver}.tar.gz")
+md5sums=('d3bd7d3bf60b523578f37315cd8a8f12')
+
+build() {
+  cd "${_pkgname}-src-${pkgver}"
+  ./configure --prefix=/usr \
+              --static \
+              --disable-lineedit \
+              --with-openssl=none \
+              --build=${CBUILD}
+
+  cp /usr/include/{zlib,zconf}.h src
+  export CFLAGS="${CFLAGS} -nostdinc"
+  make TCC="/usr/diet/bin/diet gcc" LIB="${LDFLAGS} -static -lz"
+}
+
+package() {
+  cd "${_pkgname}-src-${pkgver}"
+  install -Dm755 "${_pkgname}" \
+    "${pkgdir}/sbin/fsl"
+  install -Dm644 COPYRIGHT-BSD2.txt \
+    "${pkgdir}/usr/share/licenses/${_pkgname}/LICENSE"
+}
