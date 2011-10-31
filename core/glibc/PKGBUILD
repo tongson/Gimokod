@@ -1,19 +1,17 @@
 # Based upon the PKGBUILD from Arch Linux.
 # Patches from Gentoo, Exherbo, Openwall, Mandriva and openSUSE
 pkgname=glibc
-pkgver=2.14
-pkgrel=2
+pkgver=2.14.1
+pkgrel=1
 pkgdesc="GNU C Library"
 arch=('i686' 'x86_64')
 url="http://www.gnu.org/software/libc"
 license=('GPL' 'LGPL')
 groups=('base')
-makedepends=('gcc' 'gawk' 'tzdata' 'linux-api-headers')
-options=('!makeflags')
-backup=(etc/gai.conf
-        etc/locale.gen
-        etc/nscd.conf)
-options=('!strip')
+install=glibc.install
+makedepends=('gcc' 'gawk' 'tzdata' 'linux-headers')
+options=('!makeflags' '!strip')
+noextract=('crypt_blowfish-1.2.tar.gz')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
@@ -24,96 +22,76 @@ build() {
   sed -i '48s:tst-mqueue5::' rt/Makefile # http://sourceware.org/ml/libc-alpha/2010-09/msg00030.html
   sed -i '50s:tst-cpuclock2::' rt/Makefile # bogus
   sed -i '35s:nss3:nss:' scripts/check-local-headers.sh # correct dir
-  patch -Np1 -i ../glibc-2.14-no-tzdata-info-translation.patch
-  patch -Np1 -i ../glibc-2.14-getaddrinfo-fixes.patch
+  Patch glibc-2.14-no-tzdata-info-translation.patch
+  Patch glibc-2.14-getaddrinfo-fixes.patch
 
   # Gentoo
-  patch -Np1 -i ../0020_all_glibc-tweak-rfc1918-lookup.patch
-  patch -Np1 -i ../0030_all_glibc-respect-env-CPPFLAGS.patch
-  patch -Np1 -i ../0040_all_glibc-2.14-ssp-typo.patch
-  patch -Np1 -i ../0051_all_glibc-2.14-resolver-crash.patch
-  patch -Np1 -i ../0061_all_glibc-2.13-static-memset.patch
-  patch -Np1 -i ../1005_all_glibc-sigaction.patch
-  patch -Np1 -i ../1010_all_glibc-queue-header-updates.patch
-  patch -Np1 -i ../1060_all_glibc-localedef-mmap.patch
-  patch -Np1 -i ../1070_all_glibc-fadvise64_64.patch
-  patch -Np1 -i ../1085_all_glibc-2.9-check_native-headers.patch
-  patch -Np1 -i ../1095_all_glibc-2.14-assume-pipe2-dup3.patch
-  patch -Np0 -i ../1130_all_glibc-2.4-undefine-__i686.patch
-
-  # Exherbo
-  patch -Np1 -i ../glibc-2.14-memory-leak-getaddrinfo.patch
-  patch -Np1 -i ../glibc-2.14-fix-IPv6-only-lookups.patch
-  patch -Np1 -i ../glibc-2.14-fix-Ipv4-IPv6-lookup.patch
+  Patch 0020_all_glibc-tweak-rfc1918-lookup.patch
+  Patch 0030_all_glibc-respect-env-CPPFLAGS.patch
+  Patch 0061_all_glibc-2.13-static-memset.patch
+  Patch 1005_all_glibc-sigaction.patch
+  Patch 1010_all_glibc-queue-header-updates.patch
+  Patch 1060_all_glibc-localedef-mmap.patch
+  Patch 1070_all_glibc-fadvise64_64.patch
+  Patch 1095_all_glibc-2.14-assume-pipe2-dup3.patch
+  Patch 1130_all_glibc-2.4-undefine-__i686.patch
 
   # http://sources.redhat.com/bugzilla/show_bug.cgi?id=4781
-  patch -Np1 -i "${srcdir}"/glibc-2.10-bz4781.patch
-
-  # http://sources.redhat.com/bugzilla/show_bug.cgi?id=411
-  # http://sourceware.org/ml/libc-alpha/2009-07/msg00072.html
-  # patch -Np1 -i "${srcdir}"/glibc-__i686.patch
+  Patch glibc-2.10-bz4781.patch
 
   # http://sourceware.org/bugzilla/show_bug.cgi?id=11929
   # using Fedora "fix" as patch in that bug report causes breakages...
-  patch -Np1 -i "${srcdir}"/glibc-2.12.1-static-shared-getpagesize.patch
+  Patch glibc-2.12.1-static-shared-getpagesize.patch
 
   # http://www.exploit-db.com/exploits/15274/
   # http://sourceware.org/git/?p=glibc.git;a=patch;h=d14e6b09 (only fedora branch...)
-  patch -Np1 -i "${srcdir}"/glibc-2.12.2-ignore-origin-of-privileged-program.patch
+  Patch glibc-2.12.2-ignore-origin-of-privileged-program.patch
 
   # http://sourceware.org/bugzilla/show_bug.cgi?id=12403
-  patch -Np1 -i "${srcdir}"/glibc-2.13-futex.patch
-
-  # https://bugzilla.redhat.com/show_bug.cgi?id=593675
-  # http://sourceware.org/git/?p=glibc.git;a=commitdiff;h=2f811bf8 (only fedora branch...)
-  patch -Np1 -i "${srcdir}"/glibc-2.13-dlclose-search-reset.patch
-
-  # http://sourceware.org/git/?p=glibc.git;a=commitdiff;h=675155e9 (only fedora branch...)
-  # http://sourceware.org/ml/libc-alpha/2011-06/msg00006.html
-  patch -Np1 -i "${srcdir}"/glibc-2.14-libdl-crash.patch
+  Patch glibc-2.13-futex.patch
 
   # http://sourceware.org/bugzilla/show_bug.cgi?id=13013
   # http://sourceware.org/git/?p=glibc.git;a=commitdiff;h=032c0ee3 (only fedora branch...)
-  patch -Np1 -i "${srcdir}"/glibc-2.14-avoid-assertion-on-empty-dns-answer.patch
+  Patch glibc-2.14-avoid-assertion-on-empty-dns-answer.patch
 
   # re-export RPC interface until libtirpc is ready as a replacement
   # http://sourceware.org/git/?p=glibc.git;a=commitdiff;h=acee4873 (only fedora branch...)
-  patch -Np1 -i "${srcdir}"/glibc-2.14-reexport-rpc-interface.patch
+  Patch glibc-2.14-reexport-rpc-interface.patch
 
   # http://sourceware.org/git/?p=glibc.git;a=commitdiff;h=bdd816a3 (only fedora branch...)
-  patch -Np1 -i "${srcdir}"/glibc-2.14-reinstall-nis-rpc-headers.patch
+  Patch glibc-2.14-reinstall-nis-rpc-headers.patch
 
   # Openwall patches http://www.openwall.com/crypt/
   install -pm644 ../crypt_freesec.{c,h} crypt/
-  patch -Np1 -i ../glibc-2.14-owl-crypt.patch
+  Patch glibc-2.14-owl-crypt.patch
   tar -xf ../crypt_blowfish-1.2.tar.gz
   mv crypt/{crypt.h,gnu-crypt.h}
   cp -p crypt_blowfish-1.2/*.{c,h,S} crypt/
-  patch -Np1 -i ../glibc-2.14-owl-crypt_freesec.patch
+  Patch glibc-2.14-owl-crypt_freesec.patch
 
   # Mandriva
-  patch -Np1 -i ../glibc-2.14-owl-crypt-increase_BF_FRAME.patch
-  patch -Np1 -i ../glibc-2.14-owl-wrapper-sha.patch
+  Patch glibc-2.14-owl-crypt-increase_BF_FRAME.patch
+  Patch glibc-2.14-owl-wrapper-sha.patch
 
   # openSUSE
-  patch -Np0 -i ../glibc-resolv-reload.diff
+  Patch glibc-resolv-reload.diff
   touch -r nscd/nscd_stat.c nscd/s-stamp
-  patch -Np0 -i ../glibc-2.4.90-nscd.diff
-  patch -Np0 -i ../glibc-2.3.3-nscd-db-path.diff
-  patch -Np0 -i ../glibc-2.3.5-nscd-zeronegtimeout.diff
+  Patch glibc-2.4.90-nscd.diff
+  Patch glibc-2.3.3-nscd-db-path.diff
+  Patch glibc-2.3.5-nscd-zeronegtimeout.diff
   touch -r nscd/s-stamp nscd/nscd_stat.c
   rm nscd/s-stamp
-  patch -Np0 -i ../glibc-2.2-sunrpc.diff
-  patch -Np0 -i ../glibc-cpusetsize.diff
-  patch -Np1 -i ../glibc-resolv-mdnshint.diff
-  patch -Np1 -i ../glibc-nscd-hconf.diff
-  patch -Np0 -i ../glibc-strict-aliasing.diff
-  patch -Np1 -i ../glibc-x86-bits-sigcontext.patch
-  patch -Np1 -i ../glibc-2.15-getsysstats-speedup.patch
-  patch -Np1 -i ../glibc-fix-double-loopback.diff
-  patch -Np1 -i ../glibc-revert-fseek-on-fclose.diff
-  patch -Np1 -i ../x86-cpuid-level2.patch
-  patch -Np1 -i ../glibc-2.14-fix-ctors.patch
+  Patch glibc-2.2-sunrpc.diff
+  Patch glibc-cpusetsize.diff
+  Patch glibc-resolv-mdnshint.diff
+  Patch glibc-nscd-hconf.diff
+  Patch glibc-strict-aliasing.diff
+  Patch glibc-x86-bits-sigcontext.patch
+  Patch glibc-2.15-getsysstats-speedup.patch
+  Patch glibc-fix-double-loopback.diff
+  Patch glibc-revert-fseek-on-fclose.diff
+  Patch x86-cpuid-level2.patch
+  Patch glibc-2.14-fix-ctors.patch
 
   install -dm755 "${pkgdir}"/etc
   touch "${pkgdir}"/etc/ld.so.conf
@@ -209,19 +187,16 @@ package() {
                       lib/{libmemusage,libpcprofile,libSegFault}.so \
                       usr/lib/{audit,gconv}/*.so
 }
-source=(http://ftp.gnu.org/gnu/glibc/glibc-2.14.tar.xz)
-sha256sums=('4b20592dd4c841e54fde4c0f1d28cc75f91fb61fb3e91a906d5025dd187bfb08')
+source=(http://ftp.gnu.org/gnu/glibc/glibc-2.14.1.tar.xz)
+sha256sums=('984dcfcf2621494b56be3c2f625fa418231c1cb2eb07143ca4a587a6b250b468')
 source=(${source[@]-}
         0020_all_glibc-tweak-rfc1918-lookup.patch
         0030_all_glibc-respect-env-CPPFLAGS.patch
-        0040_all_glibc-2.14-ssp-typo.patch
-        0051_all_glibc-2.14-resolver-crash.patch
         0061_all_glibc-2.13-static-memset.patch
         1005_all_glibc-sigaction.patch
         1010_all_glibc-queue-header-updates.patch
         1060_all_glibc-localedef-mmap.patch
         1070_all_glibc-fadvise64_64.patch
-        1085_all_glibc-2.9-check_native-headers.patch
         1095_all_glibc-2.14-assume-pipe2-dup3.patch
         1130_all_glibc-2.4-undefine-__i686.patch
         crypt_blowfish-1.2.tar.gz
@@ -230,15 +205,10 @@ source=(${source[@]-}
         glibc-2.10-bz4781.patch
         glibc-2.12.1-static-shared-getpagesize.patch
         glibc-2.12.2-ignore-origin-of-privileged-program.patch
-        glibc-2.13-dlclose-search-reset.patch
         glibc-2.13-futex.patch
         glibc-2.14-avoid-assertion-on-empty-dns-answer.patch
-        glibc-2.14-fix-IPv6-only-lookups.patch
-        glibc-2.14-fix-Ipv4-IPv6-lookup.patch
         glibc-2.14-fix-ctors.patch
         glibc-2.14-getaddrinfo-fixes.patch
-        glibc-2.14-libdl-crash.patch
-        glibc-2.14-memory-leak-getaddrinfo.patch
         glibc-2.14-no-tzdata-info-translation.patch
         glibc-2.14-owl-crypt-increase_BF_FRAME.patch
         glibc-2.14-owl-crypt.patch
@@ -267,14 +237,11 @@ source=(${source[@]-}
 sha256sums=(${sha256sums[@]-}
             'b14477c710b7d25db20bc907052fce840a2abfae41e7d5abfeb9429115f33bf6'
             '0f8ecb7697a8e004b78da2b81657ff4a88e1a64fd2633750198f07c9679dcc74'
-            'a12403336f294aa71ec638601a3f90897af63e13602dc7ad695a2f4d8063fdb5'
-            '85a2e3916f76c3c730e761bce34d0507c4f836e418d362481814f0ccbcd9535c'
             'a791015f1801e60e9095eed0ee784ed90d6a7ecec59ff410c240fbcea4435383'
             'a53d562750b72cb00f4cd859fe9ef2a7e2574e19b0c69c7b416673184c450161'
             '598b08b96f68173995725f7868cdb2c9f5b94d85fd0c0ff49475f7f3af7d876d'
             'c859c254759aa032f4e18c1bbf95ee8b994f57d48ee45474b31b1b5b570389a5'
             'd11926e76fb8828aa00d1d8a0b2cad80fc8ffd0c9a473efa0ac7153cee8aafc0'
-            'fe744192dd50618d876a9daaced38e20d531412865e052f49a72d2e10a6d3a79'
             '841f254f2a05d40de75e35110720ea81b4947bc0d5803d79a7807305baf626e3'
             '1db7d3b3211733c6503b1886bb919f51070676327540900cb68e0e529454ddca'
             '12a3455700d4795f5a99e6fca54c782688d3785e6525cbfe5129dcc363858e27'
@@ -283,15 +250,10 @@ sha256sums=(${sha256sums[@]-}
             '866a4a57e50ebd2e61af7851a9a3f8d9240c3a3ea0da5d95eb6dc69ac3887dfe'
             'dcb33190d1710bb64ab49506c48398c61409ae41c89eed7e9dd23215b9dc239b'
             '977f8e6a82a1634e54e765aefe62c8bbf1bb3a7f43ad449d583e29dec36b92bd'
-            '7f31c1ee6262db1cda0e443475714e84280a8383a65929baa75e493e3c7fbb39'
             '56605e8bfe7b8c08dd9b588e4f10cc2f3e9bb3312bff8901d3809cf233faeff9'
             '757c93c6d078029f0feabdb4cb1d294cf8874a9635552a813840f0af03dc61ab'
-            '3b508b4d37d982867dc3ba286efccfb72c5b8eec4792e4b6e3596228b794428f'
-            '12dc31e17c7becc6830ae1b2daf8d8acb689ff273b3b928d39702d6e689e588c'
             '658a4bb1d22aef4ca5adbaa4a849bec78b171c09066b22daea140c6e91ea8e25'
             'f3fd2b72566de249777487d5b24a6d27c853d0ecc107ab182a10f31ed1587f96'
-            'da99dfb680c28d6670e92b9328b9a784ce51d8c6af9c5318fc19da30ae90ab67'
-            '9f53c73720854192f9299c212c78f1124bb91ef6a8bd8bf02446168e7c28e534'
             'bce1eab8c45a019c57e6b0c2e914e88c005d575a9aa239a0ff4d6b41a5d13509'
             'c37e6fd20cd0dfb9383724c6c5093c630fbb85af44324e75589fe6c6b594d7f5'
             '8dc5cd915863d947655bfc5a8627f0a61402580124acb5dc914084b7dd3ccfc3'
