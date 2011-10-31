@@ -10,11 +10,6 @@ depends=('dbus-core' 'kbd' 'libcap' 'cryptsetup' 'udev')
 makedepends=('cryptsetup' 'intltool' 'gettext' 'gperf')
 groups=('base')
 options=('!libtool' '!strip')
-backup=(etc/dbus-1/system.d/org.freedesktop.systemd1.conf
-        etc/dbus-1/system.d/org.freedesktop.login1.conf
-        etc/systemd/system.conf
-        etc/systemd/user.conf
-        etc/systemd/systemd-logind.conf)
 install=systemd.install
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
@@ -60,6 +55,9 @@ build() {
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   make DESTDIR="${pkgdir}" install
+  mkdir "${pkgdir}/usr/lib/pkgconfig"
+  mv "${pkgdir}/usr/share/pkgconfig/systemd.pc" "${pkgdir}/usr/lib/pkgconfig/systemd.pc"
+  rmdir "${pkgdir}/usr/share/pkgconfig"
   printf "d /run/console 755 root root\n" > "${pkgdir}/usr/lib/tmpfiles.d/console.conf"
 }
 

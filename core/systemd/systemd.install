@@ -15,6 +15,7 @@ post_install() {
 
   unlink lib/systemd/system/default.target
   ln -s lib/systemd/system/multi-user.target lib/systemd/system/default.target
+  . /usr/share/pacman/scm_install
 }
 
 post_upgrade() {
@@ -37,6 +38,7 @@ post_upgrade() {
       bin/systemctl try-restart systemd-logind.service
     fi
   fi
+  . /usr/share/pacman/scm_upgrade
 }
 
 # vim:set ts=2 sw=2 et:
