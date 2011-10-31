@@ -10,7 +10,8 @@ url="http://www.twinsun.com/tz/tz-link.htm"
 license=('GPL')
 groups=('base')
 options=('!emptydirs')
-source=(ftp://elsie.nci.nih.gov/pub/tzcode${_tzcode}.tar.gz
+#http://tzmirror.appealingapps.de/tzfiles/
+source=(ftp://munnari.oz.au/pub/tzcode${_tzcode}.tar.gz
         ftp://munnari.oz.au/pub/${pkgname}${_tzdata}.tar.gz
         Makefile.patch)
 md5sums=('cf7f4335b7c8682899fa2814e711c1b2'
