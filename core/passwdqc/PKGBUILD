@@ -8,6 +8,7 @@ license=('BSD')
 groups=('base')
 depends=('pam')
 options=('!emptydirs')
+install=passwdqc.install
 build() {
   cd "$srcdir/$pkgname-$pkgver"
   CFLAGS="${CFLAGS} -Wall -W -fPIC -DLINUX_PAM"
