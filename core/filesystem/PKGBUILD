@@ -6,22 +6,6 @@ arch=('any')
 url='http://localhost.localdomain'
 license=('LGPL3')
 groups=('base')
-backup=(etc/fstab
-        etc/group
-        etc/gshadow
-        etc/host.conf
-        etc/hosts
-        etc/inputrc
-        etc/issue
-        etc/tmpfiles.d/layout.conf
-        etc/ld.so.conf
-        etc/motd
-        etc/conf.d/net
-        etc/nsswitch.conf
-        etc/passwd
-        etc/profile
-        etc/securetty
-        etc/shells)
 install=filesystem.install
 
 package() {

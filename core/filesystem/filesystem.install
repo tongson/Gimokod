@@ -5,8 +5,9 @@ post_install() {
   chmod 1777 run/tmp
   ln -s run/tmp tmp
   ln -s run/tmp var/tmp
+  . /usr/share/pacman/scm_install
 }
 
 post_upgrade() {
-  post_install
+  . /usr/share/pacman/scm_upgrade
 }
