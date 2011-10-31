@@ -9,6 +9,7 @@ url="http://www.kernel.org/pub/linux/libs/pam/"
 license=('GPL')
 groups=('base')
 depends=('pam' 'tcb')
+install=simplepamapps.install
 makedepends=('pam')
 
 build() {
