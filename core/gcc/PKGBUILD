@@ -1,15 +1,15 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=('gcc' 'gcc-libs')
-pkgver=4.6.1
-pkgrel=2
+pkgver=4.6.2
+pkgrel=1
 pkgdesc="The GNU Compiler Collection"
 arch=('i686' 'x86_64')
 license=('GPL' 'LGPL' 'FDL' 'custom')
 url="http://gcc.gnu.org"
 makedepends=('binutils' 'mpc' 'gmp' 'mpfr' 'zlib' 'gawk' 'autogen' 'dejagnu')
 options=('!libtool' '!emptydirs')
-source=(ftp://gcc.gnu.org/pub/gcc/releases/gcc-${pkgver}/gcc-${pkgver}.tar.bz2)
-sha256sums=('8eebf51c908151d1f1a3756c8899c5e71572e8469a547ad72a1ef16a08a31b59')
+source=(ftp://gcc.gnu.org/pub/gcc/releases/gcc-${pkgver}/gcc-${pkgver}.tar.xz)
+sha256sums=('972d5e93b02cb747764fe1fb45ebda11ee6df193a6ad56523afbd69c234024a0')
 
 if [ -n "${_snapshot}" ]; then
   _basedir="${srcdir}/gcc-${_snapshot}"
@@ -26,20 +26,12 @@ build() {
   # Do not run fixincludes
   sed -i 's@\./fixinc\.sh@-c true@' gcc/Makefile.in
 
-  if [ "${CARCH}" = "x86_64" ]; then
-    patch -Np1 -i "${srcdir}"/gcc_pure64.patch
-  fi
-  patch -Np0 -i ../pr49756.diff
-  patch -Np1 -i ../pr48195-requires-lto.patch
-  patch -Np0 -i ../gcc-hash-style-both.patch
-  patch -Np0 -i ../pr33763.diff
-  patch -Np1 -i ../amd-save-the-initial-options-after-checking-vzeroupper.patch
-  patch -Np1 -i ../amd-ix86_reorg-run-move_or_dele.patch
-
-  patch -Np1 -i ../pr49279.diff
-  patch -Np1 -i ../pr49539.diff
-  patch -Np1 -i ../pr49651.diff
-  patch -Np1 -i ../pr49911.diff
+  [ "${CARCH}" = "x86_64" ] && Patch gcc_pure64.patch
+  Patch pr49756.diff
+  Patch gcc-hash-style-both.patch
+  Patch pr33763.diff
+  Patch amd-save-the-initial-options-after-checking-vzeroupper.patch
+  Patch amd-ix86_reorg-run-move_or_dele.patch
 
   echo ${pkgver} > gcc/BASE-VER
 
@@ -63,8 +55,8 @@ build() {
       --enable-gnu-unique-object --enable-linker-build-id \
       --without-ppl --without-cloog \
       --disable-lto --disable-gold \
-      --disable-plugin \
-      --disable-multilib --disable-libssp --disable-libstdcxx-pch \
+      --disable-plugin --disable-libstdcxx-pch \
+      --disable-multilib --disable-libssp \
       --enable-checking=release --disable-libmudflap
   make
 }
@@ -85,8 +77,8 @@ package_gcc-libs()
   for lib in libgomp libstdc++-v3/src; do
     make -j1 -C $CHOST/$lib DESTDIR="${pkgdir}" install-toolexeclibLTLIBRARIES
   done
-  make -j1 -C $CHOST/libstdc++-v3/po DESTDIR="${pkgdir}" install
-  make -j1 -C $CHOST/libgomp DESTDIR="${pkgdir}" install-info
+#  make -j1 -C $CHOST/libstdc++-v3/po DESTDIR="${pkgdir}" install
+#  make -j1 -C $CHOST/libgomp DESTDIR="${pkgdir}" install-info
 
   # remove unnecessary files installed by install-target-{libquadmath,libgfortran,libobjc}
   rm -rf "${pkgdir}"/usr/lib/{gcc/,libgfortran.spec}
@@ -170,12 +162,7 @@ source=(${source[@]-}
         gcc-hash-style-both.patch
         gcc_pure64.patch
         pr33763.diff
-        pr48195-requires-lto.patch
-        pr49279.diff
-        pr49539.diff
-        pr49651.diff
-        pr49756.diff
-        pr49911.diff)
+        pr49756.diff)
 
 sha256sums=(${sha256sums[@]-}
             'e2f9d6b971e0e7d44a3d1ca2cab60948789b2d74dcfbe2ce5c6b275f2904fdea'
@@ -183,9 +170,4 @@ sha256sums=(${sha256sums[@]-}
             '3492332fa78b545ff46c2b5293d17c63c122be6f8f6fa4798864b7d4572b0024'
             '2d369cf93c6e15c3559c3560bce581e0ae5f1f34dc86bca013ac67ef1c1a9ff9'
             'd7a0a02d59e1403261bffd04579638de0c2f7faf830ff76ee5b85ce6f3c60c08'
-            '60f37ce439053a5c5d4f7659edc380a32f993f462c622bba272d99b9309fd754'
-            'b27c8e6d0746dfbc607d5f14d498c37e4e75b6efcffb25afa7317ed1c9623deb'
-            '8f936332ed13679061922c8b7b6d4f102b46fdb4c3b858b4778aed84edbf5cf4'
-            'baba61c8d496c46270f18da38ff3c12ee3fb87df85499e8c1e935a8118803588'
-            'd8ccc639f5c2472b4ab53beada7c8552343ae960565f685c5cc8979fb28a74d1'
-            '1f47c156aa0aee2949c5b0224027a387ef25561ee6005f2174982a27dff5dfbd')
+            'd8ccc639f5c2472b4ab53beada7c8552343ae960565f685c5cc8979fb28a74d1')
