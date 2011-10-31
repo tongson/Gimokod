@@ -1,0 +1,26 @@
+pkgname=alternatives
+_pkgname=chkconfig
+pkgver=1.3.56
+pkgrel=1
+pkgdesc="reimplementation of the Debian alternatives system by Red Hat"
+arch=('i686' 'x86_64')
+url="https://fedorahosted.org/releases/c/h/chkconfig/"
+license=('GPL2')
+groups=('base')
+options=('emptydirs')
+source=(http://fedorahosted.org/releases/c/h/chkconfig/${_pkgname}-${pkgver}.tar.bz2)
+sha256sums=('cffab1de494120bf92ed27c9e6ccbd22c78a710231a618966b1f6238044aa964')
+
+build() {
+  cd "${srcdir}/${_pkgname}-${pkgver}"
+  make alternatives CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}"
+}
+
+package() {
+  cd "${srcdir}/${_pkgname}-${pkgver}"
+  install -D -m0755 alternatives "${pkgdir}/usr/sbin/alternatives"
+  install -d -m0755 "${pkgdir}/etc/alternatives"
+  install -d -m0755 "${pkgdir}/var/lib/alternatives"
+  install -D -m0644 alternatives.8 "${pkgdir}/usr/share/man/man8/alternatives.8"
+}
+
