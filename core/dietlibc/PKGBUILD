@@ -1,0 +1,28 @@
+pkgname=dietlibc
+pkgver=0.33_pre20110403
+pkgrel=1
+_githubauthor=hollow
+_githubproject=dietlibc
+_githubcommit=4e86d5e
+pkgdesc="A libc optimized for small size"
+arch=('i686' 'x86_64')
+url="http://www.fefe.de/dietlibc/"
+license=('GPL2')
+groups=('base-devel')
+#source=("http://nodeload.github.com/hollow/dietlibc/tarball/v${pkgver}")
+source=("http://gimokod.org/distfiles/dietlibc-0.33_pre20110403.tar.gz")
+sha256sums=('6505ed424a5b53850ae1dcbc75fbf92f3b7e4038dd1104d114b366221cc48eea')
+
+build() {
+  cd "${srcdir}/${_githubauthor}-${_githubproject}-${_githubcommit}"
+  export CFLAGS="${CFLAGS} -nostdinc -W -Wall -Wextra -Wchar-subscripts \
+    -Wmissing-prototypes -Wmissing-declarations -Wno-switch \
+    -Wno-unused -Wredundant-decls -fno-strict-aliasing"
+   make prefix="/usr/diet" CC="/usr/bin/gcc" CFLAGS="${CFLAGS}" STRIP=":"
+}
+
+package() {
+  cd "${srcdir}/${_githubauthor}-${_githubproject}-${_githubcommit}"
+  make prefix="/usr/diet" DESTDIR="${pkgdir}" install-bin install-headers
+}
+
