@@ -11,4 +11,9 @@ _gen_key() {
 post_install() {
   _gen_key dsa >/dev/null 2>&1 || echo "gen_key dsa failed!"
   _gen_key rsa >/dev/null 2>&1 || echo "gen_key rsa failed!"
+  . /usr/share/pacman/scm_install
+}
+
+post_upgrade() {
+  . /usr/share/pacman/scm_upgrade
 }
