@@ -1,11 +1,12 @@
 pkgname=busybox
-pkgver=1.19.2
+pkgver=1.19.3
 pkgrel=1
 pkgdesc='Utilities for rescue, embedded and minimal systems'
 arch=('i686' 'x86_64')
 url='http://busybox.net'
 license=('GPL')
 options=('emptydirs')
+install=busybox.install
 provides=('wget' 'sed' 'diffutils' 'findutils' 'awk' 'gzip' 'unzip' 'tar' 'which' 'sharutils'
           'run-parts' 'vi' 'procps' 'cpio' 'cron' 'eject' 'runit' 'psmisc' 'bridge-utils'
           'iputils' 'net-tools' 'inetutils' 'man-db' 'logger' 'ntp' 'dhcpcd' 'grep' 'ifenslave')
@@ -45,7 +46,6 @@ symlinks=(/usr/bin/uuencode
           /usr/bin/unzip
           /bin/tar
           /usr/bin/which
-          /bin/vi
           /bin/kill
           /bin/ps
           /sbin/sysctl
@@ -96,9 +96,6 @@ build() {
 
   patch -Np1 -i ../busybox-1.19.2-bb.patch
   patch -Np1 -i ../busybox-1.19.2-man.patch
-  patch -Np1 -i ../busybox-1.19.2-syslogd.patch
-  patch -Np1 -i ../busybox-1.19.2-tftp.patch
-  patch -Np1 -i ../busybox-1.19.2-patch.patch
 
   sed -i -r \
     -e 's:[[:space:]]?-(Werror|Os|falign-(functions|jumps|loops|labels)=1|fomit-frame-pointer)\>::g' \
@@ -140,15 +137,13 @@ package() {
   fi
 }
 
-source=(${url}/downloads/${pkgname}-${pkgver}.tar.bz2)
-sha256sums=('ea7ec9b6df70b8c528f4a2b6300e9913431c7223308fb08dfafa7508d75a0cb9')
+source=(${url}/downloads/${pkgname}-${pkgver}.tar.bz2{,.sign})
+sha256sums=('a1a9a35732c719ef384f02b6e357c324d8be25bc154af91a48c4264b1e6038f0'
+            '04526172ae950625388bde790f1b78ab126307a6396f80e9548e54621b513171')
 
 source=(${source[@]-}
         busybox-1.19.2-bb.patch
         busybox-1.19.2-man.patch
-        busybox-1.19.2-patch.patch
-        busybox-1.19.2-syslogd.patch
-        busybox-1.19.2-tftp.patch
         config
         man_db.conf
         runsvdir-log
@@ -159,12 +154,9 @@ source=(${source[@]-}
 sha256sums=(${sha256sums[@]-}
             '98f92c2edbcf61d1bacef783ea8b08cce07051b0a4489ed3f4579296846f89f1'
             '733e23d851e68ecd27ed8bb8f4c4b8ea27b0d143069ec49aadb04deeb65dd9f5'
-            'eb992c2fb254de4f3b2225130643e929a88252001dafab86887fa051995a027f'
-            'e772510323fb85e59005b80c7fa63072a6fbdb94216f425b14b742f1730b0472'
-            'a9796f35e00ea24824e9ea678a68f2df11ac976d405c458a4c563a285b17db10'
-            'd110af340989605cdd5221d45bc65114c2e7d5d95ffc9886e32606853370ae00'
+            '87c07fd39b180917c08e723b8d177b43ccca65f2233f8b80c286767de83bc089'
             'bf0092798438c18fd3e7f6d9a8a281d6575cf4258d2457b6320d9c6bc8443eae'
             '3e9a01d07f0d8a6f98bee545aa3009344c9f0d7a4b76b88582f9ca693d789cf7'
             'a70d24036a7ae14f213147fe6727fee4320b2090bc59d8a4ffa609d8fdd14cef'
-            'c0fe1acecbe92678bdf10245fdf30a4b04012c27b58ec4deedc70c57d2fa9501'
+            '2470c45daabf74cb4905f9e3766da7db1a638621522c51d62952ba2f02ebb342'
             '1ee4ae122a3beb89d4a322bbf2b06190971216da42ff9428fdc9d40afea3958f')

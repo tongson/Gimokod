@@ -1,0 +1,9 @@
+post_install() {
+  . /usr/share/pacman/scm_install
+  usr/sbin/alternatives --install /bin/vi vi /bin/busybox 1
+}
+
+
+post_upgrade() {
+  . /usr/share/pacman/scm_upgrade
+}

@@ -49,7 +49,7 @@ CONFIG_FEATURE_SYSLOG=y
 #
 # Build Options
 #
-CONFIG_STATIC=y
+CONFIG_STATIC=n
 # CONFIG_PIE is not set
 # CONFIG_NOMMU is not set
 # CONFIG_BUILD_LIBBUSYBOX is not set
