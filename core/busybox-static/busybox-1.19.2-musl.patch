@@ -1,0 +1,21 @@
+--- busybox-1.19.2-/networking/libiproute/iplink.c
++++ busybox-1.19.2/networking/libiproute/iplink.c
+@@ -5,7 +5,6 @@
+  * Licensed under GPLv2 or later, see file LICENSE in this source tree.
+  */
+ #include <net/if.h>
+-#include <net/if_packet.h>
+ #include <netpacket/packet.h>
+ #include <netinet/if_ether.h>
+ 
+--- busybox-1.19.2-/util-linux/fdisk.c
++++ busybox-1.19.2/util-linux/fdisk.c
+@@ -550,7 +550,7 @@
+ {
+ #if ENABLE_FDISK_SUPPORT_LARGE_DISKS
+ 	off64_t off = (off64_t)secno * sector_size;
+-	if (lseek64(dev_fd, off, SEEK_SET) == (off64_t) -1)
++	if (lseek(dev_fd, off, SEEK_SET) == (off64_t) -1)
+ 		fdisk_fatal(unable_to_seek);
+ #else
+ 	uint64_t off = (uint64_t)secno * sector_size;
