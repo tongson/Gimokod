@@ -9,9 +9,9 @@ url='https://www.openssl.org'
 license=('OPENSSL')
 groups=('base')
 depends=('zlib' 'gmp')
+install=openssl.install
 options=('!makeflags')
 makedepends=('perl' 'zlib' 'gmp' 'bc')
-backup=('etc/ssl/openssl.cnf')
 PKGEXT='.pkg.tar.gz'
 
 build() {
