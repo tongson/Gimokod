@@ -25,4 +25,9 @@ post_install() {
   _basic klogd lvm2 nscd rngd syslogd
   _multiuser crond ntpd sshd
   _shutdown remountrw systemd-random-seed-save.service sync
+  . /usr/share/pacman/scm_install
+}
+
+post_upgrade() {
+  . /usr/share/pacman/scm_upgrade
 }
