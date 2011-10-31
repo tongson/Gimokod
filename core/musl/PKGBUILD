@@ -1,0 +1,28 @@
+pkgname=musl
+pkgver=0.8.3
+pkgrel=1
+pkgdesc="A lightweight, fast, simple, and free C library implementation"
+arch=('i686' 'x86_64')
+url="http://www.etalabs.net/musl/"
+license=('LGPL2')
+makedepends=('make')
+options=('!binchecks')
+source=(http://www.etalabs.net/musl/releases/"${pkgname}"-"${pkgver}".tar.gz)
+sha256sums=('dec431b7a10f0c9f4f4a22659946146e8b5ede08a70765b398994f41174b4ffc')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  if [ "$CARCH" = "x86_64" ]; then
+    sed 's/^ARCH.*/ARCH = x86_64/' -i config.mak
+  fi
+  CFLAGS="${CFLAGS} -nostdinc -ffreestanding -std=c99 -D_XOPEN_SOURCE=700"
+  LDFLAGS="${LDFLAGS} -nostdlib -shared -fPIC -Wl,-e,_start -Wl,-Bsymbolic-functions"
+  PIC="-fPIC"
+  make prefix=/usr/musl exec_prefix=/usr CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}" PIC="${PIC}"
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  install -d -m755 "${pkgdir}/lib"
+  make DESTDIR="${pkgdir}" prefix=/usr/musl exec_prefix=/usr install
+}
