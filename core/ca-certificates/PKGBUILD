@@ -1,5 +1,5 @@
 pkgname=ca-certificates
-pkgver=20110502+nmu1
+pkgver=20111025
 pkgrel=1
 pkgdesc='Common CA certificates'
 arch=('any')
@@ -9,7 +9,6 @@ groups=('base')
 depends=('openssl')
 makedepends=('openssl' 'run-parts')
 install=ca-certificates.install
-backup=('etc/ca-certificates.conf')
 
 build() {
   cd ${srcdir}
@@ -31,7 +30,6 @@ package() {
   ) > "${pkgdir}"/etc/ca-certificates.conf
 }
 source=("http://ftp.debian.org/debian/pool/main/c/${pkgname}/${pkgname}_${pkgver}_all.deb")
-
-sha256sums=('d44284ee9b733b9890a54516f66b68a382ac5fb2c0bdceafed4cf229aa3b05a1')
+sha256sums=('7d743b307ab31138176d6da4fff1f4c7f6bd246b42698662894bfb1b74e55647')
 
 

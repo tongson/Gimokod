@@ -2,6 +2,7 @@ export LC_ALL=C
 
 post_install() {
   usr/sbin/update-ca-certificates --fresh &>/dev/null
+  . /usr/share/pacman/scm_install
   return 0
 }
 
@@ -10,6 +11,7 @@ post_upgrade() {
     echo 'Updating certificates. This might take a while...'
   fi
   usr/sbin/update-ca-certificates --fresh >/dev/null 2>&1
+  . /usr/share/pacman/scm_upgrade
 }
 
 pre_remove() {
