@@ -1,0 +1,4 @@
+  pushd etc
+    sbin/fsl stash save -m "${PKGNAME} upgraded to ${1}"
+  popd
+  echo "Run 'fsl stash ls' in /etc for possible changes"

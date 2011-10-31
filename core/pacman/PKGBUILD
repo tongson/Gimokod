@@ -1,14 +1,13 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=pacman
 pkgver=4.0.0
-pkgrel=1
+pkgrel=3
 pkgdesc="A library-based package manager with dependency support"
 arch=('i686' 'x86_64')
 url="http://www.archlinux.org/pacman/"
 license=('GPL')
 groups=('base')
 depends=('libarchive' 'gpgme' 'gimokod-keyring')
-backup=(etc/pacman.conf etc/makepkg.conf)
 install=pacman.install
 options=(!libtool)
 source=(ftp://ftp.archlinux.org/other/pacman/"${pkgname}"-"${pkgver}".tar.gz)
@@ -20,6 +19,7 @@ build() {
   cd "${srcdir}"/"${pkgname}"-"${pkgver}"
   Patch pacman-4.0.0-dload_h.patch
   Patch pacman-4.0.0-makepkg.patch
+  Patch pacman-4.0.0-PKGNAME.patch
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
@@ -27,7 +27,7 @@ build() {
               --localstatedir=/var \
               --disable-doc \
               --disable-nls \
-              --with-openssl \
+              --without-openssl \
               --without-libcurl \
               --with-gpgme
   make
@@ -65,18 +65,26 @@ package() {
   install -m644 contrib/bash_completion "${pkgdir}"/etc/bash_completion.d/pacman
   mkdir -p "${pkgdir}"/usr/share/zsh/site-functions/
   install -m644 contrib/zsh_completion "${pkgdir}"/usr/share/zsh/site-functions/_pacman
+  install -m644 "${srcdir}/scm_install" "${pkgdir}/usr/share/pacman"
+  install -m644 "${srcdir}/scm_upgrade" "${pkgdir}/usr/share/pacman"
 }
 
 source=(${source[@]-}
         makepkg.conf
+        pacman-4.0.0-PKGNAME.patch
         pacman-4.0.0-dload_h.patch
         pacman-4.0.0-makepkg.patch
         pacman.conf
-        pacman.conf.x86_64)
+        pacman.conf.x86_64
+        scm_install
+        scm_upgrade)
 
 sha256sums=(${sha256sums[@]-}
             '049491c1e3749cffb8033f7c757866490af836697fc5ce7bfbeb66596b9b0bc9'
+            'f9baafa47d65857fc5dd8b7c24b7481a66e3699211eb0fad00b1fdb4687f9271'
             '8e84d5873b8891cd4fe2b5bdfcb65c6bad4072fa4e488732cc45d12630464def'
             '058c9d1dafebadf4e579b84bbf4a79193d9677df987f124a8cdb42558b63cd63'
             '2f3916158d489f567670bb54de932419244d368fc33b0eefa3587ca8316904f3'
-            '17cda5f057d2137427437afe13544ed88c51a52dd8725fbb0bc707c38d786569')
+            '17cda5f057d2137427437afe13544ed88c51a52dd8725fbb0bc707c38d786569'
+            '4009ca1a3e5924f5799f4d7b6038327f23f5bfd4c4fce2c457aadccd07a0d718'
+            '3be60d6588ff11de69fd9cd4ff4dfdc775c5a948c39d536668088ba2e67cc621')
