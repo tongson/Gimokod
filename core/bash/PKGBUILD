@@ -10,6 +10,7 @@ license=('GPL')
 depends=('ncurses')
 url="http://www.gnu.org/software/bash/bash.html"
 groups=('base')
+install=bash.install
 backup=(etc/bash/bash{rc,_logout} etc/skel/.bash{rc,_logout})
 provides=('sh')
 source=(http://ftp.gnu.org/gnu/bash/bash-$_basever.tar.gz
