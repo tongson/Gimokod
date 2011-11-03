@@ -20,6 +20,9 @@ build() {
 
   ./configure --build=${CBUILD} \
               --host=${CHOST} \
+              --bindir=/usr/bin \
+              --sbindir=/usr/bin \
+              --libdir=/usr/lib \
               --enable-arch \
               --enable-write \
               --enable-raw \
@@ -36,6 +39,8 @@ package() {
 
   install -dm755 "${pkgdir}/var/lib/hwclock"
   make DESTDIR="${pkgdir}" install
-  chmod 0700 "${pkgdir}/bin/mount"
-  chmod 0700 "${pkgdir}/bin/umount"
+  chmod 0700 "${pkgdir}/usr/bin/mount"
+  chmod 0700 "${pkgdir}/usr/bin/umount"
+  mv "${pkgdir}"/usr/sbin/* "${pkgdir}"/usr/bin
+  rmdir "${pkgdir}"/usr/sbin
 }
