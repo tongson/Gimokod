@@ -1,5 +1,6 @@
 post_install() {
   . /usr/share/pacman/scm_install
+  /usr/bin/alternatives --install /usr/bin/sh sh /usr/bin/bash 10
 }
 
 post_upgrade() {

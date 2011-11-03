@@ -31,8 +31,8 @@ build() {
       msg "applying patch ${p}"
       patch -Np0 -i ${p}
   done
-  _bashconfig=(-DDEFAULT_PATH_VALUE=\'\"/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin\"\'
-              -DSTANDARD_UTILS_PATH=\'\"/usr/bin:/bin:/usr/sbin:/sbin\"\'
+  _bashconfig=(-DDEFAULT_PATH_VALUE=\'\"/usr/local/bin:/usr/bin\"\'
+              -DSTANDARD_UTILS_PATH=\'\"/usr/bin\"\'
               -DSYS_BASHRC=\'\"/etc/bash/bashrc\"\'
               -DSYS_BASH_LOGOUT=\'\"/etc/bash/bash_logout\"\')
   export CFLAGS="${CFLAGS} ${_bashconfig[@]}"
@@ -43,7 +43,7 @@ build() {
               --disable-nls \
               --without-bash-malloc \
               --without-installed-readline \
-              --bindir=/bin \
+              --bindir=/usr/bin \
               --mandir=/usr/share/man
   make
 }
@@ -51,8 +51,6 @@ build() {
 package() {
   cd "${srcdir}"/${pkgname}-$_basever
   make DESTDIR="${pkgdir}" install
-  cd "${pkgdir}"/bin
-  ln -s bash sh
   install -d -m0755 "${pkgdir}"/etc/skel/
   install -D -m0644 "${srcdir}"/system.bashrc "${pkgdir}"/etc/bash/bashrc
   install -D -m0644 "${srcdir}"/system.bash_logout "${pkgdir}"/etc/bash/bash_logout
