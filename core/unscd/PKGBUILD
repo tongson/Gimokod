@@ -6,6 +6,7 @@ arch=('i686' 'x86_64')
 url="http://busybox.net/~vda/unscd/"
 license=('GPL')
 groups=('base')
+install=unscd.install
 source=(http://busybox.net/~vda/${pkgname}/nscd-${pkgver}.c)
 sha256sums=('b96d6b5d1fb894a4a23c382ddc5c1e807bc45ad984053516fdd3c389fed4c5e7')
 build() {
@@ -16,7 +17,7 @@ build() {
 
 package() {
   cd "${srcdir}"
-  install -D -m0755 nscd "${pkgdir}/sbin/nscd"
+  install -D -m0755 nscd "${pkgdir}/usr/bin/unscd"
 }
 
 source=(${source[@]-}

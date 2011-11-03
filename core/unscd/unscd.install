@@ -1,0 +1,3 @@
+post_install() {
+  /usr/bin/alternatives --install /usr/bin/nscd nscd /usr/bin/unscd 10
+}
