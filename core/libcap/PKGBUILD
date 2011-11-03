@@ -22,7 +22,7 @@ build() {
 
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  make prefix=/usr DESTDIR="${pkgdir}" LIBDIR="${pkgdir}"/lib RAISE_SETFCAP=no install
-  rm "${pkgdir}"/lib/*.a
-  chmod 755 "${pkgdir}"/lib/libcap.so.${pkgver}
+  make prefix=/usr SBINDIR=${pkgdir}/usr/bin DESTDIR="${pkgdir}" LIBDIR="${pkgdir}"/usr/lib RAISE_SETFCAP=no install
+  rm "${pkgdir}"/usr/lib/*.a
+  chmod 755 "${pkgdir}"/usr/lib/libcap.so.${pkgver}
 }
