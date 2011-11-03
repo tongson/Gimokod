@@ -11,14 +11,13 @@ build() {
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
-              --exec-prefix=/
+              --exec-prefix=/usr
   make DOCBOOKTOMAN=:
 }
 
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   make DESTDIR="${pkgdir}" install
-  rm -r "${pkgdir}/usr"
 }
 
 source=(http://www.kernel.org/pub/linux/utils/kernel/module-init-tools/module-init-tools-${pkgver}.tar.bz2)
