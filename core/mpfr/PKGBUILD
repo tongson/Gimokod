@@ -24,6 +24,7 @@ build() {
               --host=${CHOST} \
               --enable-thread-safe \
               --enable-shared
+  CFLAGS=${CFLAGS/-Os/-O2}
   make
 }
 
