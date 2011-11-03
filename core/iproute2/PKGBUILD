@@ -13,7 +13,7 @@ install=iproute2.install
 source=(http://devresources.linux-foundation.org/dev/iproute2/download/iproute2-${pkgver}.tar.gz
         iproute2-fhs.patch)
 sha1sums=('9044ad0b4a34a377a54197724373330294d743c7'
-          '2416b11252364d7a6c742eabb4a6924a75637a46')
+          '78d6d2cb17b33ac89094aa3ed4810d81bb43c3d9')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
@@ -26,11 +26,9 @@ build() {
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   make DESTDIR="${pkgdir}" install
-  install -d -m0755 "${pkgdir}"/sbin
-  mv "${pkgdir}"/usr/sbin/ip "${pkgdir}"/sbin/ip
-  ln -s /sbin/ip "${pkgdir}"/usr/sbin/ip
+  cp "${pkgdir}/usr/bin/ip" "${pkgdir}/usr/bin/ip_dhcp"
+  chmod 4710 "${pkgdir}/usr/bin/ip_dhcp"
+  chown 0:188 "${pkgdir}/usr/bin/ip_dhcp"
   install -D -m0644 include/libnetlink.h "${pkgdir}"/usr/include/libnetlink.h
   install -D -m0644 lib/libnetlink.a "${pkgdir}"/usr/lib/libnetlink.a
-  chmod 2710 "${pkgdir}/sbin/ip"
-  chown 0:188 "${pkgdir}/sbin/ip"
 }

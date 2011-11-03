@@ -6,7 +6,7 @@ diff -Naur iproute2.old/Makefile iproute2-2.6.29/Makefile
  ROOTDIR=$(DESTDIR)
  LIBDIR=/usr/lib/
 -SBINDIR=/sbin
-+SBINDIR=/usr/sbin
++SBINDIR=/usr/bin
  CONFDIR=/etc/iproute2
 -DOCDIR=/share/doc/iproute2
 -MANDIR=/share/man
