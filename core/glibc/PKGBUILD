@@ -54,6 +54,10 @@ build() {
   # http://sourceware.org/git/?p=glibc.git;a=commitdiff;h=032c0ee3 (only fedora branch...)
   Patch glibc-2.14-avoid-assertion-on-empty-dns-answer.patch
 
+  # http://sourceware.org/git/?p=glibc.git;a=commitdiff;h=675155e9 (only fedora branch...)
+  # http://sourceware.org/ml/libc-alpha/2011-06/msg00006.html
+  Patch glibc-2.14-libdl-crash.patch
+
   # re-export RPC interface until libtirpc is ready as a replacement
   # http://sourceware.org/git/?p=glibc.git;a=commitdiff;h=acee4873 (only fedora branch...)
   Patch glibc-2.14-reexport-rpc-interface.patch
@@ -113,6 +117,7 @@ build() {
   "${srcdir}/${pkgname}-${pkgver}/configure" --prefix=/usr \
       --build=${CBUILD} --host=${CHOST} \
       --libdir=/usr/lib --libexecdir=/usr/lib \
+      --bindir=/usr/bin --sbindir=/usr/bin \
       --with-headers=/usr/include \
       --enable-add-ons=nptl,libidn \
       --enable-kernel=2.6.37 \
@@ -142,10 +147,9 @@ package() {
 
   rm -f "${pkgdir}"/etc/ld.so.{cache,conf}
 
-  install -dm755 "${pkgdir}"/usr/sbin
   install -dm755 "${pkgdir}"/usr/lib/locale
   install -m644 "${srcdir}"/${pkgname}-${pkgver}/nscd/nscd.conf "${pkgdir}"/etc/nscd.conf
-  install -m755 "${srcdir}"/locale-gen "${pkgdir}"/usr/sbin
+  install -m755 "${srcdir}"/locale-gen "${pkgdir}"/usr/bin
   install -m644 "${srcdir}"/${pkgname}-${pkgver}/posix/gai.conf "${pkgdir}"/etc/gai.conf
   echo -e "precedence ::ffff:0:0/96\t100" >> "${pkgdir}"/etc/gai.conf
 
@@ -186,6 +190,13 @@ package() {
                       lib/{libdl,libm,libnsl,libresolv,librt,libutil}-"${pkgver}".so \
                       lib/{libmemusage,libpcprofile,libSegFault}.so \
                       usr/lib/{audit,gconv}/*.so
+  mv lib/* usr/lib
+  mv usr/sbin/nscd usr/bin/gnscd
+  mv usr/sbin/iconvconfig usr/bin
+  mv sbin/{ldconfig,sln} usr/bin
+  rmdir lib
+  rmdir sbin
+  rmdir usr/sbin
 }
 source=(http://ftp.gnu.org/gnu/glibc/glibc-2.14.1.tar.xz)
 sha256sums=('984dcfcf2621494b56be3c2f625fa418231c1cb2eb07143ca4a587a6b250b468')
@@ -209,6 +220,7 @@ source=(${source[@]-}
         glibc-2.14-avoid-assertion-on-empty-dns-answer.patch
         glibc-2.14-fix-ctors.patch
         glibc-2.14-getaddrinfo-fixes.patch
+        glibc-2.14-libdl-crash.patch
         glibc-2.14-no-tzdata-info-translation.patch
         glibc-2.14-owl-crypt-increase_BF_FRAME.patch
         glibc-2.14-owl-crypt.patch
@@ -254,6 +266,7 @@ sha256sums=(${sha256sums[@]-}
             '757c93c6d078029f0feabdb4cb1d294cf8874a9635552a813840f0af03dc61ab'
             '658a4bb1d22aef4ca5adbaa4a849bec78b171c09066b22daea140c6e91ea8e25'
             'f3fd2b72566de249777487d5b24a6d27c853d0ecc107ab182a10f31ed1587f96'
+            '46187f64c2c3037594ec90b98e5dc476585202cca5437fba5af9e509b994119f'
             'bce1eab8c45a019c57e6b0c2e914e88c005d575a9aa239a0ff4d6b41a5d13509'
             'c37e6fd20cd0dfb9383724c6c5093c630fbb85af44324e75589fe6c6b594d7f5'
             '8dc5cd915863d947655bfc5a8627f0a61402580124acb5dc914084b7dd3ccfc3'
