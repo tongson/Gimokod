@@ -11,12 +11,12 @@ build() {
   cd "$srcdir/$pkgname-$pkgver"
   CFLAGS="${CFLAGS} -Iinclude -fPIC"
   LDFLAGS="${LDFLAGS} -s"
-  make CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}"
+  make CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}" SECUREDIR=/usr/lib/security
 }
 
 package() {
   cd "$srcdir/$pkgname-$pkgver"
-  make install DESTDIR="${pkgdir}"
+  make install SECUREDIR=/usr/lib/security DESTDIR="${pkgdir}"
   install -Dm644 "${srcdir}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }
 
