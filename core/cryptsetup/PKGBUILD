@@ -15,8 +15,8 @@ build() {
               --build=${CBUILD} \
               --host=${CHOST} \
               --enable-static-cryptsetup \
-              --sbindir=/sbin \
-              --libdir=/lib \
+              --sbindir=/usr/bin \
+              --libdir=/usr/lib \
               --disable-nls \
               --enable-udev \
               --enable-dev-random \
@@ -28,8 +28,6 @@ build() {
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   make DESTDIR="${pkgdir}" install
-  install -d -m755 "${pkgdir}"/usr/lib
-  mv "${pkgdir}"/lib/pkgconfig "${pkgdir}"/usr/lib/
 }
 
 source=(http://cryptsetup.googlecode.com/files/${pkgname}-${pkgver}.tar.bz2)
