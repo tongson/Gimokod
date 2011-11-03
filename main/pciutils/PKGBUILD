@@ -5,7 +5,6 @@ pkgrel=1
 pkgdesc="PCI bus configuration space access library and tools"
 arch=(i686 x86_64)
 license=('GPL2')
-groups=('base')
 url="http://mj.ucw.cz/pciutils.html"
 source=(ftp://ftp.kernel.org/pub/software/utils/${pkgname}/${pkgname}-${pkgver}.tar.bz2)
 md5sums=('35222edb86b50a6641352c66fe829b2e')
@@ -40,4 +39,7 @@ package() {
 
   make SHARED=yes PREFIX=/usr SHAREDIR=/usr/share/hwdata MANDIR=/usr/share/man DESTDIR="${pkgdir}" install install-lib
   install -m644 "${srcdir}/libpci.a" "${pkgdir}/usr/lib/"
+  install -d -m755 "${pkgdir}/usr/bin"
+  mv "${pkgdir}"/usr/sbin/* "${pkgdir}"/usr/bin
+  rmdir "${pkgdir}"/usr/sbin
 }
