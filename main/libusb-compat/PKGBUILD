@@ -4,7 +4,6 @@ pkgver=0.1.3
 pkgrel=1
 pkgdesc="Library to enable user space application programs to communicate with USB devices"
 arch=('i686' 'x86_64')
-groups=('base')
 depends=('libusb')
 url="http://libusb.sourceforge.net/"
 license=('LGPL')
