@@ -29,8 +29,8 @@ build() {
 
 package() {
   cd "$srcdir/$_realpkgname-$pkgver"
-  install -D -m 700 pamapps/login/login "${pkgdir}/bin/login"
-  install -D -m 4710 -o 0 -g 10 pamapps/su/su "${pkgdir}/bin/su"
+  install -D -m 700 pamapps/login/login "${pkgdir}/usr/bin/login"
+  install -D -m 4710 -o 0 -g 10 pamapps/su/su "${pkgdir}/usr/bin/su"
   install -D -m 2711 -o 0 -g 42 pamapps/passwd/passwd "${pkgdir}/usr/bin/passwd"
 
   mkdir -p "${pkgdir}/usr/share/man/man1"
