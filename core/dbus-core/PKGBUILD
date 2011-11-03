@@ -29,7 +29,7 @@ build() {
               --disable-static \
               --disable-tests \
               --disable-asserts \
-              --with-systemdsystemunitdir=/lib/systemd/system \
+              --with-systemdsystemunitdir=/usr/lib/systemd/system \
               --without-x \
               --disable-libaudit \
               --disable-selinux \
