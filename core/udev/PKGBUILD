@@ -8,8 +8,7 @@ license=('GPL')
 groups=('base')
 options=('!makeflags' '!libtool')
 install=udev.install
-depends=('util-linux' 'libusb-compat' 'glib' 'pciutils')
-makedepends=('gperf')
+makedepends=('gperf' 'glib')
 source=(http://people.freedesktop.org/~kay/$pkgname-$pkgver.tar.bz2
         udev-173-no-docs.patch)
 
@@ -18,14 +17,14 @@ md5sums=('3b84706046a33d7a7e00491a1136804d'
 
 build() {
   cd "${srcdir}/$pkgbase-${pkgver}"
-  patch -Np1 -i "${srcdir}"/udev-173-no-docs.patch
+  Patch udev-173-no-docs.patch
   ./configure --build=${CBUILD} \
               --host=${CHOST} \
               --sysconfdir=/etc \
-              --with-rootlibdir=/lib \
-              --libexecdir=/lib/udev \
-              --sbindir=/sbin \
-              --with-systemdsystemunitdir=/lib/systemd/system \
+              --with-rootlibdir=/usr/lib \
+              --libexecdir=/usr/lib/udev \
+              --sbindir=/usr/bin \
+              --with-systemdsystemunitdir=/usr/lib/systemd/system \
               --enable-gtk-doc-html=no \
               --disable-rule-generator \
               --disable-udev_acl \
@@ -43,9 +42,7 @@ build() {
 package() {
   cd "${srcdir}/$pkgbase-${pkgver}"
   make DESTDIR="${pkgdir}" install
-
-  # Replace dialout/tape/cdrom group in rules with uucp/storage/optical group
-  for i in "${pkgdir}"/lib/udev/rules.d/*.rules; do
+  for i in "${pkgdir}"/usr/lib/udev/rules.d/*.rules; do
     sed -i -e 's#GROUP="dialout"#GROUP="uucp"#g;
                s#GROUP="tape"#GROUP="storage"#g;
                s#GROUP="cdrom"#GROUP="optical"#g' $i
