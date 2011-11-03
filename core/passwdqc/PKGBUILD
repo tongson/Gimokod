@@ -19,7 +19,7 @@ build() {
 package() {
   cd "$srcdir/$pkgname-$pkgver"
   make install DESTDIR="${pkgdir}" MANDIR=/usr/share/man \
-       SHARED_LIBDIR=/usr/lib DEVEL_LIBDIR=/usr/lib SECUREDIR=/lib/security
+       SHARED_LIBDIR=/usr/lib DEVEL_LIBDIR=/usr/lib SECUREDIR=/usr/lib/security
   install -Dm644 "${srcdir}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }
 
