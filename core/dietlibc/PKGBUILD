@@ -18,11 +18,11 @@ build() {
   export CFLAGS="${CFLAGS} -nostdinc -W -Wall -Wextra -Wchar-subscripts \
     -Wmissing-prototypes -Wmissing-declarations -Wno-switch \
     -Wno-unused -Wredundant-decls -fno-strict-aliasing"
-   make prefix="/usr/diet" CC="/usr/bin/gcc" CFLAGS="${CFLAGS}" STRIP=":"
+  make prefix="/usr/lib/diet" CC="/usr/bin/gcc" CFLAGS="${CFLAGS}" STRIP=":"
 }
 
 package() {
   cd "${srcdir}/${_githubauthor}-${_githubproject}-${_githubcommit}"
-  make prefix="/usr/diet" DESTDIR="${pkgdir}" install-bin install-headers
+  make prefix="/usr/lib/diet" DESTDIR="${pkgdir}" install-bin install-headers
 }
 
