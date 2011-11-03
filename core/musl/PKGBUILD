@@ -18,11 +18,10 @@ build() {
   CFLAGS="${CFLAGS} -nostdinc -ffreestanding -std=c99 -D_XOPEN_SOURCE=700"
   LDFLAGS="${LDFLAGS} -nostdlib -shared -fPIC -Wl,-e,_start -Wl,-Bsymbolic-functions"
   PIC="-fPIC"
-  make prefix=/usr/musl exec_prefix=/usr CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}" PIC="${PIC}"
+  make prefix=/usr/lib/musl exec_prefix=/usr/lib/musl syslibdir=/usr/lib/musl/lib CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}" PIC="${PIC}"
 }
 
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  install -d -m755 "${pkgdir}/lib"
-  make DESTDIR="${pkgdir}" prefix=/usr/musl exec_prefix=/usr install
+  make DESTDIR="${pkgdir}" prefix=/usr/lib/musl exec_prefix=/usr/lib/musl syslibdir=/usr/lib/musl/lib install
 }
