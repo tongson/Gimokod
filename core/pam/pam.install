@@ -1,9 +1,9 @@
 post_install() {
-  /sbin/ldconfig -r .
+  /usr/bin/ldconfig -r .
   . /usr/share/pacman/scm_install
 }
 
 post_upgrade() {
-  post_install $1
+  /usr/bin/ldconfig -r . $1
   . /usr/share/pacman/scm_upgrade
 }

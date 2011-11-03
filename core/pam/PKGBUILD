@@ -6,7 +6,7 @@ pkgdesc="PAM (Pluggable Authentication Modules) library"
 arch=('i686' 'x86_64')
 license=('GPL2')
 groups=('base')
-url="http://www.kernel.org/pub/linux/libs/pam/"
+url="https://fedorahosted.org/linux-pam/"
 install=pam.install
 options=('!libtool' '!emptydirs')
 
@@ -17,7 +17,8 @@ build() {
               --build=${CBUILD} \
               --host=${CHOST} \
               DESTDIR="${pkgdir}" \
-              --libdir=/lib \
+              --libdir=/usr/lib \
+              --sbindir=/usr/bin \
               --disable-nls \
               --disable-nis \
               --disable-selinux \
@@ -39,10 +40,10 @@ package() {
   install -D -m0644 "${srcdir}/system-auth" "${pkgdir}/etc/pam.d/system-auth"
   install -D -m0644 "${srcdir}/config-util" "${pkgdir}/etc/pam.d/config-util"
   chgrp shadow "${pkgdir}/etc/pam.d/system-auth"
-  chmod 4755 "${pkgdir}/sbin/pam_timestamp_check"
+  chmod 4755 "${pkgdir}/usr/bin/pam_timestamp_check"
   chmod 0755 "${pkgdir}/etc/security/namespace.init"
 
-  rm "${pkgdir}/lib/security/pam_unix.so"
+  rm "${pkgdir}/usr/lib/security/pam_unix.so"
   rm "${pkgdir}/usr/share/man/man8/pam_unix.8"
 
   # add the realtime permissions for audio users
