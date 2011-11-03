@@ -1,13 +1,14 @@
 post_install() {
-  rm -rf tmp
-  rm -rf var/tmp
-  mkdir run/tmp
-  chmod 1777 run/tmp
-  ln -s run/tmp tmp
-  ln -s run/tmp var/tmp
-  . /usr/share/pacman/scm_install
+cd /etc
+/usr/bin/fsl init .fossil
+chmod 600 .fossil
+/usr/bin/fsl settings crnl-glob "*"
+/usr/bin/fsl settings allow-symlinks on
+/usr/bin/fsl open .fossil
+/usr/bin/fsl add .fossil-settings/ignore-glob
+. /usr/share/pacman/scm_install
 }
 
 post_upgrade() {
-  . /usr/share/pacman/scm_upgrade
+. /usr/share/pacman/scm_upgrade
 }

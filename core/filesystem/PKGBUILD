@@ -11,7 +11,7 @@ install=filesystem.install
 package() {
     cd ${srcdir}
 
-    for d in bin dev etc home lib/modules mnt sbin usr var opt sys run; do
+    for d in dev etc home usr var opt sys run; do
       install -d -m755 "${pkgdir}"/${d}
     done
 
@@ -76,7 +76,7 @@ package() {
 
     touch "${pkgdir}"/var/empty/.keep
 
-    for d in bin include lib sbin share/misc src; do
+    for d in bin include lib share/misc src; do
       install -d -m755 "${pkgdir}"/usr/${d}
     done
 
@@ -84,7 +84,7 @@ package() {
       install -d -m755 "${pkgdir}"/usr/share/man/man${d}
     done
 
-    for d in bin etc games include lib man sbin share src; do
+    for d in bin etc games include lib man share src; do
       install -d -m755 "${pkgdir}"/usr/local/${d}
     done
 
@@ -101,6 +101,9 @@ package() {
 
     install -D -m0644 layout.conf "${pkgdir}"/etc/tmpfiles.d/layout.conf
     install -D -m0644 net "${pkgdir}"/etc/conf.d/net
+    install -D -m0644 "${srcdir}/scm_install" "${pkgdir}/usr/share/pacman/scm_install"
+    install -D -m0644 "${srcdir}/scm_upgrade" "${pkgdir}/usr/share/pacman/scm_upgrade"
+    install -D -m0644 "${srcdir}/ignore-glob" "${pkgdir}/etc/.fossil-settings/ignore-glob"
 }
 
 source=(${source[@]-}
@@ -110,6 +113,7 @@ source=(${source[@]-}
         host.conf
         hostname
         hosts
+        ignore-glob
         inputrc
         issue
         layout.conf
@@ -122,6 +126,8 @@ source=(${source[@]-}
         passwd
         profile
         protocols
+        scm_install
+        scm_upgrade
         securetty
         services
         shells
@@ -134,19 +140,22 @@ sha256sums=(${sha256sums[@]-}
             'f0709706ce9bf46c58358e040d7eaa96994767438bab274ee5239ac19b0b814b'
             'ab014e33cfd4212e76d000310534b7528f0e2a39ee8e78660a0d9cfcdbac4e4b'
             'e3414c188757954ee34da03cf324fc9864b1758dc472cfe36884ce6415bbdbd3'
+            'a9a917b210d1f960618af6ae52742b0f146f5c51bb3611f36756d02dee4e5b09'
             '2644a0457e61bff454c317938878d827a6e1d0a403a2cea5891e373b2d9a4b35'
             '0d50b092887d0cd5063e82629860d7e70c683b22a49d7119dc116f38e134c359'
-            '9328dcb9291c2e11feb7ca710f69e83e72b62fb570a9b937d5844e52e9e4ac99'
+            '413db0af7ebad9c727023c33b593914f04e1e4735d54dce71d8fd7009e8ffba1'
             '27d7ebd402e1b9a20fd3a0663ccc10e1b1feff2d9dfb1ad7dd12bb76cfe0880a'
             '586ae0a486992c367e38ee8e103a92ad2b0baeb3a8b9898f2e4e7e0c63e5c112'
             'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
             'e210afefc512ab81447e21b12fa7389e7df3a2dc7be663a6663f210a4847ef8e'
             'a1e248357083b55d83659ab50f32c94bf1bcf0825470ccb41702dad3cff712c7'
             '99b8059593daf12e7136a3f858daedde1a9c7788ef7447361ffdaea595e89996'
-            '033c4920c3e745822baee6b370fb4379028d7dc293b0a51e126484c187466e20'
-            '7f44161b93c5fd74211d7b3be2900568631127110df029ad32ec12ea2d897ac1'
+            '61bd19c2821ef89fa0854a80854d78f5ad5dd38472e95a2bd219fb3f3a4d69b0'
+            '679a61e87556257972bc7706099c8f79135931be58b66610ba603ee8635b1a9d'
             '9b0d54d258b62c437aefe09e9c3e4e9307051b749e680024bc353f0eb92eb486'
+            'b444ab0db948fc08af57880a210c903f166a885b46309065d5922f8ef5af4410'
+            'b5d3fbe3e4401c39bd18a09240b80a3c6930b2ab4ddb559d0e0e9441f8635e1e'
             '845fec1cf9b279b2d94eb7d49f1c117d3c58c3cafa6ae4dec20ed62b91c9fb67'
             'e96af627f7774e8c87b0de843556a355fea6150c4d64fa4e2ff2c5fd610e7a79'
-            '0055e949a87c8f80bbd9aaf2acebef7926688981c90626effaac8095fa250826'
+            '612d1ba19c101dcce254dba0f566a624d42b434e10eeb1feb1e5800f69989e63'
             'e25196fd051a1ce3e2597d20d8d3d5cd77297d03eebd1d68da02e1ae44c3986d')
