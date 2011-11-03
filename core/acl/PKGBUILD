@@ -18,7 +18,7 @@ build() {
   CONFIG_SHELL=/bin/sh ./configure --prefix=/usr \
                                    --build=${CBUILD} \
                                    --host=${CHOST} \
-                                   --libdir=/lib \
+                                   --libdir=/usr/lib \
                                    --libexecdir=/usr/lib \
                                    --enable-gettext=no
   make
@@ -27,8 +27,7 @@ build() {
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   make DIST_ROOT="${pkgdir}" install install-lib install-dev
-  rm -f "${pkgdir}"/lib/libacl.a
-  chmod 0755 "${pkgdir}"/lib/libacl.so.*.*.*
+  chmod 0755 "${pkgdir}"/usr/lib/libacl.so.*.*.*
 }
 
 source=(http://download.savannah.gnu.org/releases/${pkgname}/${pkgname}-${pkgver}.src.tar.gz
