@@ -17,7 +17,7 @@ build()
     i686) sed -i 's#^OBJTYPE\s.*$#OBJTYPE = 386#' config.mk ;;
     x86_64) sed -i 's#^OBJTYPE\s.*$#OBJTYPE = x86_64#' config.mk ;;
   esac
-  echo "PREFIX = /" >>config.mk
+  echo "PREFIX = /usr" >>config.mk
   echo "CFLAGS += -D_GNU_SOURCE -DPLAN9PORT -idirafter /usr/include" >>config.mk
   sed -i 's/__linux__/__not_linux__/;s/__sun__/__linux__/' lib9/dirread.c
   sed -i '/sys.termios.h/d' lib9/readcons.c
