@@ -26,7 +26,8 @@ build() {
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
-              --with-root-prefix="" \
+              --with-root-prefix="/usr" \
+              --sbindir=/usr/bin \
               --enable-elf-shlibs \
               --disable-fsck \
               --disable-uuidd \
