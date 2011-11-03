@@ -3,20 +3,20 @@ resolv_conf="/etc/resolv.conf"
 
 case "$1" in
   bound|renew)
-    /sbin/ip addr flush dev ${interface} scope global
-    /sbin/ip addr add ${ip}/${subnet} brd ${broadcast} dev ${interface}
+    /usr/bin/ip_dhcp addr flush dev ${interface} scope global
+    /usr/bin/ip_dhcp addr add ${ip}/${subnet} brd ${broadcast} dev ${interface}
 
     if [ -n "${router}" ]
       then
       echo "udhcpc: deleting routers"
-      while /sbin/ip route del default dev ${interface} >/dev/null 2>&1
+      while /usr/bin/ip_dhcp route del default dev ${interface} >/dev/null 2>&1
         do :
       done
 
       metric=0
       for i in ${router}
       do
-        /sbin/ip route add default via ${i} dev ${inteface} metric $((metric++))
+        /usr/bin/ip_dhcp route add default via ${i} dev ${inteface} metric $((metric++))
       done
     fi
 
@@ -30,7 +30,7 @@ case "$1" in
     ;;
 
   deconfig)
-    /sbin/ip addr flush dev ${interface} scope global
+    /usr/bin/ip_dhcp addr flush dev ${interface} scope global
     ;;
 
   nak)

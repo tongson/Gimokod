@@ -1,8 +1,9 @@
 post_install() {
   . /usr/share/pacman/scm_install
-  usr/sbin/alternatives --install /bin/vi vi /bin/busybox 1
+  for l in vi awk wget tar sed cpio sed grep fgrep egrep find xargs diff cmp sh ash; do
+    /usr/bin/alternatives --install /usr/bin/${l} ${l} /usr/bin/busybox 5
+  done
 }
-
 
 post_upgrade() {
   . /usr/share/pacman/scm_upgrade

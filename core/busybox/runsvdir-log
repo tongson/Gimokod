@@ -1,2 +1,2 @@
-#!/bin/sh
-exec /sbin/svlogd -tt ./main
+#!/usr/bin/sh
+exec /usr/bin/svlogd -tt ./main

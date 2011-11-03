@@ -8,47 +8,36 @@ license=('GPL')
 options=('emptydirs')
 install=busybox.install
 provides=('wget' 'sed' 'diffutils' 'findutils' 'awk' 'gzip' 'unzip' 'tar' 'which' 'sharutils'
-          'run-parts' 'vi' 'procps' 'cpio' 'cron' 'eject' 'runit' 'psmisc' 'bridge-utils'
+          'sh' 'run-parts' 'vi' 'procps' 'cpio' 'cron' 'eject' 'runit' 'psmisc' 'bridge-utils'
           'iputils' 'net-tools' 'inetutils' 'man-db' 'logger' 'ntp' 'dhcpcd' 'grep' 'ifenslave')
 groups=('base')
 
 symlinks=(/usr/bin/uuencode
           /usr/bin/uudecode
-          /usr/bin/ip
-          /bin/smemcap
-          /bin/inotifyd
-          /bin/cpio
+          /usr/bin/smemcap
+          /usr/bin/inotifyd
           /usr/bin/run-parts
           /usr/bin/crontab
-          /usr/sbin/crond
+          /usr/bin/crond
           /usr/bin/eject
           /usr/bin/volname
-          /sbin/chpst
-          /sbin/runsv
-          /sbin/runsvdir
-          /sbin/sv
-          /sbin/svlogd
-          /sbin/setuidgid
-          /sbin/envuidgid
-          /bin/envdir
-          /bin/softlimit
-          /usr/bin/wget
-          /bin/sed
-          /usr/bin/diff
-          /usr/bin/cmp
-          /usr/bin/find
-          /usr/bin/xargs
-          /bin/awk
-          /usr/bin/awk
-          /bin/gunzip
-          /bin/uncompress
-          /bin/gzip
+          /usr/bin/chpst
+          /usr/bin/runsv
+          /usr/bin/runsvdir
+          /usr/bin/sv
+          /usr/bin/svlogd
+          /usr/bin/setuidgid
+          /usr/bin/envuidgid
+          /usr/bin/envdir
+          /usr/bin/softlimit
+          /usr/bin/gunzip
+          /usr/bin/uncompress
+          /usr/bin/gzip
           /usr/bin/unzip
-          /bin/tar
           /usr/bin/which
-          /bin/kill
-          /bin/ps
-          /sbin/sysctl
+          /usr/bin/kill
+          /usr/bin/ps
+          /usr/bin/sysctl
           /usr/bin/free
           /usr/bin/pgrep
           /usr/bin/pkill
@@ -60,34 +49,31 @@ symlinks=(/usr/bin/uuencode
           /usr/bin/fuser
           /usr/bin/killall
           /usr/bin/pstree
-          /usr/sbin/brctl
-          /bin/ping
-          /bin/ping6
-          /bin/traceroute
-          /bin/traceroute6
-          /usr/sbin/arping
+          /usr/bin/brctl
+          /usr/bin/ping
+          /usr/bin/ping6
+          /usr/bin/traceroute
+          /usr/bin/traceroute6
+          /usr/bin/arping
           /usr/bin/tftp
-          /usr/sbin/tftpd
-          /bin/hostname
-          /bin/netstat
-          /sbin/arp
-          /sbin/ifconfig
-          /sbin/iptunnel
-          /sbin/nameif
-          /sbin/route
+          /usr/bin/tftpd
+          /usr/bin/hostname
+          /usr/bin/netstat
+          /usr/bin/arp
+          /usr/bin/ifconfig
+          /usr/bin/iptunnel
+          /usr/bin/nameif
+          /usr/bin/route
           /usr/bin/telnet
-          /usr/sbin/ftpd
-          /usr/sbin/telnetd
+          /usr/bin/ftpd
+          /usr/bin/telnetd
           /usr/bin/man
-          /sbin/syslogd
-          /sbin/klogd
-          /bin/logread
+          /usr/bin/syslogd
+          /usr/bin/klogd
+          /usr/bin/logread
           /usr/bin/ntpd
-          /sbin/udhcpc
-          /bin/grep
-          /bin/egrep
-          /bin/fgrep
-          /sbin/ifenslave)
+          /usr/bin/udhcpc
+          /usr/bin/ifenslave)
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
@@ -112,7 +98,7 @@ package() {
   tar -cf busybox-links.tar -C _install .
   install -D -m0755 busybox "${pkgdir}"/bin/busybox
   install -D -m0644 busybox-links.tar "${pkgdir}/usr/share/busybox/busybox-links.tar"
-  install -m0755 -d "${pkgdir}"/usr/bin "${pkgdir}"/usr/sbin "${pkgdir}"/sbin
+  install -m0755 -d "${pkgdir}"/usr/bin
 
   for x in $(seq 0 $((${#symlinks[@]} - 1))); do
     ln -sf /bin/busybox "${pkgdir}"/${symlinks[$x]}
@@ -123,9 +109,9 @@ package() {
 
   install -D -m0644 "${srcdir}"/sysctl.conf "${pkgdir}"/etc/sysctl.conf
   install -D -m0644 "${srcdir}"/man_db.conf "${pkgdir}"/etc/man_db.conf
-  install -D -m0755 "${srcdir}"/runsvdir-start "${pkgdir}"/sbin/runsvdir-start
-  install -D -m0755 "${srcdir}"/runsvdir-log "${pkgdir}"/sbin/runsvdir-log
-  install -D -m0755 "${srcdir}"/udhcpc-script "${pkgdir}"/sbin/udhcpc-script
+  install -D -m0755 "${srcdir}"/runsvdir-start "${pkgdir}"/usr/bin/runsvdir-start
+  install -D -m0755 "${srcdir}"/runsvdir-log "${pkgdir}"/usr/bin/runsvdir-log
+  install -D -m0755 "${srcdir}"/udhcpc-script "${pkgdir}"/usr/bin/udhcpc-script
   install -D -m0644 LICENSE "${pkgdir}"/usr/share/licenses/${pkgname}/LICENSE
 
   if [[ ${CARCH} == "x86_64" ]]; then
@@ -140,7 +126,6 @@ package() {
 source=(${url}/downloads/${pkgname}-${pkgver}.tar.bz2{,.sign})
 sha256sums=('a1a9a35732c719ef384f02b6e357c324d8be25bc154af91a48c4264b1e6038f0'
             '04526172ae950625388bde790f1b78ab126307a6396f80e9548e54621b513171')
-
 source=(${source[@]-}
         busybox-1.19.2-bb.patch
         busybox-1.19.2-man.patch
@@ -156,7 +141,7 @@ sha256sums=(${sha256sums[@]-}
             '733e23d851e68ecd27ed8bb8f4c4b8ea27b0d143069ec49aadb04deeb65dd9f5'
             '87c07fd39b180917c08e723b8d177b43ccca65f2233f8b80c286767de83bc089'
             'bf0092798438c18fd3e7f6d9a8a281d6575cf4258d2457b6320d9c6bc8443eae'
-            '3e9a01d07f0d8a6f98bee545aa3009344c9f0d7a4b76b88582f9ca693d789cf7'
-            'a70d24036a7ae14f213147fe6727fee4320b2090bc59d8a4ffa609d8fdd14cef'
+            '0996e549d86446842b5b32d88e90f3b6257365ab0e2a3506e3e8e7f75f3b5138'
+            '26c4234e12c9a12ceac3e5a7a963708a5b21b5b8154c6d127be0de3d6114c203'
             '2470c45daabf74cb4905f9e3766da7db1a638621522c51d62952ba2f02ebb342'
-            '1ee4ae122a3beb89d4a322bbf2b06190971216da42ff9428fdc9d40afea3958f')
+            '0ef8e162587898f7a940ce09d32158028bf935ca247d79c5f95f1b177304e17a')
