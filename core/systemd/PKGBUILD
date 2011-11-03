@@ -23,13 +23,13 @@ build() {
               --build=${CBUILD} \
               --host=${CHOST} \
               --sysconfdir=/etc \
-              --with-udevrulesdir=/lib/udev/rules.d \
+              --with-udevrulesdir=/usr/lib/udev/rules.d \
               --with-pamlibdir=/usr/lib/security \
               --libexecdir=/usr/lib/systemd \
               --libdir=/usr/lib \
               --localstatedir=/var \
-              --with-rootdir= \
-              --with-rootlibdir=/lib \
+              --with-rootdir=/usr \
+              --with-rootlibdir=/usr/lib \
               --disable-audit \
               --disable-tcpwrap \
               --enable-libcryptsetup \
@@ -55,9 +55,6 @@ build() {
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   make DESTDIR="${pkgdir}" install
-  mkdir "${pkgdir}/usr/lib/pkgconfig"
-  mv "${pkgdir}/usr/share/pkgconfig/systemd.pc" "${pkgdir}/usr/lib/pkgconfig/systemd.pc"
-  rmdir "${pkgdir}/usr/share/pkgconfig"
   printf "d /run/console 755 root root\n" > "${pkgdir}/usr/lib/tmpfiles.d/console.conf"
 }
 
