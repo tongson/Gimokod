@@ -59,4 +59,6 @@ package() {
     -e '/^#ChallengeResponseAuthentication yes$/c ChallengeResponseAuthentication no' \
     -e '/^#UsePAM no$/c UsePAM yes' \
     -i "${pkgdir}"/etc/ssh/sshd_config
+  mv "${pkgdir}"/usr/sbin/* "${pkgdir}"/usr/bin
+  rmdir "${pkgdir}"/usr/sbin
 }
