@@ -8,9 +8,8 @@ license=('BSD')
 groups=('base')
 url="http://www.fossil-scm.org/"
 makedepends=('dietlibc' 'zlib')
-install=fsl.install
 source=("http://www.fossil-scm.org/download/fossil-src-${pkgver}.tar.gz")
-md5sums=('d3bd7d3bf60b523578f37315cd8a8f12')
+sha256sums=('636f201f236178ce9a3a9987ed43b0ce849021b2ae872ad71c5ee5780e9fe554')
 
 build() {
   cd "${_pkgname}-src-${pkgver}"
@@ -22,13 +21,12 @@ build() {
 
   cp /usr/include/{zlib,zconf}.h src
   export CFLAGS="${CFLAGS} -nostdinc"
-  make TCC="/usr/diet/bin/diet gcc" LIB="${LDFLAGS} -static -lz"
+  make TCC="/usr/lib/diet/bin/diet gcc" LIB="${LDFLAGS} -static -lz"
 }
 
 package() {
   cd "${_pkgname}-src-${pkgver}"
-  install -Dm755 "${_pkgname}" \
-    "${pkgdir}/sbin/fsl"
-  install -Dm644 COPYRIGHT-BSD2.txt \
-    "${pkgdir}/usr/share/licenses/${_pkgname}/LICENSE"
+  install -Dm755 "${_pkgname}"  "${pkgdir}/usr/bin/fsl"
+  install -Dm644 COPYRIGHT-BSD2.txt "${pkgdir}/usr/share/licenses/${_pkgname}/LICENSE"
 }
+
