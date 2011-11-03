@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=sudo
-_ver=1.8.2
+_ver=1.8.3p1
 pkgver=${_ver/[a-z]/.${_ver//[0-9.]/}}
 pkgrel=1
 pkgdesc="Give certain users the ability to run some commands as root"
@@ -10,9 +10,10 @@ license=('custom')
 depends=('zlib' 'pam')
 backup=('etc/sudoers' 'etc/pam.d/sudo')
 options=('!libtool' '!makeflags')
-source=(ftp://ftp.sudo.ws/pub/sudo/${pkgname}-$_ver.tar.gz
+source=(ftp://ftp.sudo.ws/pub/sudo/$pkgname-$_ver.tar.gz{,.sig}
         sudo.pam)
-md5sums=('000f458e7391be9fdf459a9ad6a4912a'
+md5sums=('7becc572fa97f94cf721a2ee8299c45b'
+         'b0726a25694fb2cdd5e1c146eb024e9c'
          '4e7ad4ec8f2fe6a40e12bcb2c0b256e3')
 
 build() {
