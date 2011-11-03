@@ -1,9 +1,9 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=tzdata
-pkgver=2011m
+pkgver=2011n
 pkgrel=1
 _tzcode=2011i
-_tzdata=2011m
+_tzdata=2011n
 pkgdesc="Sources for time zone and daylight saving time data"
 arch=('i686' 'x86_64')
 url="http://www.twinsun.com/tz/tz-link.htm"
@@ -15,7 +15,7 @@ source=(ftp://munnari.oz.au/pub/tzcode${_tzcode}.tar.gz
         ftp://munnari.oz.au/pub/${pkgname}${_tzdata}.tar.gz
         Makefile.patch)
 md5sums=('cf7f4335b7c8682899fa2814e711c1b2'
-         '6dc4455b62c951dcf367a239ca249e69'
+         '20dbfb28efa008ddbf6dd34601ea40fa'
          'a64ed97d1fc03c66ee8612c0d9f40507')
 
 build() {
@@ -41,4 +41,6 @@ package() {
 
   make DESTDIR="${pkgdir}" install
   rm "${pkgdir}/usr/share/zoneinfo/localtime"
+  mv "${pkgdir}"/usr/sbin/* "${pkgdir}"/usr/bin
+  rmdir "${pkgdir}"/usr/sbin
 }
