@@ -1,0 +1,19 @@
+--- alternatives.c
++++ alternatives.c
+@@ -22,7 +22,6 @@
+ #include <stdio.h>
+ #include <string.h>
+ #include <sys/stat.h>
+-#include <sys/unistd.h>
+ #include <unistd.h>
+ 
+ #define	FLAGS_TEST	(1 << 0)
+@@ -726,7 +725,7 @@
+ 
+     do {
+ 	printf("\n");
+-	printf(ngettext(_("There is %d program that provides '%s'.\n"), _("There are %d programs which provide '%s'.\n"), set.numAlts), set.numAlts, set.alts[0].master.title);
++	printf(_("Found %d program(s) which provide '%s'\n"), set.numAlts, set.alts[0].master.title);
+ 	printf("\n");
+ 	printf(_("  Selection    Command\n"));
+ 	printf("-----------------------------------------------\n");
