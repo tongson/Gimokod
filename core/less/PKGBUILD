@@ -25,6 +25,4 @@ package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
 
   make prefix="${pkgdir}"/usr install
-  install -dm755 "${pkgdir}"/bin
-  mv "${pkgdir}"/usr/bin/${pkgname} "${pkgdir}"/bin
 }
