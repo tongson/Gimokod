@@ -28,6 +28,9 @@ package() {
   cd "${pkgdir}"/usr/share/ca-certificates
   find . -name '*.crt' | LC_ALL=C sort | cut -b3-
   ) > "${pkgdir}"/etc/ca-certificates.conf
+  install -d -m755 "${pkgdir}/usr/bin"
+  mv "${pkgdir}"/usr/sbin/* "${pkgdir}/usr/bin"
+  rmdir "${pkgdir}/usr/sbin"
 }
 source=("http://ftp.debian.org/debian/pool/main/c/${pkgname}/${pkgname}_${pkgver}_all.deb")
 sha256sums=('7d743b307ab31138176d6da4fff1f4c7f6bd246b42698662894bfb1b74e55647')
