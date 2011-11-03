@@ -49,12 +49,20 @@ build() {
              ; do
     install -D -m644 /usr/include/${inc} include/${inc}
   done
-  make -j1 CC="/usr/bin/musl-gcc -D_GNU_SOURCE -DLOGIN_NAME_MAX=256 -D__musl__ -static -Wl,-z,muldefs"
+  make -j1 CC="/usr/lib/musl/bin/musl-gcc -D_GNU_SOURCE -DLOGIN_NAME_MAX=256 -D__musl__ -static -Wl,-z,muldefs"
 }
 
 package() {
   cd "${srcdir}/${_pkgname}-${pkgver}"
-  install -D -m0755 busybox "${pkgdir}"/bin/busybox-static
+  install -D -m0755 busybox "${pkgdir}"/usr/bin/busybox-static
+  install -d -m0755 "${pkgdir}/etc/alternatives"
+  pushd "${pkgdir}/etc/alternatives"
+    ln -sf /usr/bin/busybox-static sh
+  popd
+  pushd "${pkgdir}/usr/bin"
+    ln -sf /usr/bin/busybox-static sh
+  popd
+  install -D -m0644 "${srcdir}/sh" "${pkgdir}/var/lib/alternatives/sh"
 }
 
 source=(${url}/downloads/busybox-${pkgver}.tar.bz2{,.sign})
@@ -65,10 +73,12 @@ source=(${source[@]-}
         busybox-1.19.2-bb.patch
         busybox-1.19.2-man.patch
         busybox-1.19.2-musl.patch
-        config)
+        config
+        sh)
 
 sha256sums=(${sha256sums[@]-}
             '98f92c2edbcf61d1bacef783ea8b08cce07051b0a4489ed3f4579296846f89f1'
             '733e23d851e68ecd27ed8bb8f4c4b8ea27b0d143069ec49aadb04deeb65dd9f5'
             'b7a6af92ffb1879d0d947b6290a0b3109a02a71c5586bbcd19e8820aa024a0dc'
-            'a3e71b84fa9c9d225e6150f26917c584ff54873de7b6b1370a0c6e7a87cb26b8')
+            'a3e71b84fa9c9d225e6150f26917c584ff54873de7b6b1370a0c6e7a87cb26b8'
+            '5b78219c1434cf0cb6fb72b24a070d1d289211e39b91bee769cbab99cc7dbe2b')
