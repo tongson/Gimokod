@@ -17,9 +17,12 @@ PKGEXT='.pkg.tar.gz'
 
 build() {
   cd "${srcdir}"/"${pkgname}"-"${pkgver}"
-  Patch pacman-4.0.0-dload_h.patch
-  Patch pacman-4.0.0-makepkg.patch
-  Patch pacman-4.0.0-PKGNAME.patch
+  Patch 0d9e7da309f27c099814232d0f1be1b2ae884b2a.diff
+  Patch 571f2f78141a5c13aaf90cfbfe99c04af8158e4e.diff
+  Patch pacman-4.0.0-dload_h.diff
+  Patch pacman-4.0.0-makepkg.diff
+  Patch pacman-4.0.0-PKGNAME.diff
+  Patch pacman-4.0.0-usrmove.diff
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
@@ -60,31 +63,30 @@ package() {
     -e "s|@CHOST[@]|$mychost|g" \
     -e "s|@CARCHFLAGS[@]|$myflags|g"
 
-  # install completion files
   mkdir -p "${pkgdir}"/etc/bash_completion.d/
   install -m644 contrib/bash_completion "${pkgdir}"/etc/bash_completion.d/pacman
   mkdir -p "${pkgdir}"/usr/share/zsh/site-functions/
   install -m644 contrib/zsh_completion "${pkgdir}"/usr/share/zsh/site-functions/_pacman
-  install -m644 "${srcdir}/scm_install" "${pkgdir}/usr/share/pacman"
-  install -m644 "${srcdir}/scm_upgrade" "${pkgdir}/usr/share/pacman"
 }
 
 source=(${source[@]-}
+        0d9e7da309f27c099814232d0f1be1b2ae884b2a.diff
+        571f2f78141a5c13aaf90cfbfe99c04af8158e4e.diff
         makepkg.conf
-        pacman-4.0.0-PKGNAME.patch
-        pacman-4.0.0-dload_h.patch
-        pacman-4.0.0-makepkg.patch
+        pacman-4.0.0-PKGNAME.diff
+        pacman-4.0.0-dload_h.diff
+        pacman-4.0.0-makepkg.diff
+        pacman-4.0.0-usrmove.diff
         pacman.conf
-        pacman.conf.x86_64
-        scm_install
-        scm_upgrade)
+        pacman.conf.x86_64)
 
 sha256sums=(${sha256sums[@]-}
+            'da9824dd4d7b38b50d7ecf604f4a81da35329a1aa2c0e6a6d1ed1bb0449de578'
+            '27e9e6877fd8b5cf9ceb3a0be4299c0969e01a0b713d64e619cacd5fe2c21da7'
             '049491c1e3749cffb8033f7c757866490af836697fc5ce7bfbeb66596b9b0bc9'
-            'f9baafa47d65857fc5dd8b7c24b7481a66e3699211eb0fad00b1fdb4687f9271'
+            '56ee72e2fbc53b5d3201895a167b40295e638aaae93adb8cb3b9c8d0d6f4442a'
             '8e84d5873b8891cd4fe2b5bdfcb65c6bad4072fa4e488732cc45d12630464def'
             '058c9d1dafebadf4e579b84bbf4a79193d9677df987f124a8cdb42558b63cd63'
+            '5840250463cfa7889e4a1629af9d0436fc6fd903e87ff0e712ebf9b0473b609e'
             '2f3916158d489f567670bb54de932419244d368fc33b0eefa3587ca8316904f3'
-            '17cda5f057d2137427437afe13544ed88c51a52dd8725fbb0bc707c38d786569'
-            '4009ca1a3e5924f5799f4d7b6038327f23f5bfd4c4fce2c457aadccd07a0d718'
-            '3be60d6588ff11de69fd9cd4ff4dfdc775c5a948c39d536668088ba2e67cc621')
+            '17cda5f057d2137427437afe13544ed88c51a52dd8725fbb0bc707c38d786569')
