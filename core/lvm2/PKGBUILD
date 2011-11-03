@@ -23,6 +23,8 @@ build() {
               --host=${CHOST} \
               --sysconfdir=/etc \
               --localstatedir=/var \
+              --libdir=/usr/lib \
+              --sbindir=/usr/bin \
               --datarootdir=/usr/share \
               --includedir=/usr/include \
               --with-usrlibdir=/usr/lib \
@@ -37,7 +39,7 @@ build() {
               --disable-profiling \
               --enable-cmdlib \
               --enable-applib \
-              --with-udevdir=/lib/udev/rules.d/ \
+              --with-udevdir=/usr/lib/udev/rules.d/ \
               --with-default-locking-dir=/run \
               --enable-udev_sync \
               --enable-udev_rules
@@ -51,6 +53,9 @@ package_device-mapper() {
 
   cd "${srcdir}/LVM2.${pkgver}"
   make DESTDIR="${pkgdir}" install_device-mapper
+  install -d -m755 "${pkgdir}/usr/bin"
+  mv "${pkgdir}"/sbin/* "${pkgdir}"/usr/bin
+  rmdir "${pkgdir}"/sbin
 }
 
 package_lvm2() {
@@ -63,6 +68,10 @@ package_lvm2() {
   make DESTDIR="${pkgdir}" install_lvm2
   make -C liblvm DESTDIR="${pkgdir}" install
   install -d "${pkgdir}"/etc/lvm/{archive,backup}
+  install -d -m755 "${pkgdir}/usr/bin"
+  mv "${pkgdir}"/sbin/* "${pkgdir}"/usr/bin
+  rmdir "${pkgdir}"/sbin
+
 }
 
 source=(ftp://sources.redhat.com/pub/lvm2/LVM2.${pkgver}.tgz
