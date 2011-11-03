@@ -20,7 +20,7 @@ package() {
   cd "$srcdir/$pkgname-$pkgver"
   install -d -m 1777 "${pkgdir}/tmp"
   install -d -m 0755 "${pkgdir}/tmp/.private"
-  make install DESTDIR="${pkgdir}"
+  make install DESTDIR="${pkgdir}/usr"
   install -Dm644 "${srcdir}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }
 
