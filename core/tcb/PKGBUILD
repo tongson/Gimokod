@@ -21,12 +21,13 @@ package() {
   cd "$srcdir/$pkgname-$pkgver"
   make install-non-root install-pam_unix install-pam_pwdb DESTDIR="${pkgdir}" \
        MANDIR=/usr/share/man LIBDIR=/usr/lib \
-       LIBEXECDIR=/usr/lib
+       LIBEXECDIR=/usr/lib SLIBDIR=/usr/lib SBINDIR=/usr/bin
   install -Dm644 "${srcdir}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
   chgrp shadow "${pkgdir}/usr/lib/chkpwd/tcb_chkpwd"
   chmod 2711 "${pkgdir}/usr/lib/chkpwd/tcb_chkpwd"
   chgrp chkpwd "${pkgdir}/usr/lib/chkpwd"
   chmod 0710 "${pkgdir}/usr/lib/chkpwd"
+  rm -rf "${pkgdir}/usr/sbin"
 }
 
 source=(http://www.openwall.com/${pkgname}/${pkgname}-$pkgver.tar.gz
