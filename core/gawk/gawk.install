@@ -1,0 +1,7 @@
+post_install() {
+  /usr/bin/alternatives --install /usr/bin/awk awk /usr/bin/busybox 10
+}
+
+post_remove() {
+  /usr/bin/alternatives --remove awk /usr/bin/awk
+}
