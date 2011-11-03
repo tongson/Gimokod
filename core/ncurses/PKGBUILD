@@ -47,11 +47,6 @@ package() {
   cd "${srcdir}"/ncursesw-build
   make install
 
-  # move libraries needed for boot to /lib (we call tput in initscripts)
-  install -dm755 "${pkgdir}"/lib
-  mv "${pkgdir}"/usr/lib/libncursesw.so.5* "${pkgdir}"/lib
-  ln -sf ../../lib/libncursesw.so.5 "${pkgdir}"/usr/lib/libncursesw.so
-
   # Fool packages looking to link to non-wide-character ncurses libraries
   for lib in curses ncurses form panel menu; do
     rm -f "${pkgdir}"/usr/lib/lib${lib}.so
@@ -59,10 +54,6 @@ package() {
     ln -sf lib${lib}w.a "${pkgdir}"/usr/lib/lib${lib}.a
   done
   ln -sf libncurses++w.a "${pkgdir}"/usr/lib/libncurses++.a
-
-  # install tput to /bin
-  install -dm755 "${pkgdir}"/bin/
-  mv "${pkgdir}"/usr/bin/tput "${pkgdir}"/bin/tput
 
   # Some packages look for -lcurses during build
   rm -f "${pkgdir}"/usr/lib/libcursesw.so
