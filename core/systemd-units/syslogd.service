@@ -6,5 +6,5 @@ Sockets=syslog.socket
 Restart=always
 User=syslogd
 Group=syslogd
-ExecStart=/sbin/syslogd -n -C1024
+ExecStart=/usr/bin/syslogd -n -C1024
 StandardOutput=null

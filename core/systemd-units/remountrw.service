@@ -5,4 +5,4 @@ Before=systemd-random-seed-save.service shutdown.target
 
 [Service]
 Type=oneshot
-ExecStart=-/bin/mount -o remount,rw /
+ExecStart=-/usr/bin/mount -o remount,rw /

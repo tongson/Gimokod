@@ -6,4 +6,4 @@ Restart=always
 SyslogFacility=cron
 User=crond
 Group=crond
-ExecStart=/usr/sbin/crond -f -l 5
+ExecStart=/usr/bin/crond -f -l 5

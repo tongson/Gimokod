@@ -4,6 +4,6 @@ Description=BusyBox klogd
 [Service]
 Restart=always
 CapabilityBoundingSet=CAP_SYSLOG
-ExecStart=/sbin/klogd -n
+ExecStart=/usr/bin/klogd -n
 StandardOutput=null
 

@@ -10,7 +10,7 @@ install=systemd-units.install
 package() {
   cd ${srcdir}
   for s in *.service ; do
-    install -D -m0644 ${s} "${pkgdir}/lib/systemd/system/${s}"
+    install -D -m0644 ${s} "${pkgdir}/usr/lib/systemd/system/${s}"
   done
 }
 
@@ -30,16 +30,16 @@ source=(${source[@]-}
         syslogd.service)
 
 sha256sums=(${sha256sums[@]-}
-            '9c0c3947546b4a7773bd90ce0be75af38fc709d78aa352ce708d5790e939a35a'
-            '786ece8ceb6ec872ab04bdda2f7fd005d679fc1d1fb459c730522a874facc9bc'
-            '835bd763261c671af6f83f057d688ac1578fdaf996f68c11bad2a4d55589bc24'
-            '8b3c185ed435b6a7965ce804ca9cf81118fba6d1ecba830faa24c9f8f5ee31be'
-            '5a2b1359a26ded65eee2dc91e26de124cc8e4970a94416e1324818a273ee97a9'
-            'a095f409c6712bf8c60edee7cc28acc4fdcb2f44dc9515bfd509af10bbaddfca'
-            'f73ef85802a2983e38564abc61f360157485ec38431b130fbe1471b8f1267244'
-            'e9743e63e7a8187e8f8212144e160eeb703ed3a8e93db1fe9b8b865e9bb9ad44'
-            '133b0bf643da2284d1381cea8ac1603279c84402bf27c5293a2a42f092c0fa47'
-            'f640e4a30d7fe927a592d544caab7fe9a745303fcd402e6b29daa456e67adc8f'
-            'e793458e0ff0607f499f299e6f51952acaa28bda674a6dab6dec36d62b7633e4'
-            '59e725f31489f2f0b89c398f28dfbaff96adbe8d4cc8f1e7292c4e18f86e9d30'
-            '288b5e37ce590448c66c4142edd60b52e79c162a34c7e555bcbebddaf5b9c3d3')
+            '73193a22e1bbb3401c4b901c5c80a187ca42f108bc530387b90c89e2a9cd37ee'
+            '3c1a0ed5349ef4cbf3841cab90b47aa158c302f88b27a9e18e0e5289d3fc8580'
+            '5af54b553bf7bf979f456dc181ba1c6fc44d6befc89bebec22679c145cd4cefa'
+            'fe86678c1d600668965f95f33e89f4a2103d547996669ff0f88c4896b124968b'
+            '25a61c7b17379b2f547ab6cf9d54de71e7c93d6939fa9240959cdac76f596c81'
+            'fce52b10ebf40a8dd6e077210a2fa3c6b1bc5e7a549092916727be2a37c5fc15'
+            'bc5a16f46e0d754cab44babe2e002990086b29da3692eb952f288de4c2acf2e3'
+            '2b5d42dc2e117bbe296640efdc4bba1a1399dcc0a1913cb9644345230bccdb52'
+            '52e93de032f2b4007c38b5e4e928768932993ca3a8e0dff17086c81bd09d05c1'
+            '4f3af78b3e119028d421959ca7da7b7bcab0f0efe8975b76d210d9228ca0cc86'
+            'd3cfed8763bba385c9656060356fb584e0659c2f69bedd7bae3ba822ca710791'
+            '2a0508ff284e8ce2bdecfa65ef45da3173f13a4448d68232ffb03f4d73ccfc3b'
+            '3b8bc0227a856bd74d19def009a9e02d5821a3c71a62d58034dfb22e4ef98cf3')

@@ -6,7 +6,7 @@ Before=shutdown.target
 
 [Service]
 Type=oneshot
-ExecStart=/bin/sync
-ExecStart=/bin/echo 3 > /proc/sys/vm/drop_caches
-ExecStart=/bin/echo 0 > /proc/sys/vm/drop_caches
-ExecStart=/bin/mount -o remount,ro /
+ExecStart=/usr/bin/sync
+ExecStart=/usr/bin/echo 3 > /proc/sys/vm/drop_caches
+ExecStart=/usr/bin/echo 0 > /proc/sys/vm/drop_caches
+ExecStart=/usr/bin/mount -o remount,ro /
