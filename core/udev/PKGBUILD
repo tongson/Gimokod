@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=udev
-pkgver=174
+pkgver=175
 pkgrel=1
 arch=(i686 x86_64)
 url="http://www.kernel.org/pub/linux/utils/kernel/hotplug/udev.html"
@@ -9,15 +9,16 @@ groups=('base')
 options=('!makeflags' '!libtool')
 install=udev.install
 makedepends=('gperf' 'glib')
-source=(http://people.freedesktop.org/~kay/$pkgname-$pkgver.tar.bz2
+source=(http://people.freedesktop.org/~kay/udev/$pkgname-$pkgver.tar.bz2
         udev-173-no-docs.patch)
 
-md5sums=('3b84706046a33d7a7e00491a1136804d'
+md5sums=('2fc9c1efcbde98e3d73ffee7a77aea47'
          '9033a9ea911f471b3278dbaf288cd0b3')
 
 build() {
   cd "${srcdir}/$pkgbase-${pkgver}"
   Patch udev-173-no-docs.patch
+  sed -i 's:/sbin:/usr/bin:g' rules/rules.d/* >/dev/null 2>&1
   ./configure --build=${CBUILD} \
               --host=${CHOST} \
               --sysconfdir=/etc \
