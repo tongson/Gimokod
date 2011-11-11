@@ -11,7 +11,7 @@ backup=(etc/fuse.conf)
 source=(http://downloads.sourceforge.net/${pkgname}/${pkgname}-${pkgver}.tar.gz
         'fuse.conf')
 options=('!libtool')
-sha1sums='c2c0f9fff8bfee217da200888123e5abb5b498f2'
+sha1sums=('c2c0f9fff8bfee217da200888123e5abb5b498f2'
          '3b42e37a741d4651099225987dc40e7f02a716ad')
 
 build() {
@@ -22,7 +22,7 @@ build() {
               --host=${CHOST} \
               --enable-lib \
               --enable-util \
-              --bindir=/bin \
+              --bindir=/usr/bin \
               --disable-example
   make
 }
