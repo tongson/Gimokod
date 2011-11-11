@@ -1,0 +1,50 @@
+pkgname=linux-netbook
+_basekernel=3.1
+pkgver=${_basekernel}.0
+pkgrel=1
+pkgdesc="The Linux Kernel for netbooks"
+arch=('i686' 'x86_64')
+url="http://www.kernel.org/"
+license=('GPL2')
+options=('!strip' '!binchecks')
+source=("ftp://ftp.kernel.org/pub/linux/kernel/v3.0/linux-${_basekernel}.tar.xz")
+sha256sums=('6f220258f3ce9f11d0e53860ccc2d9fe746117056212099876dbe5ee1de80af3')
+
+build() {
+  cd "${srcdir}/linux-${_basekernel}"
+  # Patch patch-${pkgver}"
+  Patch i915-fix-ghost-tv-output.patch
+  Patch i915-fix-incorrect-error-message.patch
+  Patch iwlagn-fix-NULL-pointer-dereference.patch
+  cp "${srcdir}/config.${CARCH}" ./.config
+  make oldconfig
+  make -j4 bzImage
+}
+
+package() {
+  cd "${srcdir}/linux-${_basekernel}"
+  KARCH=x86
+  _kernver="$(make kernelrelease)"
+  install -d -m700 "${pkgdir}/boot"
+  install -D -m644 arch/$KARCH/boot/bzImage "${pkgdir}/boot/bzImage"
+  install -D -m644 vmlinux "${pkgdir}/usr/src/linux-${_kernver}/vmlinux"
+  install -D -m644 Makefile "${pkgdir}/usr/src/linux-${_kernver}/Makefile"
+  install -D -m644 kernel/Makefile "${pkgdir}/usr/src/linux-${_kernver}/kernel/Makefile"
+  install -D -m644 .config "${pkgdir}/usr/src/linux-${_kernver}/.config"
+  cd "${pkgdir}/usr/src"
+  ln -sf linux-${_kernver} linux
+}
+
+source=(${source[@]-}
+        config.i686
+        config.x86_64
+        i915-fix-ghost-tv-output.patch
+        i915-fix-incorrect-error-message.patch
+        iwlagn-fix-NULL-pointer-dereference.patch)
+
+sha256sums=(${sha256sums[@]-}
+            'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+            '30b2aa88f4b23a355d2669b942bd2bf36c68ae88745d6138e60728ea88a1d51c'
+            '9ccadbe3eb30bb283af3eb869c3a4bdb764628854811cc616a2e02e9ef398705'
+            '6f2af62930ba30e219e50418931cd87966990b4b446d406d9a8ebc56190a9277'
+            'd2bc969b25b686107791668a4674c485725963b499193a1e1e7c0ff30313d7cd')
