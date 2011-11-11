@@ -1,0 +1,60 @@
+#!/usr/bin/env sh
+builddir=/home/abs/builddir
+packages=/home/abs/packages
+   build=/home/abs/build
+
+# Helper functions SHOULD not echo \n. Main script handles EOLs.
+getpkgbin() {
+  local pkgbin xpkgbin
+  for pkgbin in $(find "${packages}" -name "${1}*.??");do
+    xpkgbin="${pkgbin##*/}"
+    if [[ "${xpkgbin%-*-*-*.pkg.tar.??}" = "${1}" ]];then
+      echo -n "${packages}/${xpkgbin}"
+    fi
+  done
+}
+
+getpkgbuild() {
+  local workdir="$(pwd)"
+  echo -n "${build}/${workdir##*/}/${1}/PKGBUILD"
+}
+
+getdep() {
+  local dep
+  for dep in $(getdepends "$(getpkgbuild ${1})"); do
+    if [[ $(getpkgbin ${dep}) ]]; then
+      getpkgbin ${dep}
+      echo -n " "
+    else
+      ls -1 | grep -Eq "^${dep}$" && echo -n "${dep} "
+    fi
+  done
+}
+
+echo "all:V: $(ls | tr '\n' ' ')"
+(
+for pkgdir in $(find . -mindepth 1 -type d); do
+  pkg=${pkgdir##*/}
+  if [[ $(getpkgbin ${pkg}) ]]; then
+    echo -n "${pkg}:V: $(getpkgbin ${pkg}) "
+    getdep "${pkg}"
+    echo ""
+    echo "$(getpkgbin ${pkg}):Pnt: $(getpkgbuild ${pkg})"
+    echo "      rm -rf ${builddir}/*"
+    echo "      cd $(pwd)/${pkg}"
+    echo "      makepkg --nocheck -fc"
+  else
+    echo -n "${pkg}:V: "
+    getdep "${pkg}"
+    echo ""
+    echo "      rm -rf ${builddir}/*"
+    echo "      cd $(pwd)/${pkg}"
+    echo "      makepkg --nocheck --noconfirm -ci"
+  fi
+done
+) | sed -e 's:device-mapper:lvm2:' \
+        -e 's:libltdl:libtool:' \
+        -e 's:libjpeg:libjpeg-turbo:' \
+        -e 's:xorg-server-xvfb:xorg-server:' \
+        -e 's:xorg-server-common:xorg-server:' \
+        -e 's:xorg-server-devel:xorg-server:'
