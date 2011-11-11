@@ -1,0 +1,8 @@
+[Unit]
+Description=colorum run
+
+[Service]
+Type=oneshot
+WorkingDirectory=/etc/colorum
+ExecStart=/usr/bin/mk
+

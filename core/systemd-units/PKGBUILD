@@ -15,6 +15,7 @@ package() {
 }
 
 source=(${source[@]-}
+        colorum.service
         crond.service
         klogd.service
         lvm2.service
@@ -30,6 +31,7 @@ source=(${source[@]-}
         syslogd.service)
 
 sha256sums=(${sha256sums[@]-}
+            '99ba209ddee02295ce0702020d544a6fed2e160500123fd1f8b225223a742700'
             '73193a22e1bbb3401c4b901c5c80a187ca42f108bc530387b90c89e2a9cd37ee'
             '3c1a0ed5349ef4cbf3841cab90b47aa158c302f88b27a9e18e0e5289d3fc8580'
             '5af54b553bf7bf979f456dc181ba1c6fc44d6befc89bebec22679c145cd4cefa'
