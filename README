@@ -3,7 +3,7 @@ Gimokod Linux
 A Linux distribution that aims to be lightweigt and XXX
 Pacman for package management--I had the option of using Pkgin/Pkgsrc but Pacman/ABS was so much easier to work with. I'm aiming for a very small footprint. No NLS support, multilib, texinfo manuals and HTML docs. Dependency on language interpreters (e.g. Python and Perl) are avoided as much as possible. Several components usually provided by GNU utilities are replaced by BusyBox applets, except for coreutils and util-linux. Huge part of the authentication system is taken straight from Openwall.
 
-You can think of it as a distribution between minimal Linux distributions using uClibc/BusyBox and full blown Linux distributions. The initial packages were built in Exherbo but now the base system is able to build itself. The base system and development tools needed to build itself total in at 91 packages only.
+You can think of it as a distribution between minimal Linux distributions using uClibc/BusyBox and full blown Linux distributions. The initial packages were built in Exherbo but now the base system is able to build itself. The base system and development tools needed to build itself total in at 93 packages only.
 
 Arch Linux updates its packages frequently so ABS is good for monitoring updates. I also watch the Gentoo, Exherbo, Openwall, AlpineLinux, Mandriva, Debian, Fedora and openSUSE repositories for useful updates and fixes. The kernel will be close to vanilla as much as possible but I'll probably sync up with gentoo-sources. Built-in tests are run and checked for 0 unexpected failures in the following important packages:
 
@@ -23,6 +23,7 @@ libarchive
 icu
 libxml2
 pam
+expat
 
 Misc features:
 /etc/tcb support
