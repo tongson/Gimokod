@@ -1,0 +1,26 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=slock
+pkgver=0.9
+_pkgver="d8975fb0640f"
+pkgrel=6
+pkgdesc="A simple screen locker for X"
+arch=('i686' 'x86_64')
+url="http://tools.suckless.org/slock"
+license=('MIT')
+depends=('libxext')
+source=("slock-"${pkgver}".tar.bz2::http://hg.suckless.org/slock/archive/$_pkgver.tar.gz")
+md5sums=('ae427719120dcd336dbff4cd152cbcb4')
+
+build() {
+  cd "${srcdir}/slock-${_pkgver}"
+  sed -i -e "s/CFLAGS = -std=c99 -pedantic -Wall -Os/CFLAGS += -std=c99 -pedantic -Wall -g/" \
+         -e "s/LDFLAGS = -s/LDFLAGS += -g/" config.mk
+  make X11INC=/usr/include/X11 X11LIB=/usr/lib/X11
+}
+
+package() {
+  cd "${srcdir}/slock-${_pkgver}"
+
+  make PREFIX=/usr DESTDIR="${pkgdir}" install
+  install -m644 -D LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
