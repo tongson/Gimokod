@@ -58,11 +58,14 @@ package() {
   install -d -m0755 "${pkgdir}/etc/alternatives"
   pushd "${pkgdir}/etc/alternatives"
     ln -sf /usr/bin/busybox-static sh
+    ln -sf /usr/bin/busybox-static ash
   popd
   pushd "${pkgdir}/usr/bin"
     ln -sf /usr/bin/busybox-static sh
+    ln -sf /usr/bin/busybox-static ash
   popd
   install -D -m0644 "${srcdir}/sh" "${pkgdir}/var/lib/alternatives/sh"
+  install -D -m0644 "${srcdir}/ash" "${pkgdir}/var/lib/alternatives/ash"
 }
 
 source=(${url}/downloads/busybox-${pkgver}.tar.bz2{,.sign})
@@ -70,6 +73,7 @@ sha256sums=('a1a9a35732c719ef384f02b6e357c324d8be25bc154af91a48c4264b1e6038f0'
             '04526172ae950625388bde790f1b78ab126307a6396f80e9548e54621b513171')
 
 source=(${source[@]-}
+        ash
         busybox-1.19.2-bb.patch
         busybox-1.19.2-man.patch
         busybox-1.19.2-musl.patch
@@ -77,6 +81,7 @@ source=(${source[@]-}
         sh)
 
 sha256sums=(${sha256sums[@]-}
+            '0b7984ad77179789d34381cd3cd480ce84ced49898964d78b2b70e3b1529671b'
             '98f92c2edbcf61d1bacef783ea8b08cce07051b0a4489ed3f4579296846f89f1'
             '733e23d851e68ecd27ed8bb8f4c4b8ea27b0d143069ec49aadb04deeb65dd9f5'
             'b7a6af92ffb1879d0d947b6290a0b3109a02a71c5586bbcd19e8820aa024a0dc'
