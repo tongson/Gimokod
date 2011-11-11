@@ -23,5 +23,5 @@ build() {
 package() {
   cd "${srcdir}/font-alias-${pkgver}"
   make DESTDIR="${pkgdir}" install
-  install -Dm644 "${srcdir}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/"
+  install -Dm644 "${srcdir}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }
