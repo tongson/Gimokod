@@ -56,6 +56,9 @@ package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   make DESTDIR="${pkgdir}" install
   printf "d /run/console 755 root root\n" > "${pkgdir}/usr/lib/tmpfiles.d/console.conf"
+  pushd "${pkgdir}/usr/lib/systemd/system"
+    sed -i 's:/sbin:/usr/bin:g' *.service >/dev/null 2>&1
+  popd
 }
 
 source=("http://www.freedesktop.org/software/${pkgname}/${pkgname}-${pkgver}.tar.bz2")
