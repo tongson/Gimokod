@@ -31,7 +31,7 @@ package() {
       "${pkgdir}"/usr/share/doc/${pkgname}/$file
   done
 
-  install -Dm0755 -o root -g root lsof "${pkgdir}"/usr/sbin/lsof
+  install -Dm0755 -o root -g root lsof "${pkgdir}"/usr/bin/lsof
   install -Dm0644 -o root -g root lsof.8 "${pkgdir}"/usr/share/man/man8/lsof.8
 
   install -D -m0644 -o root -g root "${srcdir}"/license.txt \
