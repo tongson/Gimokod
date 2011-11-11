@@ -8,11 +8,14 @@ license=('BSD')
 groups=('base')
 url="http://www.fossil-scm.org/"
 makedepends=('dietlibc' 'zlib')
-source=("http://www.fossil-scm.org/download/fossil-src-${pkgver}.tar.gz")
-sha256sums=('636f201f236178ce9a3a9987ed43b0ce849021b2ae872ad71c5ee5780e9fe554')
+source=("http://www.fossil-scm.org/download/fossil-src-${pkgver}.tar.gz"
+         fossil-betterstash.diff)
+sha256sums=('636f201f236178ce9a3a9987ed43b0ce849021b2ae872ad71c5ee5780e9fe554'
+            '0aaffa62b8ca5d237d86b57495e0d9e72e98ea2b8f36834fa9f9e240398897e6')
 
 build() {
   cd "${_pkgname}-src-${pkgver}"
+  Patch fossil-betterstash.diff
   ./configure --prefix=/usr \
               --static \
               --disable-lineedit \
