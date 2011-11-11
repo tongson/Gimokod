@@ -90,6 +90,7 @@ build() {
   popd
 
   ./configure --prefix=/usr \
+      --sbindir=/usr/bin \
       --build=${CBUILD} \
       --host=${CHOST} \
       --mandir=/usr/share/man \
