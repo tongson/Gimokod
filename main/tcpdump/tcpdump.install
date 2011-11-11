@@ -1,18 +1,18 @@
 post_install() {
    if ! usr/bin/getent group tcpdump >/dev/null; then
-     usr/sbin/groupadd -g 801 tcpdump
+     usr/bin/groupadd -g 801 tcpdump
    fi
    if ! usr/bin/getent passwd tcpdump >/dev/null; then
-     usr/sbin/useradd -r -M -d /var/lib/tcpdump -u 801 -g 801 tcpdump
+     usr/bin/useradd -r -M -d /var/lib/tcpdump -u 801 -g 801 tcpdump
    fi
 }
 
 post_remove() {
    if usr/bin/getent passwd tcpdump >dev/null; then
-     usr/sbin/userdel tcpdump
+     usr/bin/userdel tcpdump
    fi
    if usr/bin/getent group tcpdump >dev/null; then
-     usr/sbin/groupdel tcpdump
+     usr/bin/groupdel tcpdump
    fi
 }
 

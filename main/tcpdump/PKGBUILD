@@ -20,6 +20,7 @@ build() {
   # do not install tcpdump-4.1.1 executable (FS#23346)
   patch -Np1 -i "${srcdir}/tcpdump_duplicate_executable.patch"
   ./configure --prefix=/usr \
+              --sbindir=/usr/bin \
               --build=${CBUILD} \
               --host=${CHOST} \
               --enable-ipv6 \
