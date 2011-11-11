@@ -7,13 +7,17 @@ pkgdesc="The VP8 Codec SDK"
 arch=('i686' 'x86_64')
 url="http://www.webmproject.org/"
 license=('BSD')
+options=('!makeflags')
 makedepends=('yasm')
 source=(http://webm.googlecode.com/files/${pkgname}-v${realver}.tar.bz2)
 sha1sums=('dacfefaf3363f781de43858f09cdd0b0d469e6fc')
 
 build() {
   cd "${srcdir}/${pkgname}-v${realver}"
+  CC=/usr/bin/gcc
   ./configure --prefix=/usr \
+              --libdir=/usr/lib \
+              --as=yasm \
               --enable-vp8 \
               --enable-runtime-cpu-detect \
               --enable-shared \
@@ -23,6 +27,8 @@ build() {
               --disable-install-srcs \
               --enable-multithread \
               --disable-debug \
+              $([[ $CARCH = i686 ]] && echo "--target=x86-linux-gcc") \
+              $([[ $CARCH = x86_64 ]] && echo "--target=x86_64-linux-gcc") \
               --disable-debug-libs
   make
 }
