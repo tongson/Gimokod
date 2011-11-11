@@ -1,0 +1,88 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=libcups
+pkgver=1.5.0
+pkgrel=1
+arch=('i686' 'x86_64')
+license=('GPL')
+url="http://www.cups.org/"
+depends=('poppler' 'zlib' 'gcc-libs')
+source=(ftp://ftp.easysw.com/pub/cups/${pkgver}/cups-${pkgver}-source.tar.bz2)
+sha256sums=('c6f99b68a558f4d626e9a5076d664f38e9925715dc541b07f0328c9aeb02ec33')
+
+
+build() {
+  cd "${srcdir}/cups-${pkgver}"
+
+  # Gentoo
+  Patch cups-1.4.4-fix-install-perms.patch
+  Patch cups-1.4.4-nostrip.patch
+  Patch cups-1.4.8-CVE-2011-3170.patch
+  Patch cups-1.4.8-largeimage.patch
+
+  # Do not export SSL libs in cups-config
+  Patch cups-no-export-ssllibs.patch
+  Patch cups-no-gcrypt.patch
+
+  aclocal -I config-scripts
+  autoconf -I config-scripts
+
+  export DSOFLAGS="${LDFLAGS}"
+
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --sysconfdir=/etc \
+              --localstatedir=/var \
+              --libdir=/usr/lib \
+              --with-languages=none \
+              --disable-acl \
+              --disable-dbus \
+              --disable-debug \
+              --disable-debug-guards \
+              --disable-jpeg \
+              --disable-tiff \
+              --disable-png \
+              --disable-gssapi \
+              --disable-pam \
+              --disable-slp \
+              --disable-libusb \
+              --without-java \
+              --without-perl \
+              --without-php \
+              --without-python \
+              --without-xinetd \
+              --with-logdir=/var/log/cups \
+              --with-cups-user=nobody \
+              --with-cups-group=nobody \
+              --disable-ldap \
+              --disable-ssl \
+              --disable-dnssd \
+              --disable-gnutls \
+              --disable-avahi\
+              --with-pdftops=pdftops \
+              --with-optim="$CFLAGS"
+  make
+}
+
+package() {
+  cd "${srcdir}/cups-${pkgver}"
+  make BUILDROOT="${pkgdir}" install-headers install-libs
+  mkdir -p "${pkgdir}"/usr/bin
+  install -m755 "${srcdir}"/cups-${pkgver}/cups-config "${pkgdir}"/usr/bin/cups-config
+}
+
+source=(${source[@]-}
+        cups-1.4.4-fix-install-perms.patch
+        cups-1.4.4-nostrip.patch
+        cups-1.4.8-CVE-2011-3170.patch
+        cups-1.4.8-largeimage.patch
+        cups-no-export-ssllibs.patch
+        cups-no-gcrypt.patch)
+
+sha256sums=(${sha256sums[@]-}
+            '66e68f3bebd7339434e3de99582190d0bedce4b2e5370ff65104cc863daee6c2'
+            'b96448896f08c5f91d5afb0c093f2638a262d1c45e716c29d5164cefee18bc61'
+            'c94d49c3ff980b830874dae4158768554f87f429ae400838a605505aae350af6'
+            '364a3ed3e161ad75836e6bc56746c25207680ab6f44563219c93146f0cf74541'
+            '8afad0c55303aba58a24c29cb08e15ea3526859ad5c8e786ed96dc1bcf3472b8'
+            '592cc52a1869e047aad6118930797358f7cd378b978b1ac39bcf7abfa4b04ac8')
