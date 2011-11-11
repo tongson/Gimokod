@@ -168,6 +168,6 @@ sha256sums=(${sha256sums[@]-}
             'e2f9d6b971e0e7d44a3d1ca2cab60948789b2d74dcfbe2ce5c6b275f2904fdea'
             'ab4479c3a3cca2cfc1cbafb16574f2a0b0fae93eb62f18413c89420f8be5f181'
             '3492332fa78b545ff46c2b5293d17c63c122be6f8f6fa4798864b7d4572b0024'
-            '2d369cf93c6e15c3559c3560bce581e0ae5f1f34dc86bca013ac67ef1c1a9ff9'
+            '9e3be6a625cdfb3d2fd2732fb5a331d27b6aff7ae21e79836bfd60a0d80a5b5b'
             'd7a0a02d59e1403261bffd04579638de0c2f7faf830ff76ee5b85ce6f3c60c08'
             'd8ccc639f5c2472b4ab53beada7c8552343ae960565f685c5cc8979fb28a74d1')
