@@ -7,7 +7,9 @@ pkgdesc="Give certain users the ability to run some commands as root"
 arch=('i686' 'x86_64')
 url="http://www.sudo.ws/sudo/"
 license=('custom')
+groups=('base-devel')
 depends=('zlib' 'pam')
+install=sudo.install
 backup=('etc/sudoers' 'etc/pam.d/sudo')
 options=('!libtool' '!makeflags')
 source=(ftp://ftp.sudo.ws/pub/sudo/$pkgname-$_ver.tar.gz{,.sig}
@@ -20,12 +22,14 @@ build() {
   cd "${srcdir}/${pkgname}-$_ver"
 
   ./configure --prefix=/usr \
+              --sbindir=/usr/bin \
               --build=${CBUILD} \
               --host=${CHOST} \
               --enable-zlib=system \
               --with-pam \
               --libexecdir=/usr/lib \
               --with-env-editor \
+              --disable-nls \
               --without-linux-audit \
               --with-logfac=auth
   make
