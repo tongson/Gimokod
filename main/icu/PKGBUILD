@@ -17,6 +17,7 @@ build() {
   # fix Malayalam encoding https://bugzilla.redhat.com/show_bug.cgi?id=654200
   patch -Rp3 -i "${srcdir}"/icu.8198.revert.icu5431.patch
   ./configure --prefix=/usr \
+              --sbindir=/usr/bin \
               --build=${CBUILD} \
               --host=${CHOST} \
               --disable-debug \
