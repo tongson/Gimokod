@@ -31,7 +31,7 @@ build() {
       msg "applying patch ${p}"
       patch -Np0 -i ${p}
   done
-  _bashconfig=(-DDEFAULT_PATH_VALUE=\'\"/usr/local/bin:/usr/bin\"\'
+  _bashconfig=(-DDEFAULT_PATH_VALUE=\'\"/usr/bin\"\'
               -DSTANDARD_UTILS_PATH=\'\"/usr/bin\"\'
               -DSYS_BASHRC=\'\"/etc/bash/bashrc\"\'
               -DSYS_BASH_LOGOUT=\'\"/etc/bash/bash_logout\"\')
