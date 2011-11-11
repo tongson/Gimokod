@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=mpfr
 _pkgver=3.1.0
-_patchlevel=p1
+_patchlevel=p3
 pkgver="${_pkgver}.${_patchlevel}"
 pkgrel=1
 pkgdesc="Multiple-precision floating-point library"
@@ -11,10 +11,11 @@ license=('LGPL')
 groups=('base-devel')
 depends=('gmp')
 options=('!libtool' '!makeflags')
-source=(http://www.mpfr.org/mpfr-current/mpfr-${_pkgver}.tar.xz
+source=(http://www.mpfr.org/mpfr-current/mpfr-${_pkgver}.tar.xz{,.asc}
         mpfr-${_pkgver}.${_patchlevel}.patch)
 md5sums=('6e495841bb026481567006cec0f821c3'
-         'ec988293368d4988c76f50d6a3460166')
+         '293374ee4b01527f8f7889fdfa9016f8'
+         'd65858ccddbea968d6580124320fb6a0')
 
 build() {
   cd "${srcdir}/${pkgname}-${_pkgver}"
@@ -31,7 +32,6 @@ build() {
 check() {
   cd "${srcdir}/${pkgname}-${_pkgver}"
   make check
-  msg "${pkgname} TESTS SUCCESSFUL"
 }
 
 package() {
