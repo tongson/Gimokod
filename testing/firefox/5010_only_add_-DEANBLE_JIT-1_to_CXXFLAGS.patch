@@ -1,0 +1,36 @@
+From: Mike Hommey <mh@glandium.org>
+Date: Sat, 20 Aug 2011 14:56:49 +0200
+Subject: Bug 670719 - Only add -DENABLE_JIT=1 to CXXFLAGS if any of
+ trace/method/yarr jit is enabled.
+
+---
+ js/src/Makefile.in |    9 ++++++++-
+ 1 files changed, 8 insertions(+), 1 deletions(-)
+
+diff --git a/js/src/Makefile.in b/js/src/Makefile.in
+index 746ca7f..35d79dc 100644
+--- a/js/src/Makefile.in
++++ b/js/src/Makefile.in
+@@ -431,6 +431,9 @@ else
+ ###############################################
+ # BEGIN include sources for the Nitro assembler
+ #
++
++ENABLE_YARR_JIT = 1
++
+ VPATH += 	$(srcdir)/assembler \
+ 		$(srcdir)/assembler/wtf \
+ 		$(srcdir)/assembler/jit \
+@@ -1051,7 +1054,11 @@ endif
+ # Needed to "configure" it correctly.  Unfortunately these
+ # flags wind up being applied to all code in js/src, not just
+ # the code in js/src/assembler.
+-CXXFLAGS += -DUSE_SYSTEM_MALLOC=1 -DENABLE_ASSEMBLER=1 -DENABLE_JIT=1
++CXXFLAGS += -DUSE_SYSTEM_MALLOC=1 -DENABLE_ASSEMBLER=1
++
++ifneq (,$(ENABLE_YARR_JIT)$(ENABLE_TRACEJIT)$(ENABLE_METHODJIT))
++CXXFLAGS +=  -DENABLE_JIT=1
++endif
+ 
+ INCLUDES +=	-I$(srcdir)/assembler -I$(srcdir)/yarr
+ 
