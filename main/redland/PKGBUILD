@@ -1,5 +1,4 @@
 # Based upon the PKGBUILD from Arch Linux
-epoch=1
 pkgname=redland
 pkgver=1.0.14
 pkgrel=1

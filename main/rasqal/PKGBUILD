@@ -1,6 +1,5 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=rasqal
-epoch=1
 pkgver=0.9.27
 pkgrel=1
 pkgdesc="library that handles RDF query syntaxes/construction/execution"
