@@ -2,7 +2,6 @@
 pkgname=ethtool
 pkgver=3.0
 pkgrel=1
-epoch=1
 pkgdesc="Utility for controlling network drivers and hardware"
 arch=('i686' 'x86_64')
 url="http://www.kernel.org/pub/software/network/ethtool/"
