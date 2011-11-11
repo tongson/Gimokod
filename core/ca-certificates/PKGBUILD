@@ -7,7 +7,7 @@ url='http://packages.qa.debian.org/c/ca-certificates.html'
 license=('MPL' 'GPL')
 groups=('base')
 depends=('openssl')
-makedepends=('openssl' 'run-parts')
+makedepends=('openssl')
 install=ca-certificates.install
 
 build() {
