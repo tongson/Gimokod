@@ -7,7 +7,7 @@ arch=(i686 x86_64)
 url="http://www.nist.gov/el/msid/expect.cfm"
 license=('custom')
 groups=('base-devel')
-depends=('tcl>=8.5.3')
+depends=('tcl')
 changelog=ChangeLog
 source=(http://downloads.sourceforge.net/project/expect/Expect/${pkgver}/expect${pkgver}.tar.gz)
 md5sums=('44e1a4f4c877e9ddc5a542dfa7ecc92b')
