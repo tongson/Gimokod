@@ -6,8 +6,8 @@ pkgdesc="Multipath Tools For Linux"
 arch=('i686' 'x86_64')
 url="http://christophe.varoqui.free.fr/"
 license=('GPL')
+install=multipath.install
 depends=('libaio' 'device-mapper')
-backup=('etc/multipath.conf')
 source=("http://christophe.varoqui.free.fr/multipath-tools/"${pkgname}"-"${pkgver}".tar.bz2")
 sha256sums=('8d44c8815144b5589cc3e604cb3fc16c76a028aef08aa1bec334ff70bf9ac712')
 
@@ -23,7 +23,10 @@ build() {
 package() {
   cd "${srcdir}"
   make DESTDIR="${pkgdir}" install
-  install -D -m 644 "${srcdir}"/multipath.conf "${pkgdir}"/etc/multipath.conf
+  # install -D -m 644 "${srcdir}"/multipath.conf "${pkgdir}"/etc/multipath.conf
+  mkdir "${pkgdir}/usr/bin"
+  mv "${pkgdir}"/sbin/* "${pkgdir}/usr/bin"
+  rmdir "${pkgdir}/sbin"
 }
 
 source=(${source[@]-}
@@ -36,4 +39,4 @@ sha256sums=(${sha256sums[@]-}
             '4cd2e75782dbaba715b85ef1ececdc130e24d7497897ceea9802c779e79c1c73'
             '1f9ca1d26fee69dc7d5c1b65a835d23e1b8dd8de6fd3678faf3e7b499611d15d'
             'b543d2e012b0baedf959e4ccb097d8299bd721a5f543c82f2be01728fa2851a2'
-            '37228b735923c4c13f913644bea739013e45c9e12ae1eb373a2ed27429f744ee')
+            'a1474573a52d3e2a06e987540868cfe9f669a14b787b62835bb7decf9088e23c')
