@@ -6,7 +6,7 @@ arch=('i686' 'x86_64')
 url="http://savannah.nongnu.org/projects/acl"
 license=('LGPL')
 groups=('base')
-depends=('attr>=2.4.46')
+depends=('attr')
 options=('!libtool')
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
