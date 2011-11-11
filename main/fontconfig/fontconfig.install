@@ -17,7 +17,7 @@ configs=('20-fix-globaladvance.conf'
 
 post_install() {
   echo -n "updating font cache... "
-  /sbin/ldconfig -r .
+  /usr/bin/ldconfig -r .
   pushd /etc/fonts/conf.d > /dev/null
   for config in "${configs[@]}"; do
     ln -sf ../conf.avail/${config} .
