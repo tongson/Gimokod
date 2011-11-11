@@ -22,7 +22,7 @@ build() {
 
 package() {
   cd "${srcdir}"/wireless_tools.${pkgver}
-  make INSTALL_DIR="${pkgdir}/usr/sbin" \
+  make INSTALL_DIR="${pkgdir}/usr/bin" \
     INSTALL_LIB="${pkgdir}/usr/lib" \
     INSTALL_INC="${pkgdir}/usr/include" \
     INSTALL_MAN="${pkgdir}/usr/share/man" install
