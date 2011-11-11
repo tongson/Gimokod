@@ -23,4 +23,7 @@ package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   install -d -m755 "${pkgdir}/usr/lib"
   make prefix=/usr mandir=/usr/share/man DESTDIR="${pkgdir}" CRYPTO="OPENSSL" install
+  install -d -m755 "${pkgdir}/usr/bin"
+  mv "${pkgdir}"/usr/sbin/* "${pkgdir}"/usr/bin
+  rmdir "${pkgdir}"/usr/sbin
 }
