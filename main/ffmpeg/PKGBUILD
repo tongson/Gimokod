@@ -7,7 +7,7 @@ arch=('i686' 'x86_64')
 url="http://ffmpeg.org/"
 license=('GPL')
 depends=('bzip2' 'vo-aacenc' 'lame' 'libvorbis' 'xvidcore' 'zlib' 'x264' 'libtheora'
-         'schroedinger' 'alsa-lib' 'libxfixes' 'libvpx' 'openjpeg' 'rtmpdump')
+         'schroedinger' 'speex' 'libvpx' 'openjpeg' 'rtmpdump')
 makedepends=('yasm')
 source=(ftp://ftp.archlinux.org/other/ffmpeg/${pkgname}-${pkgver}.tar.xz)
 md5sums=('38139817bee918a5664c549adb487468')
@@ -47,6 +47,7 @@ build() {
     --disable-indev=dv1394 \
     --disable-indev=v4l \
     --disable-outdev=oss \
+    --disable-outdev=alsa \
     --disable-debug \
     --disable-ffplay \
     --disable-doc \
