@@ -1,8 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
-
 pkgname=xf86-video-ati
-pkgver=6.14.2
-pkgrel=2
+pkgver=6.14.3
+pkgrel=1
 pkgdesc="X.org ati video driver"
 arch=(i686 x86_64)
 url="http://xorg.freedesktop.org/"
@@ -12,7 +11,7 @@ makedepends=('xorg-server-devel' 'libdrm' 'xf86driproto' 'mesa' 'glproto')
 groups=('xorg-drivers' 'xorg')
 options=('!libtool')
 source=(${url}/releases/individual/driver/${pkgname}-${pkgver}.tar.bz2)
-sha1sums=('2733b3c126ad9e082ea18b7e7663d6d87fce4d49')
+sha1sums=('db635e2e2858d5db90362f546ac0adad85474bad')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
