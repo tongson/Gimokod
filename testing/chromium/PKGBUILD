@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=chromium
-pkgver=15.0.874.106
+pkgver=15.0.874.120
 pkgrel=1
 pkgdesc="The open-source project behind Google Chrome browser"
 arch=('i686' 'x86_64')
@@ -11,14 +11,8 @@ depends=('zlib' 'gtk2' 'dbus-glib' 'nss' 'alsa-lib' 'xdg-utils' 'bzip2' 'libeven
          'hicolor-icon-theme' 'libwebp' 'flac' 'libpng' 'libjpeg' 'speex')
 makedepends=('python' 'perl' 'gperf' 'yasm' 'mesa')
 install=chromium.install
-source=(http://build.chromium.org/official/chromium-${pkgver}.tar.bz2
-        nacl.gypi
-        chromium.sh
-        gcc-4.6.patch)
-sha1sums=('ddf41ebb6f4a050e2dafc97d7b333675fced8d68'
-          'df4cee39e1d49e10f9c075f5e6e9db28e8260926'
-          '427ecf06cae11f28f59b1912d659ad5541391682'
-          '39999918746524fff30e73dc656754733df5c2c2')
+source=(http://commondatastorage.googleapis.com/chromium-browser-official/$pkgname-$pkgver.tar.bz2)
+sha256sums=('bdfc4533708249b50743acaae4f49772e56c8070ea2fc4af114694c40d8ed929')
 
 build() {
   cd "${srcdir}/chromium-${pkgver}"
@@ -164,3 +158,13 @@ package() {
   install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/chromium/LICENSE"
 }
 
+
+source=(${source[@]-}
+        chromium.sh
+        gcc-4.6.patch
+        nacl.gypi)
+
+sha256sums=(${sha256sums[@]-}
+            'c53bfc4db9dde684fbaed6a4bbecb207e3e7a0a2703233426fe076a6d3c557f3'
+            '9c5e0803904d1a0e71ab7444c92a7046a34a9518eeba7a70f2eec7abecb8bf4e'
+            '25bddd2eee7821e18ddda06f6e69552c359e1c04a10971ac3985556c3d8ef059')
