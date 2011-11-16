@@ -1,0 +1,27 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=ttf-droid
+pkgver=113
+pkgrel=1
+pkgdesc="A font created by Ascender Corporation for use by the Open Handset Alliance platform, Android."
+arch=('any')
+license=('apache')
+url="http://code.google.com/android/"
+depends=('fontconfig' 'xorg-mkfontscale' 'xorg-mkfontdir')
+install=ttf-droid.install
+
+package()
+{
+  cd "${srcdir}"
+  install -d "${pkgdir}"/usr/share/fonts/TTF
+  install -m644 *.ttf "${pkgdir}"/usr/share/fonts/TTF/
+  cd droid
+  install -m644 *.ttf "${pkgdir}"/usr/share/fonts/TTF/
+}
+
+source=('droid-113-r1.tar.bz2'
+        'DroidSansMonoDotted-112_p1.ttf.bz2'
+        'DroidSansMonoSlashed-112_p1.ttf.bz2')
+sha256sums=('fec9b33203abbc2a5f62a44086de4998dce69649bd78c873e6fd44d1b7d1656e'
+            '78e4d9a5adb9cf525ed9e76f9691df8506242710a13d21bf2538a96b781a7ffa'
+            '75da778420bd26d10cc42cab8152d4ce5fb4b86fa34237e361a1782d4e60577b')
+
