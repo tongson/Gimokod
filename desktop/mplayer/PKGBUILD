@@ -1,12 +1,13 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=mplayer
-pkgver=34203
+pkgver=34344
 pkgrel=1
 pkgdesc="A movie player for linux"
 arch=('i686' 'x86_64')
-depends=('libxss' 'fribidi' 'a52dec' 'libvpx' 'x264' 'libdca' 'lame' 'fontconfig' 'libgl'
-    'libxinerama' 'libvdpau' 'xvidcore' 'libcdio' 'libmad' 'libtheora' 'speex' 'aalib'
-    'libjpeg' 'faad2' 'libxvmc' 'libass' 'libxxf86vm' 'openjpeg' 'rtmpdump')
+depends=('libxss' 'fribidi' 'a52dec' 'libvpx' 'x264' 'libdca' 'lame' 'fontconfig' 
+    'libgl' 'libxinerama' 'libvdpau' 'xvidcore' 'libcdio' 'libmad' 'libtheora' 
+    'speex' 'aalib' 'libjpeg' 'faad2' 'libxvmc' 'libass' 'libxxf86vm' 'openjpeg' 
+    'rtmpdump' 'giflib')
 makedepends=( 'libxxf86vm' 'libmad' 'libcdio' 'libxinerama' 'lame' 'libtheora' 'xvidcore' 'libxss' 'libgl'
               'x264' 'faad2' 'libxvmc' 'libvdpau' 'libdca' 'a52dec' 'libvpx'
               'unzip' 'mesa' 'yasm' 'fontconfig' 'libass')
@@ -14,7 +15,7 @@ license=('GPL')
 url="http://www.mplayerhq.hu/"
 options=('!buildflags' '!emptydirs')
 source=(ftp://ftp.archlinux.org/other/${pkgname}/${pkgname}-${pkgver}.tar.xz)
-md5sums=('2dbff62a9af24bce8a6964a1ce949d10')
+md5sums=('e4016248418b8f9d55b540d68b6cfee2')
 
 build() {
     cd "${srcdir}/${pkgname}"
@@ -95,7 +96,7 @@ build() {
                 --disable-ass-internal \
                 --with-xvmclib=XvMCW \
                 --enable-xvmc \
-                --extra-ldflags="-laa -lrtmp -lvpx"
+                --extra-ldflags="-laa -lrtmp -lvpx -lxvidcore"
     [ "$CARCH" = "i686" ] &&  sed 's|-march=i486|-march=i686|g' -i config.mak
 
     make
