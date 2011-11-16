@@ -1,23 +1,26 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=('poppler' 'poppler-glib')
 pkgbase='poppler'
-pkgver=0.18.0
+pkgver=0.18.1
 pkgrel=1
 arch=('i686' 'x86_64')
 license=('GPL')
 makedepends=('glib' 'cairo' 'libjpeg' 'libpng' 'gcc-libs' 'fontconfig' 'openjpeg' 'pkg-config' 'lcms')
 options=('!libtool')
 url="http://poppler.freedesktop.org/"
+_testtag=0d2bfd4af4c76a3bac27ccaff793d9129df7b57a
 source=(http://poppler.freedesktop.org/${pkgbase}-${pkgver}.tar.gz
-        poppler-0.18.0-poppler_page_get_image-crash.patch)
-md5sums=('4cd3bf2a0a13fa8eaf00d31368915f77'
-         '969ace9d6e7378c3de8366e61dccecaf')
+        http://cgit.freedesktop.org/poppler/test/snapshot/test-${_testtag}.tar.bz2
+        git-fixes.patch)
+md5sums=('d30e883a27423c936ef338ce1d967e2d'
+         '9dc64c254a31e570507bdd4ad4ba629a'
+         'a73ba6515aa73cb20c480692da52c79e')
 
 build() {
   cd "${srcdir}/${pkgbase}-${pkgver}"
-#  sed -i -e '/AC_PATH_XTRA/d' configure.ac
-#  autoreconf
-  patch -Np1 -i ../poppler-0.18.0-poppler_page_get_image-crash.patch
+  sed -i -e '/AC_PATH_XTRA/d' configure.ac
+  Patch git-fixes.patch
+  autoreconf -fi
   ./configure \
               --enable-libpng \
               --enable-introspection=no \
