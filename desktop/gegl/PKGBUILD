@@ -8,12 +8,15 @@ url="http://www.gegl.org/"
 license=('GPL3' 'LGPL3')
 depends=('babl' 'libpng' 'libjpeg' 'gtk2' 'librsvg')
 options=('!libtool')
-source=(ftp://ftp.gimp.org/pub/${pkgname}/${pkgver%.*}/${pkgname}-${pkgver}.tar.bz2)
-md5sums=('af5e5a7d3c7ddfaa2b3414de2a7e9113')
-sha1sums=('27bedcfd077da7a6913b82966dbec904b22c121d')
+source=(ftp://ftp.gimp.org/pub/${pkgname}/${pkgver%.*}/${pkgname}-${pkgver}.tar.bz2
+        0.1.6-ffmpeg.patch)
+sha1sums=('27bedcfd077da7a6913b82966dbec904b22c121d'
+          'd62d4987f1c0fc256f5968271fc65cce0cc4c195')
+
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
+  Patch 0.1.6-ffmpeg.patch
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
