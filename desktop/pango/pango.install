@@ -2,7 +2,7 @@
 post_install() {
 	# we need to ldconfig first, in case xfree86's libs aren't
 	# in ld.so.cache yet
-	sbin/ldconfig -r .
+	usr/bin/ldconfig -r .
 	usr/bin/pango-querymodules >etc/pango/pango.modules
 }
 
