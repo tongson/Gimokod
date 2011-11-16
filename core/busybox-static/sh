@@ -1,5 +1,5 @@
 auto
 /usr/bin/sh
 
-/usr/bin/busybox-static
+/usr/bin/busybox.static
 1
