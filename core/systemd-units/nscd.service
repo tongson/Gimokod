@@ -4,7 +4,7 @@ Description=nscd
 [Service]
 Type=forking
 PIDFile=/run/nscd/nscd.pid
-Restart=Always
+Restart=always
 ExecStart=/usr/bin/nscd
 ExecStop=/usr/bin/nscd --shutdown
 
