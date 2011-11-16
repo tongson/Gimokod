@@ -1,5 +1,5 @@
 pkgname=glib
-pkgver=2.30.1
+pkgver=2.30.2
 _mver=2.30
 pkgrel=1
 pkgdesc="Common C routines used by GTK+ and other libs"
@@ -7,7 +7,6 @@ url="http://www.gtk.org/"
 arch=(i686 x86_64)
 license=('LGPL')
 depends=('zlib' 'libffi')
-groups=('base-devel')
 makedepends=('zlib' 'libffi' 'gettext')
 options=('!libtool' '!docs')
 build() {
@@ -16,7 +15,8 @@ build() {
   sed 's/^\(.*\SUBDIRS .*\=.*\)tests\(.*\)$/\1\2/' -i $(find . -name Makefile.am -o -name Makefile.in)
   sed -i 's:^tests\/.*$::' configure.ac
   sed -i 's:^docs\/.*$::' configure.ac
-  patch -Np0 -i ../glib-2.30.1-external-gdbus-codegen.patch
+  Patch glib-2.30.1-external-gdbus-codegen.patch
+  Patch glib-2.30.2-machine-id.patch
   ln -sfn /bin/true py-compile
   AT_M4DIR="${srcdir}/${pkgname}-${pkgver}" autoreconf -v
   export DBUS1_CFLAGS="-I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include"
@@ -52,6 +52,8 @@ package() {
 }
 
 source=(http://ftp.gnome.org/pub/GNOME/sources/${pkgname}/${_mver}/${pkgname}-${pkgver}.tar.xz
+        glib-2.30.2-machine-id.patch
         glib-2.30.1-external-gdbus-codegen.patch)
-sha256sums=('82fde222ea33a0faac88e9b50f5b1f7fcfc235c861a9371e8fe47ec12c1e27f9'
+sha256sums=('f0e91e6333321ddb48fa12b5c66f56c3d5f05325748c66dd2e9016c278ff8e82'
+            'c8341c9025bfaa728cb69ad6ee47040aba2309046050dbb357def72cf90413f4'
             '45daf662034806d2858f1b2b43185e6891e9d395acd3bbfb7a81a15541b49078')
