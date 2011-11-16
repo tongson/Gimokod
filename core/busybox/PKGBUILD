@@ -72,6 +72,7 @@ symlinks=(/usr/bin/uuencode
           /usr/bin/klogd
           /usr/bin/logread
           /usr/bin/ntpd
+          /usr/bin/strings
           /usr/bin/udhcpc
           /usr/bin/ifenslave)
 
@@ -109,9 +110,12 @@ package() {
 
   install -D -m0644 "${srcdir}"/sysctl.conf "${pkgdir}"/etc/sysctl.conf
   install -D -m0644 "${srcdir}"/man_db.conf "${pkgdir}"/etc/man_db.conf
-  install -D -m0755 "${srcdir}"/runsvdir-start "${pkgdir}"/usr/bin/runsvdir-start
-  install -D -m0755 "${srcdir}"/runsvdir-log "${pkgdir}"/usr/bin/runsvdir-log
-  install -D -m0755 "${srcdir}"/udhcpc-script "${pkgdir}"/usr/bin/udhcpc-script
+  install -D -m0755 "${srcdir}"/runsvdirstart.script \
+    "${pkgdir}"/usr/bin/runsvdirstart.script
+  install -D -m0755 "${srcdir}"/runsvdirlog.script \
+    "${pkgdir}"/usr/bin/runsvdirlog.script
+  install -D -m0755 "${srcdir}"/udhcpc.script \
+    "${pkgdir}"/usr/bin/udhcpc.script
   install -D -m0644 LICENSE "${pkgdir}"/usr/share/licenses/${pkgname}/LICENSE
 
   if [[ ${CARCH} == "x86_64" ]]; then
@@ -126,22 +130,23 @@ package() {
 source=(${url}/downloads/${pkgname}-${pkgver}.tar.bz2{,.sign})
 sha256sums=('a1a9a35732c719ef384f02b6e357c324d8be25bc154af91a48c4264b1e6038f0'
             '04526172ae950625388bde790f1b78ab126307a6396f80e9548e54621b513171')
+
 source=(${source[@]-}
         busybox-1.19.2-bb.patch
         busybox-1.19.2-man.patch
         config
         man_db.conf
-        runsvdir-log
-        runsvdir-start
+        runsvdirlog.script
+        runsvdirstart.script
         sysctl.conf
-        udhcpc-script)
+        udhcpc.script)
 
 sha256sums=(${sha256sums[@]-}
             '98f92c2edbcf61d1bacef783ea8b08cce07051b0a4489ed3f4579296846f89f1'
             '733e23d851e68ecd27ed8bb8f4c4b8ea27b0d143069ec49aadb04deeb65dd9f5'
-            '87c07fd39b180917c08e723b8d177b43ccca65f2233f8b80c286767de83bc089'
+            '481d05ee0d7f74b85b737d9abca022b643d1ea75b89c0fb38e16547944cbdb7e'
             'bf0092798438c18fd3e7f6d9a8a281d6575cf4258d2457b6320d9c6bc8443eae'
-            '0996e549d86446842b5b32d88e90f3b6257365ab0e2a3506e3e8e7f75f3b5138'
-            '26c4234e12c9a12ceac3e5a7a963708a5b21b5b8154c6d127be0de3d6114c203'
+            'cb9a7e2773ee7dff82a7902d8b6db6c10b225633ba36db77b609911b150afbc4'
+            '0f88f033e562769b86e486027e37b5c27a8d0896f1a09f3c6a33374b2ff1eb33'
             '2470c45daabf74cb4905f9e3766da7db1a638621522c51d62952ba2f02ebb342'
-            '0ef8e162587898f7a940ce09d32158028bf935ca247d79c5f95f1b177304e17a')
+            'a7068e91085533825ff8e53aa6369f5deae26104d4169a0992b279fb45ef27db')
