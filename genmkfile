@@ -1,6 +1,7 @@
 #!/usr/bin/env sh
+pwdir="$(pwd)"
 builddir=/home/abs/builddir
-packages=/home/abs/packages
+packages="/home/abs/gimokod/${pwdir##*/}"
    build=/home/abs/build
 
 # Helper functions SHOULD not echo \n. Main script handles EOLs.
