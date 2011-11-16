@@ -26,9 +26,6 @@ build() {
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   make DESTDIR="${pkgdir}" install
-  cp "${pkgdir}/usr/bin/ip" "${pkgdir}/usr/bin/ip_dhcp"
-  chmod 4710 "${pkgdir}/usr/bin/ip_dhcp"
-  chown 0:188 "${pkgdir}/usr/bin/ip_dhcp"
   install -D -m0644 include/libnetlink.h "${pkgdir}"/usr/include/libnetlink.h
   install -D -m0644 lib/libnetlink.a "${pkgdir}"/usr/lib/libnetlink.a
 }
