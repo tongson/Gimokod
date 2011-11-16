@@ -9,6 +9,9 @@ groups=('base')
 
 build() {
   cd "${srcdir}/LVM2.${pkgver}"
+  cd udev
+  sed -i -e 's:/usr/sbin:/usr/bin:g' -e 's:/sbin:/usr/bin:g' * >/dev/null 2>&1
+  cd ..
   patch -Np1 -i "${srcdir}"/lvm2-2.02.63-always-make-static-libdm.patch
   patch -Np1 -i "${srcdir}"/lvm2-2.02.64-dmeventd-libs.patch
   patch -Np0 -i "${srcdir}"/lvm2-2.02.70-asneeded.patch
