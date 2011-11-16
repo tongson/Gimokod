@@ -20,7 +20,6 @@ depends=(
   flex
   gawk
   gcc
-  glib
   gnuconfig
   gperf
   guile
