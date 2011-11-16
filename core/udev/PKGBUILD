@@ -8,7 +8,6 @@ license=('GPL')
 groups=('base')
 options=('!makeflags' '!libtool')
 install=udev.install
-makedepends=('gperf' 'glib')
 source=(http://people.freedesktop.org/~kay/udev/$pkgname-$pkgver.tar.bz2
         udev-173-no-docs.patch)
 
@@ -18,7 +17,9 @@ md5sums=('2fc9c1efcbde98e3d73ffee7a77aea47'
 build() {
   cd "${srcdir}/$pkgbase-${pkgver}"
   Patch udev-173-no-docs.patch
-  sed -i 's:/sbin:/usr/bin:g' rules/rules.d/* >/dev/null 2>&1
+  cd rules/rules.d
+  sed -i 's:/sbin:/usr/bin:g' * >/dev/null 2>&1
+  cd ../..
   ./configure --build=${CBUILD} \
               --host=${CHOST} \
               --sysconfdir=/etc \
