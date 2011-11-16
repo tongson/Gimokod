@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+pwdir="$(pwd)"
+repo="${pwdir##*/}"
+packages=$(ls -1 *.pkg.tar.?? | tr '\n' ' ')
+database="/home/abs/gimokod/${repo}/${repo}.db.tar.gz"
+add=""
+          
+echo "${database}: ${packages}"
+for pkg in ${packages}; do
+  if [[ ${pkg} -nt ${database} ]]; then
+    echo "  repo-remove ${database} ${pkg%-*-*-*.pkg.tar.??}"
+    add="${add} ${pkg}"
+  fi
+done
+if [[ ${add} != "" ]]; then
+  echo "  repo-add -s ${database} ${add}"
+fi
+
