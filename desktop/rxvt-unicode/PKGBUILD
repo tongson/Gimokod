@@ -17,7 +17,7 @@ build() {
               --build=${CBUILD} \
               --host=${CHOST} \
               --with-terminfo=/usr/share/terminfo \
-              --enable-256-color \
+              --disable-256-color \
               --enable-font-styles \
               --enable-xim \
               --enable-keepscrolling \
@@ -29,7 +29,7 @@ build() {
               --enable-utmp \
               --enable-wtmp \
               --enable-perl \
-              --enable-unicode3 \
+              --disable-unicode3 \
               --enable-lastlog \
               --disable-frills
   make
