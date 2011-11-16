@@ -1,19 +1,20 @@
 pkgname=linux-kvm
 _basekernel=3.1
-pkgver=${_basekernel}.0
+pkgver=${_basekernel}.1
 pkgrel=1
 pkgdesc="The Linux Kernel for KVM"
 arch=('i686' 'x86_64')
 url="http://www.kernel.org/"
 license=('GPL2')
 options=('!strip' '!binchecks')
-source=("ftp://ftp.kernel.org/pub/linux/kernel/v3.0/linux-${_basekernel}.tar.xz")
-sha256sums=('6f220258f3ce9f11d0e53860ccc2d9fe746117056212099876dbe5ee1de80af3')
+source=("ftp://ftp.kernel.org/pub/linux/kernel/v3.0/linux-${_basekernel}.tar.xz"
+         "http://www.kernel.org/pub/linux/kernel/v3.0/patch-${pkgver}.bz2")
+sha256sums=('6f220258f3ce9f11d0e53860ccc2d9fe746117056212099876dbe5ee1de80af3'
+            '192b3716fa29bafcf8871676d530cf008b4bcc9ae98f1fde812de2a1047ee4c3')
 
 build() {
   cd "${srcdir}/linux-${_basekernel}"
-  # Patch patch-${pkgver}"
-  Patch md-raid10-fix-bug-when-activating-a-hot-spare.patch
+  Patch "patch-${pkgver}"
   cp "${srcdir}/config.${CARCH}" ./.config
   make oldconfig
   make -j4 bzImage
@@ -35,10 +36,8 @@ package() {
 
 source=(${source[@]-}
         config.i686
-        config.x86_64
-        md-raid10-fix-bug-when-activating-a-hot-spare.patch)
+        config.x86_64)
 
 sha256sums=(${sha256sums[@]-}
             'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
-            'bb4451fef60b33b08dfd721f7e82ff43af5c0c130eccf0ef06ea0e161225adad'
-            'd8bc0389c6310b9088fcd1f4483fcc005149e0a3a0ac52cfe6d44265ca4b2fea')
+            '9df11fc46ff1bed701634754e5e3237bc9905ac4b320747f9ebd2216d1042976')
