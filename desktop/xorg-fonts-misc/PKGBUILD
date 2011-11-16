@@ -6,7 +6,8 @@ pkgdesc="X.org misc fonts"
 arch=(any)
 url="http://xorg.freedesktop.org/"
 license=('custom')
-depends=(xorg-fonts-encodings xorg-fonts-alias xorg-font-util fontconfig)
+depends=('xorg-fonts-encodings' 'xorg-fonts-alias' 'xorg-font-util'
+         'fontconfig' 'xorg-mkfontdir' 'xorg-mkfontscale')
 makedepends=('gettext' 'intltool')
 install=xfonts.install
 options=('!binchecks')
