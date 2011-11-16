@@ -57,7 +57,7 @@ echo "Running mount -o ro,${REAL_ROOTFLAGS} ..."
 mount -o ro,${REAL_ROOTFLAGS} ${REAL_ROOT} /real_root
 
 echo "Switching root..."
-exec /sbin/switch_root -c "/dev/console" "/real_root" "/bin/systemd" "${SYSTEMD_OPTS}"
+exec /sbin/switch_root -c "/dev/console" "/real_root" "/usr/bin/systemd" "${SYSTEMD_OPTS}"
 
 echo "Did not boot properly. Running a shell"
 exec /bin/ash
