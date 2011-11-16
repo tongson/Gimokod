@@ -1,0 +1,8 @@
+[Unit]
+Description=BusyBox udhcpc
+
+[Service]
+Restart=always
+RestartSec=60
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_NET_BROADCAST CAP_NET_ADMIN CAP_NET_RAW
+ExecStart=-/usr/bin/udhcpc -v -f -S -i %I
