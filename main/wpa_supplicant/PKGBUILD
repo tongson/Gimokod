@@ -1,0 +1,36 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=wpa_supplicant
+pkgver=0.7.3
+pkgrel=1
+pkgdesc="A utility providing key negotiation for WPA wireless networks"
+url="http://hostap.epitest.fi/wpa_supplicant"
+arch=('i686' 'x86_64')
+depends=('libnl' 'openssl' 'zlib')
+license=('GPL')
+source=(http://hostap.epitest.fi/releases/wpa_supplicant-"${pkgver}".tar.gz)
+sha256sums=('d0cd50caa85346ccc376dcda5ed3c258eef19a93b3cade39d25760118ad59443')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}/${pkgname}"
+  cp "${srcdir}/config" ./.config
+  sed -i 's@/usr/local/sbin@$(PREFIX)/bin@g' Makefile
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}/${pkgname}"
+  make PREFIX=/usr DESTDIR="${pkgdir}" install
+  install -D -m644 "${srcdir}/wpa_supplicant.service" "${pkgdir}/usr/lib/systemd/system/wpa_supplicant.service"
+  install -d -m755 "${pkgdir}/usr/share/man/man"{5,8}
+  install -m644 doc/docbook/*.5 "${pkgdir}/usr/share/man/man5/"
+  install -m644 doc/docbook/*.8 "${pkgdir}/usr/share/man/man8/"
+  rm -f "${pkgdir}/usr/share/man/man8/wpa_"{priv,gui}.8
+}
+
+source=(${source[@]-}
+        config
+        wpa_supplicant.service)
+
+sha256sums=(${sha256sums[@]-}
+            '1ab2c26c1b3e6d09c2da2f0b11b44b5c17514c55a18cf57dfd07b9230edd61c6'
+            '447b87de8e393af70ff50f7efd010a57d8df211fe5cbb76b0a5e15e6df865107')
