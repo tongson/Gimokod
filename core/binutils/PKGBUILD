@@ -8,6 +8,7 @@ url="http://www.gnu.org/software/binutils/"
 license=('GPL')
 groups=('base-devel')
 depends=('zlib')
+install=binutils.install
 options=('!libtool' '!distcc' '!ccache')
 build() {
   cd ${srcdir}/${pkgname}-${pkgver}
@@ -81,6 +82,7 @@ package() {
   rm -f "${pkgdir}"/usr/lib/lib{bfd,opcodes}.so
   echo "INPUT ( /usr/lib/libbfd.a -liberty -lz )" >"${pkgdir}"/usr/lib/libbfd.so
   echo "INPUT ( /usr/lib/libopcodes.a -lbfd )" >"${pkgdir}"/usr/lib/libopcodes.so
+  mv "${pkgdir}/usr/bin/strings" "${pkgdir}/usr/bin/gstrings"
 }
 source=(ftp://gcc.gnu.org/pub/binutils/snapshots/$pkgname-$pkgver.tar.bz2)
 sha256sums=('cdecfa69f02aa7b05fbcdf678e33137151f361313b2f3e48aba925f64eabf654')
