@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=lame
-pkgver=3.99
+pkgver=3.99.1
 pkgrel=1
 pkgdesc="A high-quality MP3 encoder"
 arch=('i686' 'x86_64')
@@ -10,7 +10,7 @@ makedepends=('nasm')
 license=('LGPL')
 options=('!libtool')
 source=(http://downloads.sourceforge.net/${pkgname}/${pkgname}-${pkgver}.tar.gz)
-md5sums=('7abacd1d0a65a63733335786015626db')
+md5sums=('2576a7368b5c90a87adc9de6b9f0628c')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
