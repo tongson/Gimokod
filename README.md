@@ -44,11 +44,11 @@ pplications. Not too bulky to manage or replicate.
 ## ACTIVELY MAINTAINED AND STABLE
 
   Arch Linux updates its packages frequently so the Arch Build System is good for
-monitoring updates. The repositories of Gentoo, Exherbo, Openwall, Alpine Linux,
-Mandrive, Debian, Fedora and openSUSE are also monitored for updates and useful
-patches. Relevant channels are monitored for security vulnerabilities affecting
-supported packages. Keeping the base system small has the added benefit of
-needing less work with keeping abreast with essential updates.
+monitoring updates. The repositories of Gentoo, Openwall, Mandriva, Debian,
+Fedora and openSUSE are also monitored for updates and useful patches. Relevant
+channels are monitored for security vulnerabilities affecting supported
+packages. Keeping the base system small has the added benefit of needing less
+work with keeping abreast with essential updates.
 
   The `core` and `main` repositories are meant to host stable packages but they
 will be updated or preferrably patched immediately if any serious security
