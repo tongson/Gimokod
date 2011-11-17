@@ -1,0 +1,5 @@
+post_install() {
+  for l in sh ash; do
+    /usr/bin/alternatives --install /usr/bin/${l} ${l} /usr/bin/busybox.static 1
+  done
+}

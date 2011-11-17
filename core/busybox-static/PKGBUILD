@@ -6,6 +6,7 @@ pkgdesc='Utilities for rescue, embedded and minimal systems'
 arch=('i686' 'x86_64')
 url='http://busybox.net'
 license=('GPL')
+install=busybox.install
 options=('emptydirs' '!binchecks')
 groups=('base')
 
@@ -56,16 +57,6 @@ package() {
   cd "${srcdir}/${_pkgname}-${pkgver}"
   install -D -m0755 busybox "${pkgdir}"/usr/bin/busybox.static
   install -d -m0755 "${pkgdir}/etc/alternatives"
-#  pushd "${pkgdir}/etc/alternatives"
-#    ln -sf /usr/bin/busybox.static sh
-#    ln -sf /usr/bin/busybox.static ash
-#  popd
-#  pushd "${pkgdir}/usr/bin"
-#    ln -sf /usr/bin/busybox.static sh
-#    ln -sf /usr/bin/busybox.static ash
-#  popd
-#  install -D -m0644 "${srcdir}/sh" "${pkgdir}/var/lib/alternatives/sh"
-#  install -D -m0644 "${srcdir}/ash" "${pkgdir}/var/lib/alternatives/ash"
 }
 
 source=(${url}/downloads/busybox-${pkgver}.tar.bz2{,.sign})
