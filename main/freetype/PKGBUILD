@@ -1,5 +1,5 @@
 # Based upon the PKGBUILD from Arch Linux
-pkgname=freetype2
+pkgname=freetype
 pkgver=2.4.7
 pkgrel=1
 pkgdesc="TrueType font rendering library"
