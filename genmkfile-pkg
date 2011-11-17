@@ -4,15 +4,15 @@ repo="${pwdir##*/}"
 packages=$(ls -1 *.pkg.tar.?? | tr '\n' ' ')
 database="/home/abs/gimokod/${repo}/${repo}.db.tar.gz"
 add=""
-          
+
 echo "${database}: ${packages}"
 for pkg in ${packages}; do
   if [[ ${pkg} -nt ${database} ]]; then
-    echo "  repo-remove ${database} ${pkg%-*-*-*.pkg.tar.??}"
+    echo "  /usr/bin/repo-remove ${database} ${pkg%-*-*-*.pkg.tar.??} || true"
     add="${add} ${pkg}"
   fi
 done
 if [[ ${add} != "" ]]; then
-  echo "  repo-add -s ${database} ${add}"
+  echo "  /usr/bin/repo-add -s ${database} ${add}"
 fi
 
