@@ -1,31 +1,32 @@
 #!/usr/bin/env sh
-pwdir="$(pwd)"
+pwd="$(pwd)"
 builddir=/home/abs/builddir
-packages="/home/abs/gimokod/${pwdir##*/}"
-   build=/home/abs/build
+packages="/home/abs/gimokod/${pwd##*/}"
+build=/home/abs/build
 
 # Helper functions SHOULD not echo \n. Main script handles EOLs.
 getpkgbin() {
-  local pkgbin xpkgbin
-  for pkgbin in $(find "${packages}" -name "${1}*.??");do
-    xpkgbin="${pkgbin##*/}"
-    if [[ "${xpkgbin%-*-*-*.pkg.tar.??}" = "${1}" ]];then
-      echo -n "${packages}/${xpkgbin}"
+  local pkgbin pkg
+  for pkg in $(find "${packages}" -name "${1}*.pkg.tar.??");do
+    pkgbin="${pkg##*/}"
+    if [[ "${pkgbin%-*-*-*.pkg.tar.??}" = "${1}" ]]; then
+      echo -n "${packages}/${pkgbin}"
     fi
   done
 }
 
 getpkgbuild() {
-  local workdir="$(pwd)"
-  echo -n "${build}/${workdir##*/}/${1}/PKGBUILD"
+  echo -n "${build}/${pwd##*/}/${1}/PKGBUILD"
 }
 
 getdep() {
   local dep
   for dep in $(getdepends "$(getpkgbuild ${1})"); do
+    # if matching binary package is found then
+    # use the binary package file name
+    # else if it matches a dir then use that
     if [[ $(getpkgbin ${dep}) ]]; then
-      getpkgbin ${dep}
-      echo -n " "
+      getpkgbin ${dep} ; echo -n ' '
     else
       ls -1 | grep -Eq "^${dep}$" && echo -n "${dep} "
     fi
@@ -38,22 +39,21 @@ for pkgdir in $(find . -mindepth 1 -type d); do
   pkg=${pkgdir##*/}
   if [[ $(getpkgbin ${pkg}) ]]; then
     echo -n "${pkg}:V: $(getpkgbin ${pkg}) "
-    getdep "${pkg}"
-    echo ""
+    getdep "${pkg}" ; echo
     echo "$(getpkgbin ${pkg}):Pnt: $(getpkgbuild ${pkg})"
     echo "      rm -rf ${builddir}/*"
     echo "      cd $(pwd)/${pkg}"
-    echo "      makepkg --nocheck -fc"
+    echo "      /usr/bin/makepkg --nocheck --noconfirm -fci"
   else
     echo -n "${pkg}:V: "
-    getdep "${pkg}"
-    echo ""
+    getdep "${pkg}" ; echo
     echo "      rm -rf ${builddir}/*"
     echo "      cd $(pwd)/${pkg}"
-    echo "      makepkg --nocheck --noconfirm -ci"
+    echo "      /usr/bin/makepkg --nocheck --noconfirm -ci"
   fi
 done
 ) | sed -e 's:device-mapper:lvm2:' \
+        -e 's:gcc-libs:gcc:' \
         -e 's:libltdl:libtool:' \
         -e 's:libjpeg:libjpeg-turbo:' \
         -e 's:xorg-server-xvfb:xorg-server:' \
