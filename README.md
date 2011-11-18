@@ -94,7 +94,7 @@ failures:
 ## CURRENT BASE SYSTEM SIZE
 
     As of November 2011:
-    110MB (uncompressed)
+    122MB (uncompressed)
 
 See the core repository for packages in the base system.
 
