@@ -11,7 +11,7 @@ install=filesystem.install
 package() {
     cd ${srcdir}
 
-    for d in dev etc home usr var opt sys run media; do
+    for d in dev etc home usr var opt sys run media srv; do
       install -d -m755 "${pkgdir}"/${d}
     done
 
