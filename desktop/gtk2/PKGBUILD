@@ -9,10 +9,12 @@ makedepends=('glib' 'pkg-config' 'fontconfig' 'atk' 'pango' 'libxcursor' 'libxin
              'libxcomposite' 'libxdamage' 'shared-mime-info' 'cairo' 'gdk-pixbuf')
 options=('!libtool' '!docs')
 license=('LGPL')
-source=(http://ftp.gnome.org/pub/gnome/sources/gtk+/2.24/gtk+-${pkgver}.tar.xz
-        xid-collision-debug.patch)
+source=(http://ftp.gnome.org/pub/gnome/sources/gtk+/2.24/gtk+-$pkgver.tar.xz
+        xid-collision-debug.patch
+        revert-iconview.patch)
 sha256sums=('8a3b29f667933cf52eea2db7b066723edbc80443ca9c75b7cd7cbe8c8b90b93c'
-            'd758bb93e59df15a4ea7732cf984d1c3c19dff67c94b957575efea132b8fe558')
+            'd758bb93e59df15a4ea7732cf984d1c3c19dff67c94b957575efea132b8fe558'
+            '517b3d0797b27324b8fa042ce4b653334ff3b55e48b921de3485505b9ca99fba')
 
 _strip_builddir() {
   local rule=$1
@@ -24,14 +26,15 @@ _strip_builddir() {
 
 build() {
   cd "${srcdir}/gtk+-${pkgver}"
-  patch -Np1 -i "${srcdir}/xid-collision-debug.patch"
+  Patch xid-collision-debug.patch
+  Patch revert-iconview.patch
   # Stop trying to build unmaintained docs, tests and demos. From Gentoo.
   _strip_builddir SUBDIRS tutorial docs/Makefile.am docs/Makefile.in
   _strip_builddir SUBDIRS faq docs/Makefile.am docs/Makefile.in
   _strip_builddir SRC_SUBDIRS tests Makefile.am Makefile.in
   _strip_builddir SRC_SUBDIRS demos Makefile.am Makefile.in
 
-  CXX=/bin/false ./configure --prefix=/usr \
+  CXX=/usr/bin/false ./configure --prefix=/usr \
       --build=${CBUILD} \
       --host=${CHOST} \
       --sysconfdir=/etc \
