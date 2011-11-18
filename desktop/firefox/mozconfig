@@ -55,6 +55,7 @@ ac_add_options --disable-necko-wifi
 ac_add_options --enable-crypto
 ac_add_options --disable-mailnews
 ac_add_options --enable-system-ffi
+ac_add_options --enable-system-pixman
 
 export BUILD_OFFICIAL=0
 export MOZILLA_OFFICIAL=0
