@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=pango
 pkgver=1.29.4
-pkgrel=1
+pkgrel=2
 pkgdesc="A library for layout and rendering of text"
 arch=('i686' 'x86_64')
 license=('LGPL')
@@ -19,6 +19,9 @@ build() {
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
+              --with-x \
+              --x-includes=/usr/include \
+              --x-libraries=/usr/lib \
               --sysconfdir=/etc \
               --localstatedir=/var \
               --with-included-modules=basic-fc \
