@@ -2,7 +2,7 @@
 pkgname=simplepamapps
 _realpkgname=SimplePAMApps
 pkgver=0.60
-pkgrel=1
+pkgrel=3
 pkgdesc="Simple PAM-based Applications"
 arch=('i686' 'x86_64')
 url="http://www.kernel.org/pub/linux/libs/pam/"
