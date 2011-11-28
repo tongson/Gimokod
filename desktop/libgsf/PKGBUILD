@@ -1,0 +1,44 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=libgsf
+pkgver=1.14.21
+pkgrel=1
+pkgdesc="The GNOME Structured File Library. For reading and writing structured file formats"
+arch=('i686' 'x86_64')
+url="http://www.gnome.org/"
+license=('GPL' 'LGPL')
+depends=('libxml2' 'glib' 'bzip2')
+makedepends=('pkg-config')
+options=('!libtool' '!emptydirs')
+source=(http://ftp.gnome.org/pub/GNOME/sources/${pkgname}/1.14/${pkgname}-${pkgver}.tar.bz2)
+sha256sums=('eef0a9d6eca4e6af6c16b208947e3c958c428b94d22792bdd0b80c08a4b301db')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --sysconfdir=/etc \
+              --localstatedir=/var \
+              --mandir=/usr/share/man \
+              --with-gio \
+              --with-bz2 \
+              --without-gnome-vfs \
+              --without-bonobo \
+              --without-python \
+              --without-gdk-pixbuf \
+              --without-gconf \
+              --disable-static
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" GCONF_DISABLE_MAKEFILE_SCHEMA_INSTALL=1 install
+  rm -f "${pkgdir}/usr/share/man/man1/gsf-office-thumbnailer.1"
+  rm -f "${pkgdir}/usr/lib/libgsf-gnome"*
+  rm -rf "${pkgdir}/usr/include/libgsf-1/gsf-gnome/"
+  rm -rf "${pkgdir}/etc/gconf"
+  rm -f "${pkgdir}/usr/lib/pkgconfig/libgsf-gnome-1.pc"
+  rm -f "${pkgdir}/usr/bin/gsf-office-thumbnailer"
+  rm -f "${pkgdir}"/usr/lib/python*/site-packages/gsf/gnomemodule.so
+}
