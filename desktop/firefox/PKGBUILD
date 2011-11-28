@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=firefox
-pkgver=8.0
+pkgver=8.0.1
 pkgrel=1
 pkgdesc="Standalone web browser from mozilla.org (unofficial build)"
 arch=('i686' 'x86_64')
@@ -12,7 +12,7 @@ makedepends=('unzip' 'zip' 'pkg-config' 'yasm' 'mesa' 'autoconf21')
 url="http://www.mozilla.org/projects/firefox"
 install=firefox.install
 source=(ftp://ftp.mozilla.org/pub/mozilla.org/firefox/releases/${pkgver}/source/firefox-${pkgver}.source.tar.bz2)
-sha256sums=('d950324ecd5362a648a891a66c3f2dde5e69b09f30ef8470b7759ec007691139')
+sha256sums=('b350376cb40bb1e35afb4c581b4a7d9377493335b159828a2182d7f39fca1455')
 
 build() {
   cd "${srcdir}/mozilla-release"
@@ -82,7 +82,7 @@ package() {
 
   #workaround for now
   #https://bugzilla.mozilla.org/show_bug.cgi?id=658850
-  ln -sf /usr/lib/firefox/firefox-bin "${pkgdir}/usr/lib/firefox/firefox"
+  ln -sf firefox "${pkgdir}/usr/lib/firefox/firefox-bin"
 }
 source=(${source[@]-}
         1000-config_rules_install_dist_files.patch
