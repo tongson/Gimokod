@@ -1,6 +1,6 @@
 pkgname=devel-meta
 pkgver=2011.10
-pkgrel=1
+pkgrel=2
 pkgdesc="base-devel meta package"
 arch=('any')
 url="http://gimokod.org"
