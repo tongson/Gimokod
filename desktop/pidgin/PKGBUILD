@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=('pidgin' 'libpurple')
 pkgver=2.10.0
-pkgrel=1
+pkgrel=3
 arch=('i686' 'x86_64')
 url="http://pidgin.im/"
 license=('GPL')
@@ -17,6 +17,9 @@ build() {
               --build=${CBUILD} \
               --host=${CHOST} \
               --sysconfdir=/etc \
+              --disable-consoleui \
+              --enable-gtkui \
+              --enable-sm \
               --disable-cap \
               --disable-gevolution \
               --disable-gtkspell \
@@ -34,10 +37,10 @@ build() {
               --disable-dbus \
               --disable-schemas-install \
               --disable-meanwhile \
-              --disable-nls \
               --enable-gnutls=no \
               --enable-nss=yes \
               --enable-cyrus-sasl \
+              --enable-nls \
               --disable-doxygen \
               --disable-nm \
               --with-system-ssl-certs=/etc/ssl/certs
@@ -60,8 +63,6 @@ package_pidgin(){
 
   # Remove files that are packaged in libpurle
   make -C libpurple DESTDIR="${pkgdir}" uninstall-libLTLIBRARIES
-
-  rm "${pkgdir}/usr/share/man/man1/finch.1"
 }
 
 package_libpurple(){
