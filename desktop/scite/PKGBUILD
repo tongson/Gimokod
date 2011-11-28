@@ -1,0 +1,34 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=scite
+pkgver=3.0.1
+pkgrel=1
+pkgdesc='Editor with facilities for building and running programs.'
+arch=('i686' 'x86_64')
+url='http://www.scintilla.org/SciTE.html'
+license=('custom:scite')
+depends=('gtk2' 'glib' 'cairo')
+source=("http://downloads.sourceforge.net/sourceforge/scintilla/${pkgname}${pkgver//./}.tgz")
+md5sums=('e2ed3190ebf714f037d05cde7b9591de')
+
+build() {
+  sed "s/CXXTFLAGS=-DNDEBUG -Os $(CXXBASEFLAGS)/CXXTFLAGS=-DNDEBUG ${CXXFLAGS} $(CXXBASEFLAGS)/" -i scite/gtk/makefile
+  sed "s/CXXBASEFLAGS=-Wall -Wno-missing-braces -Wno-char-subscripts -pedantic -DGTK -DSCI_LEXER \$(INCLUDEDIRS)/CXXBASEFLAGS=-Wall -Wno-missing-braces -Wno-char-subscripts -pedantic ${CXXFLAGS} -DGTK -DSCI_LEXER \$(INCLUDEDIRS)/" -i scintilla/gtk/makefile
+  sed "s/CXXFLAGS=-DNDEBUG -Os \$(CXXBASEFLAGS) \$(THREADFLAGS)/CXXFLAGS=-DNDEBUG ${CXXFLAGS} \$(CXXBASEFLAGS) \$(THREADFLAGS)/" -i scintilla/gtk/makefile
+  cd "${srcdir}/scintilla/gtk"
+  make
+  cd "${srcdir}"/${pkgname}/gtk
+  make
+}
+
+
+package() {
+  cd "${srcdir}/${pkgname}/gtk"
+  make DESTDIR="${pkgdir}" install
+  install -D -m644 ../License.txt \
+    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE-scite"
+  install -D -m644 "${srcdir}/scintilla/License.txt" \
+    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE-scintilla"
+  ln -sf SciTE ${pkgdir}/usr/bin/scite
+}
+
+
