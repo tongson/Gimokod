@@ -1,61 +1,115 @@
-#!/usr/bin/env sh
-pwd="$(pwd)"
-builddir=/home/abs/builddir
-packages="/home/abs/gimokod/${pwd##*/}"
+#!/usr/bin/env bash
+set +f
 build=/home/abs/build
+builddir=/home/abs/builddir
+packages=/home/abs/packages
+pwd=$(pwd)
+repo="/home/abs/gimokod/${pwd##*/}"
 
-# Helper functions SHOULD not echo \n. Main script handles EOLs.
+# Helper functions should not echo \n. Main script handles EOLs.
+
 getpkgbin() {
-  local pkgbin pkg
-  for pkg in $(find "${packages}" -name "${1}*.pkg.tar.??");do
+  local pkg pkgbin
+  for pkg in $(echo -n ${repo}/$1-*-*-*.pkg.tar.??); do
     pkgbin="${pkg##*/}"
-    if [[ "${pkgbin%-*-*-*.pkg.tar.??}" = "${1}" ]]; then
-      echo -n "${packages}/${pkgbin}"
+    if [[ "${pkgbin%-*-*-*.pkg.tar.??}" = "$1" ]]; then
+      [[ -f ${pkg} ]] && echo -n "${pkg}"
     fi
   done
 }
 
-getpkgbuild() {
-  echo -n "${build}/${pwd##*/}/${1}/PKGBUILD"
+getpkgnames() {
+  local pkgname pkg pkgbuild
+  pkgbuild="${build}/${pwd##*/}/$1/PKGBUILD"
+  if [[ $(grep -q pkgbase ${pkgbuild}; echo $?) -eq 0 ]]; then
+    pkgname="$(sed -n '/^pkgname=(/,/)/p' ${pkgbuild} |
+              tr -d '\n' |
+              tr -d '\047' |
+              tr -d '\050' |
+              tr -d '\051' |
+              tr -s '\040')"
+    for pkg in $(echo -n "${pkgname#*=}"); do
+      echo -n "${pkg}" ; echo -n " "
+    done
+  else
+    pkgname="$(grep -E "^pkgname" ${pkgbuild})"
+    echo -n "${pkgname#*=}" ; echo -n " "
+  fi
+}
+
+getdepends() {
+  sed -ne "/^depends=(/,/)/p" -e "/^makedepends=(/,/)/p" $1 |
+  sed -e "s:makedepends=::" \
+      -e "s:depends=::" \
+      -e "s:['()]::g" |
+  tr '\n' '\000' |
+  tr ' ' '\000' |
+  sort -zu |
+  tr '\000' ' ' |
+  sed -e 's:device-mapper:lvm2:' \
+      -e 's:gcc-libs:gcc:' \
+      -e 's:boost-libs:boost:' \
+      -e 's:libltdl:libtool:' \
+      -e 's:libjpeg:libjpeg-turbo:' \
+      -e 's:libgl:mesa:' \
+      -e 's:libglapi:mesa:' \
+      -e 's:libegl:mesa:' \
+      -e 's:ati-dri:mesa:' \
+      -e 's:intel-dri:mesa:' \
+      -e 's:nouveau-dri:mesa:' \
+      -e 's:khrplatform-devel:mesa:' \
+      -e 's:libpurple:pidgin:' \
+      -e 's:xorg-server-xvfb:xorg-server:' \
+      -e 's:xorg-server-common:xorg-server:' \
+      -e 's:xorg-server-devel:xorg-server:'
 }
 
 getdep() {
   local dep
-  for dep in $(getdepends "$(getpkgbuild ${1})"); do
+  for dep in $(getdepends ${build}/${pwd##*/}/$1/PKGBUILD); do
     # if matching binary package is found then
     # use the binary package file name
     # else if it matches a dir then use that
-    if [[ $(getpkgbin ${dep}) ]]; then
+    if [[ $(getpkgbin ${dep})>/dev/null ]]; then
       getpkgbin ${dep} ; echo -n ' '
     else
-      ls -1 | grep -Eq "^${dep}$" && echo -n "${dep} "
+      [[ -d ./${dep} ]] && echo -n "${dep} "
     fi
   done
 }
 
-echo "all:V: $(ls | tr '\n' ' ')"
+pwddirs() {
+  local dir
+  for dir in *; do
+    [[ -d ./${dir} ]] && echo -n "${dir} "
+  done
+}
+
+echo "all:V: $(pwddirs)"
 (
-for pkgdir in $(find . -mindepth 1 -type d); do
-  pkg=${pkgdir##*/}
+for pkg in $(pwddirs); do
   if [[ $(getpkgbin ${pkg}) ]]; then
-    echo -n "${pkg}:V: $(getpkgbin ${pkg}) "
-    getdep "${pkg}" ; echo
-    echo "$(getpkgbin ${pkg}):Pnt: $(getpkgbuild ${pkg})"
-    echo "      rm -rf ${builddir}/*"
-    echo "      cd $(pwd)/${pkg}"
-    echo "      /usr/bin/makepkg --nocheck --noconfirm -fci"
-  else
-    echo -n "${pkg}:V: "
-    getdep "${pkg}" ; echo
+    echo -n "${pkg}:V: $(getpkgbin ${pkg}) " ; getdep "${pkg}" ; echo
+    echo "$(getpkgbin ${pkg}): ${build}/${pwd##*/}/${pkg}/PKGBUILD"
     echo "      rm -rf ${builddir}/*"
     echo "      cd $(pwd)/${pkg}"
     echo "      /usr/bin/makepkg --nocheck --noconfirm -ci"
+    for oldpkg in $(getpkgnames ${pkg}); do
+      echo "      rm -f $(getpkgbin ${oldpkg}){,.sig}"
+    done
+    for newpkg in $(getpkgnames ${pkg}); do
+      newbin="${newpkg##*/}"
+      echo "      mv ${packages}/${newbin%-*-*-*.pkg.tar.??}-*-*-*.pkg.tar.??{,.sig} ${repo} || true "
+    done
+  else
+    echo -n "${pkg}:V: " ; getdep "${pkg}" ; echo
+    echo "      rm -rf ${builddir}/*"
+    echo "      cd $(pwd)/${pkg}"
+    echo "      /usr/bin/makepkg --nocheck --noconfirm -ci"
+    for newpkg in $(getpkgnames ${pkg}); do
+      newbin="${newpkg##*/}"
+      echo "      mv ${packages}/${newbin%-*-*-*.pkg.tar.??}-*-*-*.pkg.tar.??{,.sig} ${repo} || true "
+    done
   fi
 done
-) | sed -e 's:device-mapper:lvm2:' \
-        -e 's:gcc-libs:gcc:' \
-        -e 's:libltdl:libtool:' \
-        -e 's:libjpeg:libjpeg-turbo:' \
-        -e 's:xorg-server-xvfb:xorg-server:' \
-        -e 's:xorg-server-common:xorg-server:' \
-        -e 's:xorg-server-devel:xorg-server:'
+)
