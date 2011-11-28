@@ -1,17 +1,18 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgbase=mesa
-pkgname=('mesa' 'libgl' 'libglapi' 'libegl' 'ati-dri' 'intel-dri' 'nouveau-dri')
-pkgver=7.11
+pkgname=('mesa' 'libgl' 'libglapi' 'libegl' 'ati-dri' 'intel-dri' 'nouveau-dri' 
+         'khrplatform-devel')
+pkgver=7.11.2
 pkgrel=1
 arch=('i686' 'x86_64')
 makedepends=('glproto' 'libdrm' 'libxxf86vm' 'libxdamage' 'expat' 'libx11' 'libxt'
              'gcc-libs' 'dri2proto' 'python' 'libxml2' 'imake' 'llvm' 'udev')
 url="http://mesa3d.sourceforge.net"
 license=('custom')
-source=(LICENSE)
-source=(${source[@]} "ftp://ftp.freedesktop.org/pub/mesa/${pkgver}/MesaLib-${pkgver}.tar.bz2")
-md5sums=('5c65a0fe315dd347e09b1f2826a1df5a'
-         'ff03aca82d0560009a076a87c888cf13')
+source=("ftp://ftp.freedesktop.org/pub/mesa/${pkgver}/MesaLib-${pkgver}.tar.bz2"
+        LICENSE)
+md5sums=('0837c52698fe3252369c3fdb5195afcc'
+         '5c65a0fe315dd347e09b1f2826a1df5a')
 
 build() {
     cd "${srcdir}"/?esa-*
@@ -73,7 +74,8 @@ package_libglapi() {
 }
 
 package_libegl() {
-  depends=('libglapi' 'libdrm' 'libxext' 'libxfixes' 'udev')
+  depends=('libglapi' 'libdrm' 'libxext' 'libxfixes' 'udev'
+  'khrplatform-devel')
   pkgdesc="Mesa EGL libraries and headers"
 
   cd "${srcdir}"/?esa-*
@@ -83,7 +85,6 @@ package_libegl() {
   install -m755 -d "${pkgdir}/usr/include"
   install -m755 -d "${pkgdir}/usr/include/"
   install -m755 -d "${pkgdir}/usr/include/EGL"
-  install -m755 -d "${pkgdir}/usr/include/KHR"
   install -m755 -d "${pkgdir}/usr/share"
   install -m755 -d "${pkgdir}/usr/share/doc"
   install -m755 -d "${pkgdir}/usr/share/doc/libegl"
@@ -92,7 +93,6 @@ package_libegl() {
   bin/minstall lib/egl/* "${pkgdir}/usr/lib/egl/"
   bin/minstall src/egl/main/egl.pc "${pkgdir}/usr/lib/pkgconfig/"
   bin/minstall include/EGL/* "${pkgdir}/usr/include/EGL/"
-  bin/minstall include/KHR/khrplatform.h "${pkgdir}/usr/include/KHR/"
   bin/minstall docs/egl.html "${pkgdir}/usr/share/doc/libegl/"
 
   install -m755 -d "${pkgdir}/usr/share/licenses/libegl"
@@ -118,6 +118,7 @@ package_mesa() {
   rm -f "${pkgdir}/usr/include/GL/wglew.h"
   rm -f "${pkgdir}/usr/include/GL/glut.h"
   rm -rf "${pkgdir}"/usr/include/{GLES,GLES2,EGL,KHR}
+  rm -rf "${pkgdir}"/usr/lib/dri
 
   install -m755 -d "${pkgdir}/usr/share/licenses/mesa"
   install -m644 "${srcdir}/LICENSE" "${pkgdir}/usr/share/licenses/mesa/"
@@ -152,4 +153,13 @@ package_nouveau-dri() {
   make -C "${srcdir}"/?esa-*/src/mesa/drivers/dri/nouveau DESTDIR="${pkgdir}" install
   # gallium3D driver for nv30 - nv40 - nv50 nouveau_dri.so
   make -C "${srcdir}"/?esa-*/src/gallium/targets/dri-nouveau DESTDIR="${pkgdir}" install
+}
+
+package_khrplatform-devel() {
+  pkgdesc="Khronos platform development package"
+  cd ${srcdir}/?esa-*
+  install -m755 -d "${pkgdir}/usr/include/KHR"
+  bin/minstall include/KHR/khrplatform.h "${pkgdir}/usr/include/KHR/"
+  install -m755 -d "${pkgdir}/usr/share/licenses/khrplatform-devel"
+  install -m644 "${srcdir}/LICENSE" "${pkgdir}/usr/share/licenses/khrplatform-devel/"
 }
