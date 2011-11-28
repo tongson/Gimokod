@@ -1,0 +1,30 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=wv
+pkgver=1.2.7
+pkgrel=1
+pkgdesc="MSWord library can load and parse Word 2000, 97, 95 and 6 file formats"
+arch=(i686 x86_64)
+url="http://sourceforge.net/projects/wvware"
+license=(GPL)
+depends=('libgsf' 'libpng' 'zlib' 'libxml2' 'glib')
+makedepends=('pkg-config')
+options=('!libtool')
+source=(http://www.abisource.com/downloads/${pkgname}/${pkgver}/${pkgname}-${pkgver}.tar.gz
+        fix-soname.patch)
+sha256sums=('a3a367062e894770fc3ef63bbf7e285cb025253f972fa899c16931f741e856ea'
+            '0fccf12cc5db8481dfcd5cffa987545e060f8bb526c9c910fd76a18468bd7ce1')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  patch -Np1 -i "${srcdir}/fix-soname.patch"
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --mandir=/usr/share/man
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}
