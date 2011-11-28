@@ -1,14 +1,15 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=chromium
 pkgver=15.0.874.121
-pkgrel=1
+pkgrel=11
 pkgdesc="The open-source project behind Google Chrome browser"
 arch=('i686' 'x86_64')
 url="http://www.chromium.org/"
 license=('BSD')
-depends=('zlib' 'gtk2' 'dbus-glib' 'nss' 'alsa-lib' 'xdg-utils' 'bzip2' 'libevent'
+depends=('zlib' 'gtk2' 'dbus-glib' 'nss' 'nss-freebl' 'alsa-lib' 'xdg-utils' 'bzip2' 'libevent'
          'libxss' 'libgcrypt' 'ttf-dejavu' 'desktop-file-utils' 'libxml2' 'icu'
-         'hicolor-icon-theme' 'libwebp' 'flac' 'libpng' 'libjpeg' 'speex')
+         'hicolor-icon-theme' 'libwebp' 'flac' 'libpng' 'libjpeg' 'speex'
+         'libxslt')
 makedepends=('python' 'perl' 'gperf' 'yasm' 'mesa')
 install=chromium.install
 source=(http://commondatastorage.googleapis.com/chromium-browser-official/$pkgname-$pkgver.tar.bz2)
@@ -39,47 +40,51 @@ build() {
   sed -i '1i#define OF(x) x' \
           third_party/zlib/contrib/minizip/{ioapi,{,un}zip}.c \
           chrome/common/zip.cc
-
   find third_party -type f \! -iname '*.gyp*' \
-                \! -path 'third_party/WebKit/*' \
-                \! -path 'third_party/angle/*' \
-                \! -path 'third_party/cacheinvalidation/*' \
-                \! -path 'third_party/cld/*' \
-                \! -path 'third_party/expat/*' \
-                \! -path 'third_party/ffmpeg/*' \
-                \! -path 'third_party/flac/flac.h' \
-                \! -path 'third_party/gpsd/*' \
-                \! -path 'third_party/harfbuzz/*' \
-                \! -path 'third_party/hunspell/*' \
-                \! -path 'third_party/iccjpeg/*' \
-                \! -path 'third_party/launchpad_translations/*' \
-                \! -path 'third_party/leveldb/*' \
-                \! -path 'third_party/libjingle/*' \
-                \! -path 'third_party/libphonenumber/*' \
-                \! -path 'third_party/libvpx/*' \
-                \! -path 'third_party/mesa/*' \
-                \! -path 'third_party/modp_b64/*' \
-                \! -path 'third_party/npapi/*' \
-                \! -path 'third_party/openmax/*' \
-                \! -path 'third_party/ots/*' \
-                \! -path 'third_party/protobuf/*' \
-                \! -path 'third_party/sfntly/*' \
-                \! -path 'third_party/skia/*' \
-                \! -path 'third_party/speex/speex.h' \
-                \! -path 'third_party/sqlite/*' \
-                \! -path 'third_party/tcmalloc/*' \
-                \! -path 'third_party/tlslite/*' \
-                \! -path 'third_party/undoview/*' \
-                \! -path 'third_party/webgl_conformance/*' \
-                \! -path 'third_party/webrtc/*' \
-                \! -path 'third_party/yasm/*' \
-                \! -path 'third_party/zlib/contrib/minizip/*' \
-                \! -path 'third_party/leveldatabase/*' \
-                \! -path 'third_party/mongoose/*' \
-                \! -path 'third_party/smhasher/*' \
-                \! -path 'third_party/v8-i18n/*' \
-                \! -path 'third_party/webdriver/*' \
-                -delete
+    \! -path 'third_party/WebKit/*' \
+    \! -path 'third_party/angle/*' \
+    \! -path 'third_party/cacheinvalidation/*' \
+    \! -path 'third_party/cld/*' \
+    \! -path 'third_party/expat/*' \
+    \! -path 'third_party/ffmpeg/*' \
+    \! -path 'third_party/flac/flac.h' \
+    \! -path 'third_party/gpsd/*' \
+    \! -path 'third_party/harfbuzz/*' \
+    \! -path 'third_party/hunspell/*' \
+    \! -path 'third_party/iccjpeg/*' \
+    \! -path 'third_party/launchpad_translations/*' \
+    \! -path 'third_party/leveldb/*' \
+    \! -path 'third_party/leveldatabase/*' \
+    \! -path 'third_party/libjingle/*' \
+    \! -path 'third_party/libphonenumber/*' \
+    \! -path 'third_party/libvpx/*' \
+    \! -path 'third_party/mesa/*' \
+    \! -path 'third_party/modp_b64/*' \
+    \! -path 'third_party/mongoose/*' \
+    \! -path 'third_party/npapi/*' \
+    \! -path 'third_party/openmax/*' \
+    \! -path 'third_party/ots/*' \
+    \! -path 'third_party/protobuf/*' \
+    \! -path 'third_party/sfntly/*' \
+    \! -path 'third_party/skia/*' \
+    \! -path 'third_party/smhasher/*' \
+    \! -path 'third_party/speex/speex.h' \
+    \! -path 'third_party/sqlite/*' \
+    \! -path 'third_party/tcmalloc/*' \
+    \! -path 'third_party/tlslite/*' \
+    \! -path 'third_party/undoview/*' \
+    \! -path 'third_party/v8-i18n/*' \
+    \! -path 'third_party/webdriver/*' \
+    \! -path 'third_party/webgl_conformance/*' \
+    \! -path 'third_party/webrtc/*' \
+    \! -path 'third_party/yasm/*' \
+    \! -path 'third_party/zlib/contrib/minizip/*' \
+    \! -path 'third_party/nss/*' \
+    \! -path 'third_party/nspr/*' \
+    \! -path 'third_party/openssl/*' \
+    \! -path 'third_party/mozilla/*' \
+    \! -path 'third_party/mozilla_security_manager/*' \
+    -delete
   export CXXFLAGS="${CXXFLAGS/-Os/-O2}"
   export CFLAGS="${CFLAGS/-Os/-O2}"
   export CXX="/usr/bin/x86_64-pc-linux-gnu-g++"
@@ -91,7 +96,7 @@ build() {
     -Dlinux_sandbox_chrome_path=/usr/lib/chromium/chromium \
     -Dlinux_strip_binary=1 \
     -Drelease_extra_cflags="${CFLAGS}" \
-    -Dffmpeg_branding=Chromium \
+    -Dffmpeg_branding=Chrome \
     -Dproprietary_codecs=0 \
     -Duse_system_bzip2=1 \
     -Duse_system_ffmpeg=0 \
