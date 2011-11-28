@@ -1,0 +1,57 @@
+# Based upon the PKGBUILD from Arch Linux and ebuild from Gentoo
+pkgname=lua
+pkgver=5.1.4
+pkgrel=1
+_patchver=5.1.4-4
+pkgdesc="A powerful light-weight programming language designed for extending applications"
+arch=('i686' 'x86_64')
+url="http://www.lua.org/"
+license=('MIT')
+options=('!makeflags' '!emptydirs')
+source=(http://www.lua.org/ftp/${pkgname}-${pkgver}.tar.gz
+        http://www.lua.org/ftp/patch-lua-${_patchver})
+sha256sums=('b038e225eaf2a5b57c9bcc35cd13aa8c6c8288ef493d52970c9545074098af3a'
+            '14b54366dd1ebd36aa06ae7ecb4ef236561856f8ce7f574403a421f85978d863')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  patch -p0 -i "${srcdir}/patch-lua-${_patchver}" -d src
+  Patch lua-5.1-make.patch
+  Patch lua-5.1-module_paths.patch
+  Patch lua-5.1-readline.patch
+  Patch lua-5.1-make_static.patch
+  sed -i 's:-lreadline -lhistory -lncurses::' src/Makefile
+  sed -i -e 's/\(LIB_VERSION = \)6:1:1/\16:4:1/' src/Makefile
+  cd src
+  make CFLAGS="-DLUA_USE_LINUX $CFLAGS" \
+       RPATH="/usr/lib" \
+       LIB_LIBS="-lpthread -ldl -lm" \
+       V=$pkgver \
+       gentoo_all
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make INSTALL_TOP="$pkgdir"/usr INSTALL_LIB="$pkgdir"/usr/lib \
+                  V=$pkgver gentoo_install
+  install -D -m644 etc/lua.pc "${pkgdir}/usr/lib/pkgconfig/lua.pc"
+  install -D -m644 COPYRIGHT "${pkgdir}/usr/share/licenses/${pkgname}/COPYRIGHT"
+
+  # Install the documentation
+  install -d "${pkgdir}/usr/share/doc/lua"
+  install -m644 doc/*.{gif,png,css,html} "${pkgdir}/usr/share/doc/lua"
+  install -D -m 644 doc/lua.1 "${pkgdir}"/usr/share/man/man1/lua.1
+  install -D -m 644 doc/luac.1 "{$pkgdir}"/usr/share/man/man1/luac.1
+}
+
+source=(${source[@]-}
+        lua-5.1-make.patch
+        lua-5.1-make_static.patch
+        lua-5.1-module_paths.patch
+        lua-5.1-readline.patch)
+
+sha256sums=(${sha256sums[@]-}
+            'bf691afd2480a496bfa9b2c46fcbb396e7034ea58e94399788e05ab7872ae46f'
+            '077f5da55b9b354b8b901d8a769c92aad104d79ba0a6acee0096c9a5d94b259a'
+            '1115b6aa00eb4e918156ae70c763534bd2f603ba888da75e4908c19c2ac3e5f7'
+            '1f0f90eb8103e338f1188cc884c0c59cc6afd023828c11d86b8145b2a8d1efc2')
