@@ -1,0 +1,59 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=abiword
+pkgver=2.8.6
+pkgrel=1
+arch=('i686' 'x86_64')
+license=('GPL')
+url="http://www.abisource.com"
+makedepends=('pkg-config')
+depends=('boost' 'fribidi' 'wv' 'libxslt' 'glib' 'freetype' 'zlib'
+         'libpng' 'libjpeg' 'cairo' 'gtk2' 'libxml2' 'gcc-libs')
+options=('!makeflags' '!libtool')
+source=("http://www.abisource.com/downloads/${pkgname}/${pkgver}/source/${pkgname}-${pkgver}.tar.gz"
+        abiword-2.8.6-no-undefined.patch)
+sha1sums=('998f69d038000b3fc027d4259548f02d67c8d0df'
+          '159b1cd0b9354868ab86f851b64a03dae7d254dc')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  # fix a gcc 4.6.x build issue, patch from Fedora
+  Patch abiword-2.8.6-no-undefined.patch
+  libtoolize --force
+  autoreconf
+
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --enable-clipart \
+              --enable-templates \
+              --enable-statusbar \
+              --enable-shave \
+              --disable-maintainer-mode \
+              --disable-default-plugins \
+              --disable-builtin-plugins \
+              --disable-collab-backend-telepathy \
+              --disable-collab-backend-sugar \
+              --enable-plugins="openxml latex" \
+              --disable-spell \
+              --without-gnomevfs \
+              --with-gio \
+              --without-goffice \
+              --disable-static \
+              --with-psiconv-config=/nothere
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  sed -i plugins/Makefile \
+      -e 's/ collab / /' \
+      -e 's/ wpg / /' \
+      -e 's/ wmf / /' \
+      -e 's/ grammar / /' \
+      -e 's/ mathview / /' \
+      -e 's/ aiksaurus / /' \
+      -e 's/ ots / /' \
+      -e 's/ wordperfect / /'
+  make DESTDIR="${pkgdir}" install
+}
+
