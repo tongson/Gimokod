@@ -2,7 +2,7 @@
 pkgbase=gtk2
 pkgname=('gtk2' 'gtk-update-icon-cache')
 pkgver=2.24.8
-pkgrel=1
+pkgrel=2
 arch=('i686' 'x86_64')
 url="http://www.gtk.org/"
 makedepends=('glib' 'pkg-config' 'fontconfig' 'atk' 'pango' 'libxcursor' 'libxinerama' 'libxrandr' 'libxi'
@@ -57,7 +57,6 @@ package_gtk2() {
   install=gtk2.install
   depends=('glib' 'fontconfig' 'atk' 'pango' 'libxcursor' 'libxinerama' 'libxrandr' 'libxi' 'libxcomposite'
            'libxdamage' 'shared-mime-info' 'cairo' 'gtk-update-icon-cache')
-  backup=(etc/gtk-2.0/gtkrc)
   cd "${srcdir}/gtk+-${pkgver}"
   make DESTDIR="${pkgdir}" install
   echo 'gtk-fallback-icon-theme = "gnome"' > "${pkgdir}/etc/gtk-2.0/gtkrc"
