@@ -50,13 +50,11 @@ channels are monitored for security vulnerabilities affecting supported
 packages. Keeping the base system small has the added benefit of needing less
 work with keeping abreast with essential updates.
 
-  The `core` and `main` repositories are meant to host stable packages but they
-will be updated or preferrably patched immediately if any serious security
-vulnerabilities are reported. Once Gimokod is deployed for production use it
-will be a policy to only consider bumping the version of a package in the `core`
-repository after two weeks without reported regressions. The `main` repo after a
-week. There will be a `testing` repository for any immediate version bump
-requirement.
+  The `core` and `main` repositories are meant to host stable packages. Packages
+will only be updated (or preferrably patched) immediately if any serious security
+vulnerabilities are reported. The `testing` repository will contain updated
+versions of packages. This policy will be put into practice once Gimokod is used
+in production systems.
 
   Built-in tests of the following packages are run and checked for 0 unexpected
 failures:
