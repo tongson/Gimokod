@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=ffmpeg
-pkgver=20111108
+pkgver=20111123
 pkgrel=1
 pkgdesc="Complete and free Internet live audio and video broadcasting solution for Linux/Unix"
 arch=('i686' 'x86_64')
@@ -10,7 +10,7 @@ depends=('bzip2' 'vo-aacenc' 'lame' 'libvorbis' 'xvidcore' 'zlib' 'x264' 'libthe
          'schroedinger' 'speex' 'libvpx' 'openjpeg' 'rtmpdump')
 makedepends=('yasm')
 source=(ftp://ftp.archlinux.org/other/ffmpeg/${pkgname}-${pkgver}.tar.xz)
-md5sums=('bad7e47f6974cee62d98ce9de710076c')
+md5sums=('8ec30d05efe0f6cc6f702933e6781e8e')
 
 build() {
   cd "${srcdir}/${pkgname}"
