@@ -1,4 +1,3 @@
-# Based upon the PKGBUILD from Arch Linux
 pkgname=ebdftopcf
 pkgver=2
 pkgrel=1
