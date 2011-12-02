@@ -1,0 +1,43 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=iptables
+pkgver=1.4.12.1
+pkgrel=1
+pkgdesc='Linux kernel packet control tool'
+arch=('i686' 'x86_64')
+license=('GPL2')
+url='http://www.netfilter.org/projects/iptables/index.html'
+makedepends=('linux-headers' 'automake')
+options=('!libtool')
+source=("http://www.iptables.org/projects/iptables/files/${pkgname}-${pkgver}.tar.bz2")
+sha256sums=('77e6581f21f15946a814fa311236e5f3f7c6593180f9d695cea06aa95e464aba')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  Patch iptables-1.4.12.1-lm.patch
+  Patch iptables-1.4.12.1-conntrack-v2-ranges.patch
+  automake
+  ./configure --prefix=/usr \
+              --sbindir=/usr/bin \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --libexecdir=/usr/lib/iptables \
+              --sysconfdir=/etc \
+              --with-xtlibdir=/usr/lib/iptables \
+              --enable-devel \
+              --enable-libipq
+
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}
+
+source=(${source[@]-}
+        iptables-1.4.12.1-conntrack-v2-ranges.patch
+        iptables-1.4.12.1-lm.patch)
+
+sha256sums=(${sha256sums[@]-}
+            '713e62adae8651e94296619297afe603ef3f7da68c4ff10e5a64be24c5cfe537'
+            'dfc429b71c6a3d77a6447e4d7c0c13f62cf086187f491968b3361568f9aa09ef')
