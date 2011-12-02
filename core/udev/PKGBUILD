@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=udev
 pkgver=175
-pkgrel=1
+pkgrel=2
 arch=(i686 x86_64)
 url="http://www.kernel.org/pub/linux/utils/kernel/hotplug/udev.html"
 license=('GPL')
@@ -19,6 +19,7 @@ build() {
   Patch udev-173-no-docs.patch
   cd rules/rules.d
   sed -i 's:/sbin:/usr/bin:g' * >/dev/null 2>&1
+  sed -i '5s:modprobe -bv:echo:' 80-drivers.rules
   cd ../..
   ./configure --build=${CBUILD} \
               --host=${CHOST} \
