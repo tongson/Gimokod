@@ -2,7 +2,7 @@
 pkgname=simplepamapps
 _realpkgname=SimplePAMApps
 pkgver=0.60
-pkgrel=3
+pkgrel=4
 pkgdesc="Simple PAM-based Applications"
 arch=('i686' 'x86_64')
 url="http://www.kernel.org/pub/linux/libs/pam/"
@@ -69,6 +69,6 @@ sha256sums=(${sha256sums[@]-}
             '9a230b5ef9a324cfb1b0d73aa7616f936c2a475561428478440abb74f4f31fcd'
             '71818ca204fb444198a9c65208580618079484cf6e80d4d40147fe8a632c7055'
             '0311af234856387e496d42c3915fdad5457001131e9dbaa993681cb3c7071884'
-            '1a8f0ffb22995278970abd4f33fffe5f1e94159fd3acb29532aad5a0c9f50ddc'
+            '49c51cb51df2baa4be34aaf2d130aaf97b55aac38a6793c038c0cdaeecbe84bd'
             '29ac78e44aa33ded8f43b4ff6822adb2ce6481b40110640dc4393b206731a22f'
             '8c535a9cdbe8c0067d1a7b08e50e5cd6343473b58e428f75174ce051acd73fd7')
