@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=perl
-pkgver=5.14.1
+pkgver=5.14.2
 pkgrel=1
 pkgdesc="A highly capable, feature-rich programming language"
 arch=(i686 x86_64)
@@ -16,7 +16,7 @@ source=(http://www.cpan.org/src/5.0/perl-${pkgver}.tar.bz2
         0001-Append-CFLAGS-and-LDFLAGS-to-their-Config.pm-counter.patch)
 install=perl.install
 options=('!makeflags' '!purge')
-md5sums=('97cd306a2c22929cc141a09568f43bb0'
+md5sums=('04a4c5d3c1f9f19d77daff8e8cd19a26'
          '74a952f1277f770d9c552a46ddf0fca0'
          '5ed2542fdb9a60682f215bd33701e61a'
          '1f0cbbee783e8a6d32f01be5118e0d5e'
@@ -25,9 +25,11 @@ md5sums=('97cd306a2c22929cc141a09568f43bb0'
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   mv pod/{perlpod,perl}.pod ..
+  mv pod/perldiag.pod ..
   ../strippm.sh pod
   mv ../perl.pod pod/perl.pod
   mv ../perlpod.pod pod/perlpod.pod
+  mv ../perldiag.pod pod/perldiag.pod
 
   export LC_ALL="C"
 
@@ -38,6 +40,9 @@ build() {
     # for i686
     arch_opts=""
   fi
+
+  # remove rpath FS#27173
+  sed -i 's#xxx="-Wl,-rpath,$shrpdir"##' Configure
   ./Configure -Dcc="/usr/bin/gcc" -des -Dusethreads -Duseshrplib -Doptimize="${CFLAGS}" -DDEBUGGING=none \
     -Dprefix=/usr -Dinstallprefix="${pkgdir}"/usr -Dvendorprefix=/usr \
     -Dprivlib=/usr/share/perl5/core_perl \
@@ -55,6 +60,12 @@ build() {
   patch -Np1 -i "${srcdir}"/0001-Append-CFLAGS-and-LDFLAGS-to-their-Config.pm-counter.patch
   make
 }
+
+check() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make test
+}
+
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   make install
