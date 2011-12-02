@@ -2,7 +2,7 @@
 pkgname=openssl
 _ver=1.0.0e
 pkgver=${_ver/[a-z]/.${_ver//[0-9.]/}}
-pkgrel=1
+pkgrel=2
 pkgdesc='The Open Source toolkit for Secure Sockets Layer and Transport Layer Security'
 arch=('i686' 'x86_64')
 url='https://www.openssl.org'
@@ -23,10 +23,13 @@ build() {
     openssltarget='linux-elf'
   fi
 
+  rm -f Makefile
   sed -i -e '/DIRS/s: fips : :g' \
          -e '/^MAKEDEPPROG/s:=.*:=$(CC):' \
          -e '/^install:/s:install_docs::' \
-         Makefile{,.org}
+         Makefile.org
+
+  Patch openssl-1.0.0e-pkg-config.patch
 
   sed -i '/^SET_X/s:=.*:=set -x:' Makefile.shared
 
@@ -37,7 +40,7 @@ build() {
 
   ./Configure --prefix=/usr \
               --openssldir=/etc/ssl \
-              --libdir=lib \
+              --libdir=/usr/lib \
               shared \
               zlib \
               threads \
@@ -64,7 +67,8 @@ build() {
          Makefile
 
   make depend
-  make all rehash
+  make all
+  make rehash
 }
 
 check() {
@@ -80,7 +84,9 @@ package() {
 }
 
 source=(https://www.openssl.org/source/${pkgname}-${_ver}.tar.gz
+        openssl-1.0.0e-pkg-config.patch
         c_rehash)
 
 sha256sums=('e361dc2775733fb84de7b5bf7b504778b772869e8f7bfac0b28b935cbf7380f7'
+            'f506d94ee240776e3f5d93ecdaa010539aa264ec4553b09fa8093074401fe98b'
             '4999ee79892f52bd6a4a7baba9fac62262454d573bbffd72685d3aae9e48cee0')
