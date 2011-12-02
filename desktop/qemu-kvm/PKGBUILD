@@ -1,0 +1,72 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=qemu-kvm
+pkgver=0.15.1
+pkgrel=1
+pkgdesc="a fast open source processor emulator"
+arch=('i686' 'x86_64')
+license=('GPL2' 'LGPL2.1')
+url="http://www.linux-kvm.org"
+depends=('glib' 'libaio' 'alsa-lib' 'zlib' 'ncurses' 'sdl'
+         'libx11' 'util-linux' 'libxau' 'libxcb' 'libxdmcp')
+makedepends=('python' 'pciutils')
+install=qemu-kvm.install
+source=(http://downloads.sourceforge.net/kvm/${pkgname}-${pkgver}.tar.gz)
+options=('!strip' '!binchecks')
+
+build()
+{
+    cd "${srcdir}/${pkgname}-${pkgver}"
+    ./configure --prefix=/usr \
+              --sysconfdir=/etc \
+              --cc=/usr/bin/gcc \
+              --host-cc=/usr/bin/gcc \
+              --python=/usr/bin/python \
+              --sysconfdir=/etc \
+              --audio-drv-list=alsa \
+              --audio-card-list=es1370 \
+              --enable-linux-aio \
+              --disable-bluez \
+              --disable-brlapi \
+              --disable-curl \
+              --disable-fdt \
+              --disable-user-pie \
+              --disable-vnc-jpeg \
+              --enable-curses \
+              --disable-smartcard-nss \
+              --disable-vnc-png \
+              --disable-rbd \
+              --disable-vnc-sasl \
+              --enable-sdl \
+              --disable-spice \
+              --disable-vnc-tls \
+              --disable-vnc-thread \
+              --disable-vde \
+              --disable-xen \
+              --disable-attr \
+              --disable-darwin-user \
+              --disable-bsd-user \
+              --disable-vhost-net \
+              --disable-strip \
+              --disable-werror \
+              --enable-kvm \
+              --enable-nptl \
+              --enable-uuid \
+              --extra-ldflags="-Wl,-z,execheap" \
+              --disable-docs
+    make
+}
+package()
+{
+    cd "${srcdir}/${pkgname}-${pkgver}"
+    make DESTDIR="${pkgdir}" install
+    # symbolic link for backwards compatibility
+    ln -s qemu-system-x86_64 "${pkgdir}"/usr/bin/qemu-kvm
+    # strip scripts directory
+    find "${pkgdir}"/usr/bin  -type f -perm -u+w 2>/dev/null | while read binary ; do
+      case "$(file -bi "$binary")" in
+        *application/x-executable*) # Binaries
+        /usr/bin/strip $STRIP_BINARIES "$binary";;
+      esac
+    done
+}
+md5sums=('8800a7d6b3aa4a168ea7f78dc66c0320')

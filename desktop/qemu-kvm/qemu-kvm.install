@@ -1,0 +1,12 @@
+post_install() {
+  if ! usr/bin/getent group kvm >/dev/null; then
+    usr/bin/groupadd -g 78 kvm
+  fi
+}
+
+post_remove() {
+  if usr/bin/getent group kvm >dev/null; then
+    usr/bin/groupdel kvm
+  fi
+}
+
