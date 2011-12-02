@@ -71,6 +71,9 @@ failures:
     pam
     expat
     gnupg
+    bison
+    gdbm
+    perl
     nss
     libgcrypt
     libevent
