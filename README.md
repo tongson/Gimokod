@@ -84,7 +84,7 @@ failures:
 ## MISCELLANEOUS FEATURES (to be documented)
 
 * Signed binary packages
-* /etc/tcb support (Blowfish hashes)
+* /etc/tcb support (and Blowfish hashes)
 * Read-only root filesystem
 * /etc under revision control (Fossil SCM)
 * Alternatives system
@@ -100,3 +100,8 @@ failures:
 See the core repository for packages in the base system.
 
 
+## HISTORY
+
+Prototype was based on Gentoo. Full Systemd startup, read-only root filesystem and
+encrypted /home was implemented. The initial base system was built inside a
+chroot under Exherbo.
