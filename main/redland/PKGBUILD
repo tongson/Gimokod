@@ -1,16 +1,16 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=redland
-pkgver=1.0.14
-pkgrel=1
+pkgver=1.0.15
+pkgrel=2
 url="http://librdf.org/"
 license=("GPL")
 arch=('i686' 'x86_64')
-depends=('libtool' 'libxml2' 'openssl' 'rasqal' 'raptor')
+depends=('libltdl' 'libxml2' 'openssl' 'rasqal' 'raptor')
 makedepends=('rasqal' 'raptor')
 options=('!libtool')
 source=(http://download.librdf.org/source/${pkgname}-${pkgver}.tar.gz
         rpath.diff)
-md5sums=('3400579d137da82c4175debf9f6d53ba'
+md5sums=('b0deb87f3c7d3237a3d587c1e0f2f266'
          'acc85e784f01a656bd56777f95880787')
 
 build() {
