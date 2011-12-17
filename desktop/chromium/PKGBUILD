@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=chromium
-pkgver=15.0.874.121
-pkgrel=11
+pkgver=16.0.912.63
+pkgrel=1
 pkgdesc="The open-source project behind Google Chrome browser"
 arch=('i686' 'x86_64')
 url="http://www.chromium.org/"
@@ -13,10 +13,12 @@ depends=('zlib' 'gtk2' 'dbus-glib' 'nss' 'nss-freebl' 'alsa-lib' 'xdg-utils' 'bz
 makedepends=('python' 'perl' 'gperf' 'yasm' 'mesa')
 install=chromium.install
 source=(http://commondatastorage.googleapis.com/chromium-browser-official/$pkgname-$pkgver.tar.bz2)
-sha256sums=('4d3e340b43ca1f5dd7bd5b7b0c575dfe158eee3ba5163a1c42be53dfc7db5aec')
+sha256sums=('da806829adee04c0701444b1842975eec2e4b745956933d760153a414b53c588')
 
 build() {
   cd "${srcdir}/chromium-${pkgver}"
+
+  Patch fix_compilation_without_cups.diff
 
   # NaCL build remains faily
   cp "${srcdir}/nacl.gypi" chrome/
@@ -26,8 +28,8 @@ build() {
   patch -Np0 -i "${srcdir}/gcc-4.6.patch"
 
   # Fix build with CUPS 1.5
-  sed -i '/#include <cups\/cups.h>/ a #include <cups/ppd.h>' \
-    chrome/browser/ui/webui/print_preview_handler.cc
+  # sed -i '/#include <cups\/cups.h>/ a #include <cups/ppd.h>' \
+  #  chrome/browser/ui/webui/print_preview_handler.cc
 
   #mkdir "${srcdir}/python-path"
   ##ln -s /usr/bin/python "${srcdir}/python-path/python"
@@ -163,13 +165,14 @@ package() {
   install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/chromium/LICENSE"
 }
 
-
 source=(${source[@]-}
         chromium.sh
+        fix_compilation_without_cups.diff
         gcc-4.6.patch
         nacl.gypi)
 
 sha256sums=(${sha256sums[@]-}
             '10edbd6d0d961f12fde37aec9b2e1508c44309080409f0a0708d493ef941e25e'
+            '5c13d2a3b18be7e7c5312209e746b49081bd5163a90a988517e67428d5008f9c'
             '9c5e0803904d1a0e71ab7444c92a7046a34a9518eeba7a70f2eec7abecb8bf4e'
             '25bddd2eee7821e18ddda06f6e69552c359e1c04a10971ac3985556c3d8ef059')
