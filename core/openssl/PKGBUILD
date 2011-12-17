@@ -2,7 +2,7 @@
 pkgname=openssl
 _ver=1.0.0e
 pkgver=${_ver/[a-z]/.${_ver//[0-9.]/}}
-pkgrel=2
+pkgrel=3
 pkgdesc='The Open Source toolkit for Secure Sockets Layer and Transport Layer Security'
 arch=('i686' 'x86_64')
 url='https://www.openssl.org'
@@ -40,7 +40,7 @@ build() {
 
   ./Configure --prefix=/usr \
               --openssldir=/etc/ssl \
-              --libdir=/usr/lib \
+              --libdir=lib \
               shared \
               zlib \
               threads \
