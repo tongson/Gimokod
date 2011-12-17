@@ -1,6 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
+# no libbluray support
 pkgname=mplayer
-pkgver=34344
+pkgver=34426
 pkgrel=1
 pkgdesc="A movie player for linux"
 arch=('i686' 'x86_64')
@@ -15,7 +16,7 @@ license=('GPL')
 url="http://www.mplayerhq.hu/"
 options=('!buildflags' '!emptydirs')
 source=(ftp://ftp.archlinux.org/other/${pkgname}/${pkgname}-${pkgver}.tar.xz)
-md5sums=('e4016248418b8f9d55b540d68b6cfee2')
+md5sums=('ff81117293e76b59e54debc439d8e612')
 
 build() {
     cd "${srcdir}/${pkgname}"
