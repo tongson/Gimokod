@@ -36,3 +36,4 @@ X11
 profile.d
 ld.so.conf.d
 conky
+qemu
