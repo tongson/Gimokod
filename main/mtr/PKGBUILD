@@ -1,21 +1,22 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=mtr
-pkgver=0.81
+pkgver=0.82
 pkgrel=1
 arch=('i686' 'x86_64')
 pkgdesc="Combines the functionality of traceroute and ping into one tool (CLI version)"
 license=('GPL')
 depends=('ncurses')
 makedepends=('ncurses')
-source=(ftp://ftp.bitwizard.nl/mtr/${pkgname}-${pkgver}.tar.gz)
+source=(ftp://ftp.bitwizard.nl/mtr/$pkgname-$pkgver.tar.gz)
 url="http://www.bitwizard.nl/mtr/"
-md5sums=('b7a7914f1fc1b5a21ab10bdca44356e1')
+md5sums=('10601ea543fda3e51545c4bce195b64c')
 
 build() {
   install -d "${srcdir}/"mtr-cli
   cd "${srcdir}/mtr-cli"
   ../${pkgbase}-${pkgver}/configure --enable-ipv6 \
               --prefix=/usr \
+              --sbindir=/usr/bin \
               --build=${CBUILD} \
               --host=${CHOST} \
               --disable-gtktest \
