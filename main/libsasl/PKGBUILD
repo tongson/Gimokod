@@ -1,8 +1,8 @@
 # Based upon the PKGBUILD from Arch Linux
+pkgbase=libsasl
 pkgname=('libsasl' 'cyrus-sasl')
 pkgver=2.1.23
-pkgrel=1
-pkgdesc="Cyrus Simple Authentication Service Layer (SASL) library"
+pkgrel=2
 arch=('i686' 'x86_64')
 url="http://cyrusimap.web.cmu.edu/downloads.html#sasl"
 license=('custom')
@@ -25,9 +25,7 @@ source=(ftp://ftp.andrew.cmu.edu/pub/cyrus-mail/cyrus-sasl-${pkgver}.tar.gz
         0025_ld_as_needed.patch
         0026_drop_krb5support_dependency.patch
         0027_db5_support.patch
-        0030-dont_use_la_files_for_opening_plugins.patch
-        saslauthd.conf.d
-        saslauthd)
+        0030-dont_use_la_files_for_opening_plugins.patch)
 md5sums=('2eb0e48106f0e9cd8001e654f267ecbc'
          'e27ddff076342e7a3041c4759817d04b'
          'd7e6886e88af04d05f3dec7f0a59ccf7'
@@ -45,9 +43,7 @@ md5sums=('2eb0e48106f0e9cd8001e654f267ecbc'
          '62bf892fe4d1df41ff748e91a1afaf67'
          'b7848957357e7c02d6490102be496bf9'
          'd86a5aa2e3b5b7c1bad6f8b548b7ea36'
-         '8e7106f32e495e9ade69014fd1b3352a'
-         '49219af5641150edec288a3fdb65e7c1'
-         '75542f613185d5a90520ad0d7d926a20')
+         '8e7106f32e495e9ade69014fd1b3352a')
 
 build() {
   cd "${srcdir}/cyrus-sasl-${pkgver}"
@@ -133,7 +129,7 @@ build() {
 
 package_libsasl() {
   pkgdesc="Cyrus Simple Authentication Service Layer (SASL) Library"
-  depends=('openssl')
+  depends=('openssl' 'gdbm')
 
   cd "${srcdir}/cyrus-sasl-${pkgver}"
   for dir in include lib sasldb plugins utils; do
@@ -149,18 +145,12 @@ package_libsasl() {
 }
 
 package_cyrus-sasl() {
-  depends=("libsasl=${pkgver}-${pkgrel}")
   pkgdesc="Cyrus saslauthd SASL authentication daemon"
-  backup=('etc/conf.d/saslauthd')
+  depends=('libsasl')
 
   cd "${srcdir}/cyrus-sasl-${pkgver}/saslauthd"
   sed -i 's:nroff -mdoc:mandoc:g' Makefile
   make DESTDIR="${pkgdir}" install
-  install -m755 -d "${pkgdir}/etc/rc.d"
-  install -m755 -d "${pkgdir}/etc/conf.d"
-  install -m755 "${srcdir}/saslauthd" "${pkgdir}/etc/rc.d/"
-  install -m644 "${srcdir}/saslauthd.conf.d" "${pkgdir}/etc/conf.d/saslauthd"
-
   install -m755 -d "${pkgdir}/usr/share/licenses/cyrus-sasl"
   ln -sf ../libsasl/COPYING "${pkgdir}/usr/share/licenses/cyrus-sasl/"
 }
