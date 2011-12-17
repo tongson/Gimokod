@@ -1,0 +1,49 @@
+pkgname=mupdf
+pkgver=0.9
+pkgrel=1
+pkgdesc="lightweight PDF viewer and toolkit written in portable C"
+arch=('i686' 'x86_64')
+url="http://mupdf.com"
+license=('GPL3')
+depends=('freetype2' 'libjpeg' 'jbig2dec' 'openjpeg' 'libxext')
+source=("http://mupdf.com/download/${pkgname}-${pkgver}-source.tar.gz")
+sha256sums=('abed825cb1d73e0e28f0a7ee72b5d7a451ba41d21b0c55837ed2a212f3b16b2d')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  Patch mupdf-0.8.165-buildsystem.patch
+  Patch mupdf-0.8.165-zoom.patch
+  Patch mupdf-0.9-dpi_hack.patch
+  Patch mupdf-0.9-scroll_hack.patch
+  make CC=/usr/bin/gcc build=release verbose=true prefix="${pkgdir}/usr"
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make build=release verbose=true LIBDIR="${pkgdir}/usr/lib" \
+       prefix="${pkgdir}/usr" install
+
+  # Rename executables to avoid conflicts
+  msg "Renaming executables"
+  cd "${pkgdir}/usr/bin"
+  for i in pdf*; do 
+    mv "$i" "mupdf_$i";
+  done
+
+  cd "$srcdir/$pkgname-$pkgver/debian"
+  install -Dm644 mupdf.pc "${pkgdir}/usr/lib/pkgconfig/mudpdf.pc"
+}
+
+
+source=(${source[@]-}
+        mupdf-0.8.165-buildsystem.patch
+        mupdf-0.8.165-zoom.patch
+        mupdf-0.9-dpi_hack.patch
+        mupdf-0.9-scroll_hack.patch)
+
+sha256sums=(${sha256sums[@]-}
+            '3f2b801b2fcf74736916ad6268fbb186bd7d79aef9c0283de48b6f7c1412586f'
+            '8215d4f9c27bf1899524046fe431890e0eb3a1390676b3ad69d97ae0eec0e3d0'
+            '76724555c6044864ef01dbdc6f27b7b47d705155556cb6bf7056285ad64e6341'
+            'a5750a052f975c55b58e27f138a0e5fa51cb118483c43a987f4aeaf2abfa0d95')
+

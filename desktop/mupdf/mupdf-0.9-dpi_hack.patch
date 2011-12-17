@@ -1,0 +1,35 @@
+From http://aur.archlinux.org/packages.php?ID=52333
+
+--- mupdf-0.9/apps/x11_main.c
++++ mupdf-0.9/apps/x11_main.c
+@@ -539,6 +539,21 @@
+ 	exit(1);
+ }
+ 
++int get_dpi(void)
++{
++	Display *xdpy;
++	int xscr;
++	int x = 0;
++	
++	if ((xdpy = XOpenDisplay(NULL))) {
++		xscr = DefaultScreen(xdpy);
++		x = (int) (DisplayWidth(xdpy, xscr) * 25.4 /
++		DisplayWidthMM(xdpy, xscr) + 0.5);
++		XCloseDisplay(xdpy);
++	}
++	return x;
++}
++
+ int main(int argc, char **argv)
+ {
+ 	int c;
+@@ -547,7 +562,7 @@
+ 	KeySym keysym;
+ 	int oldx = 0;
+ 	int oldy = 0;
+-	int resolution = 72;
++	int resolution = get_dpi();
+ 	int pageno = 1;
+ 	int accelerate = 1;
+ 	int fd;
