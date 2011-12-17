@@ -1,12 +1,12 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=xf86-video-intel
 pkgver=2.17.0
-pkgrel=1
+pkgrel=2
 pkgdesc="X.org Intel i810/i830/i915/945G/G965+ video drivers"
 arch=('i686' 'x86_64')
 url="http://xorg.freedesktop.org/"
 license=('custom')
-depends=(intel-dri libxvmc libpciaccess libdrm xcb-util libxfixes udev)
+depends=('intel-dri' 'libxvmc' 'libpciaccess' 'libdrm' 'xcb-util' 'libxfixes' 'udev')
 makedepends=('xorg-server-devel' 'libx11' 'libdrm' 'xf86driproto' 'glproto' 'mesa' 'libxvmc' 'xcb-util' 'libxrender')
 options=('!libtool')
 groups=('xorg-drivers' 'xorg')
