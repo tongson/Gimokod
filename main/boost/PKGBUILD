@@ -1,16 +1,18 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgbase=boost
 pkgname=('boost' 'boost-libs')
-pkgver=1.47.0
+pkgver=1.48.0
 _boostver=${pkgver//./_}
 pkgrel=1
 arch=('i686' 'x86_64')
 url="http://www.boost.org/"
 source=(http://downloads.sourceforge.net/${pkgbase}/${pkgbase}_${_boostver}.tar.gz
+        BOOST_FOREACH.patch
         random-Jamfile-1.47.0
         exceptions.patch)
 license=('custom')
-md5sums=('ff180a5276bec773a7625cac7e2288e8'
+md5sums=('313a11e97eb56eb7efd18325354631be'
+         '2db6098a1a39bced4c6162eb46418320'
          '6db01e5cde8739ce35e7f0a2abb0de14'
          '623b2d3b64fbb03b0d23ae9d9830a966')
 
@@ -22,6 +24,9 @@ build() {
   # http://web.archiveorange.com/archive/v/Q0J4VE5bwsy3zxRXqUgd
   cd "${srcdir}/${pkgbase}_${_boostver}"
   Patch exceptions.patch
+
+  # https://svn.boost.org/trac/boost/ticket/6131
+  Patch BOOST_FOREACH.patch
 
   # build bjam
   cd "${srcdir}/${pkgbase}_${_boostver}/tools/build/v2/engine"
@@ -52,7 +57,7 @@ build() {
 
   # /dev/urandom support
   mkdir -p libs/random/build
-  cp "${srcdir}/random-Jamfile-${pkgver}" libs/random/build/Jamfile.v2
+  cp "${srcdir}/random-Jamfile-1.47.0" libs/random/build/Jamfile.v2
 
   # default "minimal" install: "release link=shared,static
   # runtime-link=shared threading=single,multi"
