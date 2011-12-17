@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=gegl
-pkgver=0.1.6
+pkgver=0.1.8
 pkgrel=1
 pkgdesc="Graph based image processing framework"
 arch=('i686' 'x86_64')
@@ -8,15 +8,12 @@ url="http://www.gegl.org/"
 license=('GPL3' 'LGPL3')
 depends=('babl' 'libpng' 'libjpeg' 'gtk2' 'librsvg')
 options=('!libtool')
-source=(ftp://ftp.gimp.org/pub/${pkgname}/${pkgver%.*}/${pkgname}-${pkgver}.tar.bz2
-        0.1.6-ffmpeg.patch)
-sha1sums=('27bedcfd077da7a6913b82966dbec904b22c121d'
-          'd62d4987f1c0fc256f5968271fc65cce0cc4c195')
+source=(ftp://ftp.gimp.org/pub/${pkgname}/${pkgver%.*}/${pkgname}-${pkgver}.tar.bz2)
+sha1sums=('3d4d902580f5c5122b01b5188b6b5da03089ecac')
 
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  Patch 0.1.6-ffmpeg.patch
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
