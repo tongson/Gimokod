@@ -1,0 +1,43 @@
+pkgname=linux-t60
+_basekernel=3.1
+pkgver=${_basekernel}.5
+pkgrel=1
+pkgdesc="The Linux Kernel for KVM"
+arch=('i686' 'x86_64')
+url="http://www.kernel.org/"
+license=('GPL2')
+options=('!strip' '!binchecks')
+source=("ftp://ftp.kernel.org/pub/linux/kernel/v3.0/linux-${_basekernel}.tar.xz"
+         "http://www.kernel.org/pub/linux/kernel/v3.0/patch-${pkgver}.bz2")
+sha256sums=('6f220258f3ce9f11d0e53860ccc2d9fe746117056212099876dbe5ee1de80af3'
+            '474698393a39b792c02b7269010a8fd90fb38bfe7bd6f7bfc7dc5984afbce6ee')
+
+build() {
+  cd "${srcdir}/linux-${_basekernel}"
+  Patch "patch-${pkgver}"
+  cp "${srcdir}/config.${CARCH}" ./.config
+  make oldconfig
+  make -j4 bzImage
+}
+
+package() {
+  cd "${srcdir}/linux-${_basekernel}"
+  KARCH=x86
+  _kernver="$(make kernelrelease)"
+  install -d -m700 "${pkgdir}/boot"
+  install -D -m644 arch/$KARCH/boot/bzImage "${pkgdir}/boot/bzImage"
+  install -D -m644 vmlinux "${pkgdir}/usr/src/linux-${_kernver}/vmlinux"
+  install -D -m644 Makefile "${pkgdir}/usr/src/linux-${_kernver}/Makefile"
+  install -D -m644 kernel/Makefile "${pkgdir}/usr/src/linux-${_kernver}/kernel/Makefile"
+  install -D -m644 .config "${pkgdir}/usr/src/linux-${_kernver}/.config"
+  cd "${pkgdir}/usr/src"
+  ln -sf linux-${_kernver} linux
+}
+
+source=(${source[@]-}
+        config.i686
+        config.x86_64)
+
+sha256sums=(${sha256sums[@]-}
+            'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+            '34986ccd0eba0987d39bee836f5ab9d5a0708f9cb613273330d3c988968633f2')
