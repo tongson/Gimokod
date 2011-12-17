@@ -2,5 +2,6 @@
 Description=OpenBSD Secure Shell Service
 
 [Service]
-ExecStart=/usr/bin/sshd -D -oKexAlgorithms=diffie-hellman-group-exchange-sha256 -h /etc/ssh/ssh_host_dsa_key -h /etc/ssh/ssh_host_rsa_key
+ExecStart=/usr/bin/sshd -e -D -oKexAlgorithms=diffie-hellman-group-exchange-sha256 -h /etc/ssh/ssh_host_dsa_key -h /etc/ssh/ssh_host_rsa_key
+ExecReload=/usr/bin/kill -HUP $MAINPID
 

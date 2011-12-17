@@ -1,5 +1,5 @@
 pkgname=systemd-units
-pkgver=2011.09
+pkgver=2011.12
 pkgrel=1
 pkgdesc="Systemd units for the base system"
 arch=('any')
@@ -41,6 +41,6 @@ sha256sums=(${sha256sums[@]-}
             '59cdc236a82272083651e8c35a21834ff8018e050f8893aa0e0763540d751b3e'
             '52e93de032f2b4007c38b5e4e928768932993ca3a8e0dff17086c81bd09d05c1'
             '4f3af78b3e119028d421959ca7da7b7bcab0f0efe8975b76d210d9228ca0cc86'
-            'd3cfed8763bba385c9656060356fb584e0659c2f69bedd7bae3ba822ca710791'
+            '951179823694bd5863ddd442bc26f86a08bff85db5fcf2ac9fe008007701bd4d'
             '2a0508ff284e8ce2bdecfa65ef45da3173f13a4448d68232ffb03f4d73ccfc3b'
             '3b8bc0227a856bd74d19def009a9e02d5821a3c71a62d58034dfb22e4ef98cf3')
