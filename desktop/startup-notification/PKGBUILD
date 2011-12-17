@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=startup-notification
 pkgver=0.12
-pkgrel=1
+pkgrel=2
 pkgdesc="Monitor and display application startup"
 arch=(i686 x86_64)
 license=('LGPL')
@@ -13,6 +13,8 @@ md5sums=('2cd77326d4dcaed9a5a23a1232fb38e9')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
+  sed -i -e '/AC_PATH_XTRA/d' configure.in
+  autoreconf --force --install
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
