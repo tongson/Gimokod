@@ -1,0 +1,392 @@
+diff -urN a/security/manager/ssl/src/nsCertVerificationThread.cpp b/security/manager/ssl/src/nsCertVerificationThread.cpp
+--- a/security/manager/ssl/src/nsCertVerificationThread.cpp	2011-12-20 07:50:52.319314979 -0600
++++ b/security/manager/ssl/src/nsCertVerificationThread.cpp	2011-12-20 07:51:48.298615136 -0600
+@@ -132,15 +132,14 @@
+ 
+     {
+       MutexAutoLock threadLock(verification_thread_singleton->mMutex);
+-
+-      while (!exitRequested(threadLock) &&
+-             0 == verification_thread_singleton->mJobQ.GetSize()) {
++      
++      while (!mExitRequested && (0 == verification_thread_singleton->mJobQ.GetSize())) {
+         // no work to do ? let's wait a moment
+ 
+         mCond.Wait();
+       }
+       
+-      if (exitRequested(threadLock))
++      if (mExitRequested)
+         break;
+       
+       job = static_cast<nsBaseVerificationJob*>(mJobQ.PopFront());
+@@ -161,7 +160,6 @@
+         static_cast<nsCertVerificationJob*>(mJobQ.PopFront());
+       delete job;
+     }
+-    postStoppedEventToMainThread(threadLock);
+   }
+ }
+ 
+diff -urN a/security/manager/ssl/src/nsNSSCallbacks.cpp b/security/manager/ssl/src/nsNSSCallbacks.cpp
+--- a/security/manager/ssl/src/nsNSSCallbacks.cpp	2011-12-20 07:50:52.353314554 -0600
++++ b/security/manager/ssl/src/nsNSSCallbacks.cpp	2011-12-20 07:51:48.299615124 -0600
+@@ -440,7 +440,7 @@
+ 
+       if (!request_canceled)
+       {
+-        PRBool wantExit = nsSSLThread::stoppedOrStopping();
++        PRBool wantExit = nsSSLThread::exitRequested();
+         PRBool timeout = 
+           (PRIntervalTime)(PR_IntervalNow() - start_time) > mTimeoutInterval;
+ 
+diff -urN a/security/manager/ssl/src/nsNSSComponent.cpp b/security/manager/ssl/src/nsNSSComponent.cpp
+--- a/security/manager/ssl/src/nsNSSComponent.cpp	2011-12-20 07:50:52.298315241 -0600
++++ b/security/manager/ssl/src/nsNSSComponent.cpp	2011-12-20 07:51:48.301615100 -0600
+@@ -390,8 +390,7 @@
+   mIsNetworkDown = PR_FALSE;
+ }
+ 
+-void 
+-nsNSSComponent::deleteBackgroundThreads()
++nsNSSComponent::~nsNSSComponent()
+ {
+   if (mSSLThread)
+   {
+@@ -399,43 +398,16 @@
+     delete mSSLThread;
+     mSSLThread = nsnull;
+   }
++  
+   if (mCertVerificationThread)
+   {
+     mCertVerificationThread->requestExit();
+     delete mCertVerificationThread;
+     mCertVerificationThread = nsnull;
+   }
+-}
+-
+-void
+-nsNSSComponent::createBackgroundThreads()
+-{
+-  NS_ASSERTION(mSSLThread == nsnull, "SSL thread already created.");
+-  NS_ASSERTION(mCertVerificationThread == nsnull,
+-               "Cert verification thread already created.");
+-
+-  mSSLThread = new nsSSLThread;
+-  nsresult rv = mSSLThread->startThread();
+-  if (NS_FAILED(rv)) {
+-    delete mSSLThread;
+-    mSSLThread = nsnull;
+-    return;
+-  }
+ 
+-  mCertVerificationThread = new nsCertVerificationThread;
+-  rv = mCertVerificationThread->startThread();
+-  if (NS_FAILED(rv)) {
+-    delete mCertVerificationThread;
+-    mCertVerificationThread = nsnull;
+-  }
+-}
+-
+-nsNSSComponent::~nsNSSComponent()
+-{
+   PR_LOG(gPIPNSSLog, PR_LOG_DEBUG, ("nsNSSComponent::dtor\n"));
+ 
+-  deleteBackgroundThreads();
+-
+   if (mUpdateTimerInitialized) {
+     {
+       MutexAutoLock lock(mCrlTimerLock);
+@@ -2000,7 +1972,13 @@
+   if (mClientAuthRememberService)
+     mClientAuthRememberService->Init();
+ 
+-  createBackgroundThreads();
++  mSSLThread = new nsSSLThread();
++  if (mSSLThread)
++    mSSLThread->startThread();
++  mCertVerificationThread = new nsCertVerificationThread();
++  if (mCertVerificationThread)
++    mCertVerificationThread->startThread();
++
+   if (!mSSLThread || !mCertVerificationThread)
+   {
+     PR_LOG(gPIPNSSLog, PR_LOG_DEBUG, ("NSS init, could not create threads\n"));
+@@ -2607,9 +2585,14 @@
+ void
+ nsNSSComponent::DoProfileChangeNetRestore()
+ {
+-  /* XXX this doesn't work well, since nothing expects null pointers */
+-  deleteBackgroundThreads();
+-  createBackgroundThreads();
++  delete mSSLThread;
++  mSSLThread = new nsSSLThread();
++  if (mSSLThread)
++    mSSLThread->startThread();
++  delete mCertVerificationThread;
++  mCertVerificationThread = new nsCertVerificationThread();
++  if (mCertVerificationThread)
++    mCertVerificationThread->startThread();
+   mIsNetworkDown = PR_FALSE;
+ }
+ 
+diff -urN a/security/manager/ssl/src/nsNSSComponent.h b/security/manager/ssl/src/nsNSSComponent.h
+--- a/security/manager/ssl/src/nsNSSComponent.h	2011-12-20 07:50:52.304315166 -0600
++++ b/security/manager/ssl/src/nsNSSComponent.h	2011-12-20 07:51:48.302615088 -0600
+@@ -356,12 +356,8 @@
+   nsNSSShutDownList *mShutdownObjectList;
+   SmartCardThreadList *mThreadList;
+   PRBool mIsNetworkDown;
+-
+-  void deleteBackgroundThreads();
+-  void createBackgroundThreads();
+   nsSSLThread *mSSLThread;
+   nsCertVerificationThread *mCertVerificationThread;
+-
+   nsNSSHttpInterface mHttpForNSS;
+   nsRefPtr<nsClientAuthRememberService> mClientAuthRememberService;
+   nsRefPtr<nsCERTValInParamWrapper> mDefaultCERTValInParam;
+diff -urN a/security/manager/ssl/src/nsNSSIOLayer.cpp b/security/manager/ssl/src/nsNSSIOLayer.cpp
+--- a/security/manager/ssl/src/nsNSSIOLayer.cpp	2011-12-20 07:50:52.303315179 -0600
++++ b/security/manager/ssl/src/nsNSSIOLayer.cpp	2011-12-20 07:51:48.304615064 -0600
+@@ -361,7 +361,7 @@
+   if (mDocShellDependentStuffKnown)
+     return NS_OK;
+ 
+-  if (!mCallbacks || nsSSLThread::stoppedOrStopping())
++  if (!mCallbacks || nsSSLThread::exitRequested())
+     return NS_ERROR_FAILURE;
+ 
+   mDocShellDependentStuffKnown = PR_TRUE;
+@@ -568,7 +568,7 @@
+ 
+     rv = ir->GetInterface(uuid, result);
+   } else {
+-    if (nsSSLThread::stoppedOrStopping())
++    if (nsSSLThread::exitRequested())
+       return NS_ERROR_FAILURE;
+ 
+     nsCOMPtr<nsIInterfaceRequestor> proxiedCallbacks;
+@@ -1414,7 +1414,7 @@
+   // The interface requestor object may not be safe, so proxy the call to get
+   // the nsIPrompt.
+ 
+-  if (nsSSLThread::stoppedOrStopping())
++  if (nsSSLThread::exitRequested())
+     return NS_ERROR_FAILURE;
+ 
+   nsCOMPtr<nsIInterfaceRequestor> proxiedCallbacks;
+@@ -1451,7 +1451,7 @@
+     return NS_OK;
+   }
+ 
+-  if (nsSSLThread::stoppedOrStopping()) {
++  if (nsSSLThread::exitRequested()) {
+     return NS_ERROR_FAILURE;
+   }
+ 
+@@ -3353,7 +3353,7 @@
+   if (!infoObject)
+     return SECFailure;
+ 
+-  if (nsSSLThread::stoppedOrStopping())
++  if (nsSSLThread::exitRequested())
+     return cancel_and_failure(infoObject);
+ 
+   CERTCertificate *peerCert = nsnull;
+diff -urN a/security/manager/ssl/src/nsPSMBackgroundThread.cpp b/security/manager/ssl/src/nsPSMBackgroundThread.cpp
+--- a/security/manager/ssl/src/nsPSMBackgroundThread.cpp	2011-12-20 07:50:52.320314966 -0600
++++ b/security/manager/ssl/src/nsPSMBackgroundThread.cpp	2011-12-20 07:51:48.305615052 -0600
+@@ -36,7 +36,6 @@
+  * ***** END LICENSE BLOCK ***** */
+ 
+ #include "nsPSMBackgroundThread.h"
+-#include "nsThreadUtils.h"
+ 
+ using namespace mozilla;
+ 
+@@ -50,7 +49,7 @@
+ : mThreadHandle(nsnull),
+   mMutex("nsPSMBackgroundThread.mMutex"),
+   mCond(mMutex, "nsPSMBackgroundThread.mCond"),
+-  mExitState(ePSMThreadRunning)
++  mExitRequested(PR_FALSE)
+ {
+ }
+ 
+@@ -71,48 +70,19 @@
+ {
+ }
+ 
+-PRBool
+-nsPSMBackgroundThread::exitRequested(const MutexAutoLock & /*proofOfLock*/) const
+-{
+-  return exitRequestedNoLock();
+-}
+-
+-nsresult
+-nsPSMBackgroundThread::postStoppedEventToMainThread(
+-    MutexAutoLock const & /*proofOfLock*/)
+-{
+-  NS_ASSERTION(PR_GetCurrentThread() == mThreadHandle,
+-               "Background thread stopped from another thread");
+-
+-  mExitState = ePSMThreadStopped;
+-  // requestExit is waiting for an event, so give it one.
+-  return NS_DispatchToMainThread(new nsRunnable());
+-}
+-
+ void nsPSMBackgroundThread::requestExit()
+ {
+-  NS_ASSERTION(NS_IsMainThread(),
+-               "nsPSMBackgroundThread::requestExit called off main thread.");
+-
+   if (!mThreadHandle)
+     return;
+ 
+   {
+     MutexAutoLock threadLock(mMutex);
+-    if (mExitState < ePSMThreadStopRequested) {
+-      mExitState = ePSMThreadStopRequested;
+-      mCond.NotifyAll();
+-    }
+-  }
+-  
+-  nsCOMPtr<nsIThread> mainThread = do_GetCurrentThread();
+-  for (;;) {
+-    {
+-      MutexAutoLock threadLock(mMutex);
+-      if (mExitState == ePSMThreadStopped)
+-        break;
+-    }
+-    NS_ProcessPendingEvents(mainThread, PR_MillisecondsToInterval(50));
++
++    if (mExitRequested)
++      return;
++
++    mExitRequested = PR_TRUE;
++    mCond.NotifyAll();
+   }
+ 
+   PR_JoinThread(mThreadHandle);
+diff -urN a/security/manager/ssl/src/nsPSMBackgroundThread.h b/security/manager/ssl/src/nsPSMBackgroundThread.h
+--- a/security/manager/ssl/src/nsPSMBackgroundThread.h	2011-12-20 07:50:52.317315005 -0600
++++ b/security/manager/ssl/src/nsPSMBackgroundThread.h	2011-12-20 07:51:48.306615040 -0600
+@@ -42,7 +42,6 @@
+ #include "nscore.h"
+ #include "mozilla/CondVar.h"
+ #include "mozilla/Mutex.h"
+-#include "nsNSSComponent.h"
+ 
+ class nsPSMBackgroundThread
+ {
+@@ -54,25 +53,16 @@
+   PRThread *mThreadHandle;
+ 
+   // Shared mutex used for condition variables,
+-  // and to protect access to mExitState.
++  // and to protect access to mExitRequested.
+   // Derived classes may use it to protect additional
+   // resources.
+   mozilla::Mutex mMutex;
+ 
+-  // Used to signal the thread's Run loop when a job is added 
+-  // and/or exit is requested.
++  // Used to signal the thread's Run loop
+   mozilla::CondVar mCond;
+ 
+-  PRBool exitRequested(::mozilla::MutexAutoLock const & proofOfLock) const;
+-  PRBool exitRequestedNoLock() const { return mExitState != ePSMThreadRunning; }
+-  nsresult postStoppedEventToMainThread(::mozilla::MutexAutoLock const & proofOfLock);
+-
+-private:
+-  enum {
+-    ePSMThreadRunning = 0,
+-    ePSMThreadStopRequested = 1,
+-    ePSMThreadStopped = 2
+-  } mExitState;
++  // Has termination of the SSL thread been requested?
++  PRBool mExitRequested;
+ 
+ public:
+   nsPSMBackgroundThread();
+diff -urN a/security/manager/ssl/src/nsSSLThread.cpp b/security/manager/ssl/src/nsSSLThread.cpp
+--- a/security/manager/ssl/src/nsSSLThread.cpp	2011-12-20 07:50:52.351314578 -0600
++++ b/security/manager/ssl/src/nsSSLThread.cpp	2011-12-20 07:51:48.307615028 -0600
+@@ -510,7 +510,7 @@
+   {
+     MutexAutoLock threadLock(ssl_thread_singleton->mMutex);
+ 
+-    if (ssl_thread_singleton->exitRequested(threadLock)) {
++    if (ssl_thread_singleton->mExitRequested) {
+       PR_SetError(PR_UNKNOWN_ERROR, 0);
+       return -1;
+     }
+@@ -737,7 +737,7 @@
+   {
+     MutexAutoLock threadLock(ssl_thread_singleton->mMutex);
+     
+-    if (ssl_thread_singleton->exitRequested(threadLock)) {
++    if (ssl_thread_singleton->mExitRequested) {
+       PR_SetError(PR_UNKNOWN_ERROR, 0);
+       return -1;
+     }
+@@ -958,7 +958,7 @@
+         continue; // go back and finally destroy it, before doing anything else
+       }
+ 
+-      if (exitRequested(threadLock))
++      if (mExitRequested)
+         break;
+ 
+       PRBool pending_work = PR_FALSE;
+@@ -981,13 +981,12 @@
+           mCond.Wait();
+         }
+         
+-      } while (!pending_work && !exitRequested(threadLock) &&
+-               !mSocketScheduledToBeDestroyed);
++      } while (!pending_work && !mExitRequested && !mSocketScheduledToBeDestroyed);
+       
+       if (mSocketScheduledToBeDestroyed)
+         continue;
+       
+-      if (exitRequested(threadLock))
++      if (mExitRequested)
+         break;
+       
+       if (!pending_work)
+@@ -1135,16 +1134,17 @@
+         PR_SetPollableEvent(nsSSLIOLayerHelpers::mSharedPollableEvent);
+       }
+     }
+-    postStoppedEventToMainThread(threadLock);
+   }
+ }
+ 
+-PRBool nsSSLThread::stoppedOrStopping()
++PRBool nsSSLThread::exitRequested()
+ {
+   if (!ssl_thread_singleton)
+     return PR_FALSE;
+ 
+-  return ssl_thread_singleton->exitRequestedNoLock();
++  // no lock
++
++  return ssl_thread_singleton->mExitRequested;
+ }
+ 
+ nsSSLThread *nsSSLThread::ssl_thread_singleton = nsnull;
+diff -urN a/security/manager/ssl/src/nsSSLThread.h b/security/manager/ssl/src/nsSSLThread.h
+--- a/security/manager/ssl/src/nsSSLThread.h	2011-12-20 07:50:52.350314590 -0600
++++ b/security/manager/ssl/src/nsSSLThread.h	2011-12-20 07:51:48.308615016 -0600
+@@ -152,7 +152,7 @@
+ 
+   static nsresult requestActivateSSL(nsNSSSocketInfo *si);
+   
+-  static PRBool stoppedOrStopping();
++  static PRBool exitRequested();
+ };
+ 
+ #endif //_NSSSLTHREAD_H_
