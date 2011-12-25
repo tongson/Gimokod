@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=gdk-pixbuf
-pkgver=2.24.0
+pkgver=2.24.1
 pkgrel=1
 pkgdesc="An image loading library"
 arch=('i686' 'x86_64')
@@ -10,7 +10,7 @@ depends=('glib' 'libpng' 'libtiff' 'libjpeg' 'libx11')
 options=('!libtool')
 install=gdk-pixbuf2.install
 source=(http://download.gnome.org/sources/gdk-pixbuf/2.24/gdk-pixbuf-${pkgver}.tar.xz)
-sha256sums=('67c11d3aa40441c1cea42c365bf2d6a9a9dd52fae2d359a707ad5e8abb4d28a7')
+sha256sums=('da7a3f00db360913716368e19e336402755cafa93769f3cfa28a969303e4bee1')
 
 build() {
   cd "${srcdir}/gdk-pixbuf-${pkgver}"
@@ -18,6 +18,7 @@ build() {
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
+              --with-x11 \
               --without-libjasper \
               --with-included-loaders=png \
               --disable-gtk-doc \
