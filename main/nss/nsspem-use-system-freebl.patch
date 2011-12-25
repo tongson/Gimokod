@@ -1,0 +1,93 @@
+diff -up ./mozilla/security/coreconf/Linux.mk.sytemfreebl ./mozilla/security/coreconf/Linux.mk
+--- ./mozilla/security/coreconf/Linux.mk.sytemfreebl	2011-12-03 22:07:23.924156119 -0800
++++ ./mozilla/security/coreconf/Linux.mk	2011-12-03 22:08:28.322328345 -0800
+@@ -182,6 +182,9 @@ endif
+ USE_SYSTEM_ZLIB = 1
+ ZLIB_LIBS = -lz
+ 
++USE_SYSTEM_FREEBL = 1
++FREEBL_LIBS = -lfreebl3
++
+ # The -rpath '$$ORIGIN' linker option instructs this library to search for its
+ # dependencies in the same directory where it resides.
+ ifeq ($(BUILD_SUN_PKG), 1)
+diff -up ./mozilla/security/nss/lib/ckfw/pem/config.mk.extras ./mozilla/security/nss/lib/ckfw/pem/config.mk
+--- ./mozilla/security/nss/lib/ckfw/pem/config.mk.extras	2010-11-25 10:01:17.000000000 -0800
++++ ./mozilla/security/nss/lib/ckfw/pem/config.mk	2011-06-21 18:20:04.484985568 -0700
+@@ -41,6 +41,11 @@ CONFIG_CVS_ID = "@(#) $RCSfile: config.m
+ #  are specifed as dependencies within rules.mk.
+ #
+ 
++
++EXTRA_LIBS += \
++	$(SOFTOKEN_LIB_DIR)/$(LIB_PREFIX)freebl.$(LIB_SUFFIX) \
++	$(NULL)
++
+ TARGETS        = $(SHARED_LIBRARY)
+ LIBRARY        =
+ IMPORT_LIBRARY =
+@@ -69,3 +74,22 @@ ifeq ($(OS_TARGET),SunOS)
+ MKSHLIB += -R '$$ORIGIN'
+ endif
+ 
++# If a platform has a system nssutil, set USE_SYSTEM_NSSUTIL to 1 and
++# NSSUTIL_LIBS to the linker command-line arguments for the system nssutil
++# (for example, -lnssutil3 on fedora) in the platform's config file in coreconf.
++ifdef USE_SYSTEM_NSSUTIL
++OS_LIBS += $(NSSUTIL_LIBS)
++else
++NSSUTIL_LIBS = $(DIST)/lib/$(LIB_PREFIX)nssutil3.$(LIB_SUFFIX)
++EXTRA_LIBS += $(NSSUTIL_LIBS)
++endif
++# If a platform has a system freebl, set USE_SYSTEM_FREEBL to 1 and
++# FREEBL_LIBS to the linker command-line arguments for the system nssutil
++# (for example, -lfreebl3 on fedora) in the platform's config file in coreconf.
++ifdef USE_SYSTEM_FREEBL
++OS_LIBS += $(FREEBL_LIBS)
++else
++FREEBL_LIBS = $(DIST)/lib/$(LIB_PREFIX)freebl3.$(LIB_SUFFIX)
++EXTRA_LIBS += $(FREEBL_LIBS)
++endif
++
+diff -up ./mozilla/security/nss/lib/ckfw/pem/Makefile.extras ./mozilla/security/nss/lib/ckfw/pem/Makefile
+--- ./mozilla/security/nss/lib/ckfw/pem/Makefile.extras	2010-11-25 10:01:17.000000000 -0800
++++ ./mozilla/security/nss/lib/ckfw/pem/Makefile	2011-06-21 18:25:25.959136920 -0700
+@@ -43,8 +43,7 @@ include config.mk
+ EXTRA_LIBS = \
+ 	$(DIST)/lib/$(LIB_PREFIX)nssckfw.$(LIB_SUFFIX) \
+ 	$(DIST)/lib/$(LIB_PREFIX)nssb.$(LIB_SUFFIX) \
+-	$(DIST)/lib/$(LIB_PREFIX)freebl.$(LIB_SUFFIX) \
+-	$(DIST)/lib/$(LIB_PREFIX)nssutil.$(LIB_SUFFIX) \
++	$(FREEBL_LIB_DIR)/$(LIB_PREFIX)freebl.$(LIB_SUFFIX) \
+ 	$(NULL)
+ 
+ # can't do this in manifest.mn because OS_TARGET isn't defined there.
+@@ -56,6 +55,9 @@ EXTRA_LIBS += \
+ 	-lplc4 \
+ 	-lplds4 \
+ 	-lnspr4 \
++	-L$(NSSUTIL_LIB_DIR) \
++	-lnssutil3 \
++	-lfreebl3
+ 	$(NULL)
+ else 
+ EXTRA_SHARED_LIBS += \
+@@ -74,6 +76,9 @@ EXTRA_LIBS += \
+ 	-lplc4 \
+ 	-lplds4 \
+ 	-lnspr4 \
++	-L$(NSSUTIL_LIB_DIR) \
++	-lnssutil3 \
++	-lfreebl3 \
+ 	$(NULL)
+ endif
+ 
+diff -up ./mozilla/security/nss/lib/ckfw/pem/manifest.mn.extras ./mozilla/security/nss/lib/ckfw/pem/manifest.mn
+--- ./mozilla/security/nss/lib/ckfw/pem/manifest.mn.extras	2010-11-25 10:01:17.000000000 -0800
++++ ./mozilla/security/nss/lib/ckfw/pem/manifest.mn	2011-06-21 18:20:04.485985661 -0700
+@@ -65,4 +65,4 @@ REQUIRES = nspr
+ 
+ LIBRARY_NAME = nsspem
+ 
+-#EXTRA_SHARED_LIBS = -L$(DIST)/lib -lnssckfw -lnssb -lplc4 -lplds4
++EXTRA_SHARED_LIBS = -L$(DIST)/lib -lnssckfw -lnssb -lplc4 -lplds4 -L$(NSS_LIB_DIR) -lnssutil3 -lfreebl3 -lsoftokn3

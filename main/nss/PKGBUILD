@@ -2,8 +2,8 @@
 # Current diff.: check(), libfreebl3.so split
 pkgbase=nss
 pkgname=('nss' 'nss-freebl')
-pkgver=3.12.11
-pkgrel=2
+pkgver=3.13.1
+pkgrel=1
 pkgdesc="Mozilla Network Security Services"
 arch=('i686' 'x86_64')
 url="http://www.mozilla.org/projects/security/pki/nss/"
@@ -12,23 +12,40 @@ _nsprver=4.8.9
 depends=("nspr>=${_nsprver}" 'sqlite' 'zlib')
 makedepends=('perl')
 options=('!strip')
-source=(http://pkgs.fedoraproject.org/repo/pkgs/${pkgbase}-${pkgver}-stripped.tar.bz2/c9f781e984550985e4ae18d7bfafb7b4/${pkgbase}-${pkgver}-stripped.tar.bz2)
-sha256sums=('4317abb981001339651b9c2ed96a70e6abd19e58a7291937b0b2a092fd86d6a0')
+source=(http://pkgs.fedoraproject.org/repo/pkgs/${pkgbase}/${pkgbase}-${pkgver}-stripped.tar.bz2/5e92ca8e516fd7f6a566e1690f313106/${pkgbase}-${pkgver}-stripped.tar.bz2
+        http://pkgs.fedoraproject.org/repo/pkgs/nss/nss-pem-20101125.tar.bz2/e63cddf74c07f0d818d1052ecc6fbb1f/nss-pem-20101125.tar.bz2)
+sha256sums=('00724772084e32494c6a12e9fd22016cff8918f976bef1a86606a9b92b11c578'
+            '5593b45e838b899bc599f7d78a0b770032eafc55785e218080bbcaf52f73b298')
+noextract=('nss-pem-20101125.tar.bz2')
 
 build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  tar -xf "${srcdir}/nss-pem-20101125.tar.bz2"
   cd "${srcdir}/${pkgname}-${pkgver}/mozilla"
-  # Distrust DigiNotar root CA - backported from CVS (https://bugzilla.mozilla.org/show_bug.cgi?id=682927)
-  patch -Np0 -i "${srcdir}/distrust-diginotar.patch"
-  # Adds the SPI Inc. and CAcert.org CA certificates - patch from Debian
-  patch -Np2 -i "${srcdir}/add_spi+cacert_ca_certs.patch"
-  # Adds transitional SSL renegotiate support - patch from Debian
-  patch -Np2 -i "${srcdir}/ssl-renegotiate-transitional.patch"
-  # Removes rpath
-  patch -Np2 -i "${srcdir}/nss-no-rpath.patch"
+
+  Patch ssl-renegotiate-transitional.patch
+  Patch nss-enable-pem.patch
+  Patch nsspem-642433.patch
+  Patch 0001-Bug-695011-PEM-logging.patch
+  Patch nss-539183.patch
+  Patch nss-646045.patch
+  Patch nsspem-createobject-initialize-pointer.patch
+  Patch 0001-libnsspem-rhbz-734760.patch
+  Patch nsspem-init-inform-not-thread-safe.patch
+  Patch nss-ckbi-1.88.rtm.patch
+ # Patch nsspem-use-system-freebl.patch
+  Patch nofipstest.patch
+  Patch nsspem-bz754771.patch
+  Patch add_spi+cacert_ca_certs.patch
+  Patch nss-no-rpath.patch
 
   # Respect LDFLAGS
   sed -e 's/\$(MKSHLIB) -o/\$(MKSHLIB) \$(LDFLAGS) -o/g' \
       -i security/coreconf/rules.mk
+
+  # Generate certdata.c from certdata.txt
+  cd security/nss/lib/ckfw/builtins
+  make generate
 
   cd "${srcdir}/${pkgname}-${pkgver}"
   export FREEBL_NO_DEPEND=1
@@ -109,17 +126,39 @@ package_nss-freebl() {
 }
 
 source=(${source[@]-}
+        0001-Bug-695011-PEM-logging.patch
+        0001-libnsspem-rhbz-734760.patch
         add_spi+cacert_ca_certs.patch
-        distrust-diginotar.patch
+        nofipstest.patch
+        nss-539183.patch
+        nss-646045.patch
+        nss-ckbi-1.88.rtm.patch
         nss-config.in
+        nss-enable-pem.patch
         nss-no-rpath.patch
         nss.pc.in
+        nsspem-642433.patch
+        nsspem-bz754771.patch
+        nsspem-createobject-initialize-pointer.patch
+        nsspem-init-inform-not-thread-safe.patch
+        nsspem-use-system-freebl.patch
         ssl-renegotiate-transitional.patch)
 
 sha256sums=(${sha256sums[@]-}
-            'fa940c5937b1388f4c5621eb25c3de2bc989cd5063ca3d0a1fef1018a75729b4'
-            '78183be674638132754985563b413deafe56657dd8f5b5a2e09e148185fe7fb7'
+            'a75b90c1acacc176e934be7c89c5af010a01ba8c49f8b5a77bacaba22c84b860'
+            'bb961da0435ce2c98d5e729bcc1899f3530c02eeb038c64b7ea892283b976878'
+            '9e65c76ea1f807a815b012f7ce808371594c82a800433497888a25e2ef426f44'
+            'c4a89cda8b777db1201ae7f7b57f8dc46d07563ad0f8dc274752ee355e4384d5'
+            '6a758e35f2f23a41f1e943a5e3597afcf13cf3e86aed5d966cc26bf1ffaf052c'
+            '15163d5504989a90756298bdce4a98f974ac0119b9424ab0e07df4d3e00b28e8'
+            '9ddfc9ffbd5108a92b74686d905eedffdb5855371398e2bc8aaec93e6aa57887'
             'e44ac5095b4d88f24ec7b2e6a9f1581560bd3ad41a3d198596d67ef22f67adb9'
+            '5f2342915c22f06f23aa70e3d0cec95408e57329823e2599f29e56ac8692db4d'
             '3e6679f72c64182f3e425817ef1757d8d41bc09aa974c57e27223f768c95c49e'
             'b9f1428ca2305bf30b109507ff335fa00bce5a7ce0434b50acd26ad7c47dd5bd'
+            'ba26a05c7e184f750697fb7221609b0c67a9de5a1aff127b36ead28d2febda69'
+            '65c31c6f3a59fb00eb1a27ff152c1cf870fcfe240b1be85d54bac97a5c2d7676'
+            '7b7bd9ed6b9823eee50b4400db91633cf976f8f3abeb8f8802bd40c9d6f2455e'
+            '91a8028a5161f7b9c22f014b29138dbecf43683e03640b116be3ba26c9b8388c'
+            '01da8dbb2dbc4f6eba749f9ffef8cd64b5aa62307bc557fa2ed1cdc207ebc5ee'
             '12df04bccbf674db1eef7a519a28987927b5e9c107b1dc386686f05e64f49a97')

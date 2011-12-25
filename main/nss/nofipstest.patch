@@ -1,0 +1,19 @@
+diff -up ./mozilla/security/nss/cmd/manifest.mn.nofipstest ./mozilla/security/nss/cmd/manifest.mn
+--- ./mozilla/security/nss/cmd/manifest.mn.nofipstest	2011-12-03 22:54:40.969914919 -0800
++++ ./mozilla/security/nss/cmd/manifest.mn	2011-12-03 22:55:12.348505822 -0800
+@@ -54,7 +54,6 @@ DIRS = lib  \
+  dbtest \
+  derdump  \
+  digest  \
+- fipstest  \
+  makepqg  \
+  multinit \
+  ocspclnt  \
+@@ -84,6 +83,7 @@ DIRS = lib  \
+  $(NULL)
+ 
+ TEMPORARILY_DONT_BUILD = \
++ fipstest  \
+  $(NULL)
+ 
+ # rsaperf  \
