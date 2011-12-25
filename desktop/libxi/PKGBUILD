@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=libxi
-pkgver=1.4.3
+pkgver=1.4.4
 pkgrel=1
 pkgdesc="X11 Input extension library"
 arch=('i686' 'x86_64')
@@ -10,7 +10,7 @@ makedepends=('pkg-config' 'xorg-util-macros')
 options=(!libtool)
 license=('custom')
 source=(${url}/releases/individual/lib/libXi-${pkgver}.tar.bz2)
-sha1sums=('c66cfdee74e8d169a7992b5f257395e653ca761b')
+sha1sums=('e4ca1b45368214ba246bfad398ea087125c79f31')
 
 build() {
   cd "${srcdir}/libXi-${pkgver}"
