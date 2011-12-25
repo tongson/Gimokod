@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=sdl
 pkgver=1.2.14
-pkgrel=1
+pkgrel=2
 pkgdesc="portable low-level access to a video framebuffer, audio output, mouse, and keyboard"
 arch=('i686' 'x86_64')
 url="http://www.libsdl.org"
@@ -10,11 +10,13 @@ depends=('alsa-lib')
 makedepends=('mesa' 'libxext' 'libxrender' 'libx11')
 options=('!libtool')
 source=(http://www.libsdl.org/release/SDL-${pkgver}.tar.gz
+        fs27469.patch
         sdl-1.2.14-joystick-crash.diff
         sdl-1.2.14-fix-mouse-clicking.patch
         sdl-1.2.14-fix-disappearing-cursor.patch
         sdl-1.2.14-disable-mmx.patch)
 md5sums=('e52086d1b508fa0b76c52ee30b55bec4'
+         '89091617e27fcad64451bc0b28e48501'
          '9d8890b3817736a5d365f7497f096634'
          '04d8c179f125e04bcd4c9d60e013c2d7'
          'a6cf3e71b653aa97d0d8ae6c0a789807'
@@ -22,6 +24,7 @@ md5sums=('e52086d1b508fa0b76c52ee30b55bec4'
 
 build() {
   cd "${srcdir}"/SDL-${pkgver}
+  Patch fs27469.patch
   patch -Np1 -i "${srcdir}"/sdl-1.2.14-joystick-crash.diff
   patch -Np1 -i "${srcdir}"/sdl-1.2.14-fix-mouse-clicking.patch
   patch -Np1 -i "${srcdir}"/sdl-1.2.14-fix-disappearing-cursor.patch
