@@ -1,11 +1,11 @@
 pkgname=mupdf
 pkgver=0.9
-pkgrel=1
+pkgrel=2
 pkgdesc="lightweight PDF viewer and toolkit written in portable C"
 arch=('i686' 'x86_64')
 url="http://mupdf.com"
 license=('GPL3')
-depends=('freetype2' 'libjpeg' 'jbig2dec' 'openjpeg' 'libxext')
+depends=('freetype' 'libjpeg' 'jbig2dec' 'openjpeg' 'libxext')
 source=("http://mupdf.com/download/${pkgname}-${pkgver}-source.tar.gz")
 sha256sums=('abed825cb1d73e0e28f0a7ee72b5d7a451ba41d21b0c55837ed2a212f3b16b2d')
 
