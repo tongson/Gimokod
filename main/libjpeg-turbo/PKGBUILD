@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=libjpeg-turbo
 pkgver=1.1.1
-pkgrel=1
+pkgrel=2
 pkgdesc="libjpeg derivative with accelerated baseline JPEG compression and decompression"
 arch=('i686' 'x86_64')
 url="http://libjpeg-turbo.virtualgl.org/"
@@ -23,6 +23,11 @@ build() {
               --with-jpeg8 \
               --mandir=/usr/share/man
   make
+}
+
+check() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make test
 }
 
 package() {
