@@ -1,5 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux.
 # Patches from Gentoo, Exherbo, Openwall, Mandriva and openSUSE
+# tzfile overflow not yet patched
 pkgname=glibc
 pkgver=2.14.1
 pkgrel=1
@@ -182,10 +183,9 @@ package() {
                         usr/sbin/{iconvconfig,nscd}
   [[ $CARCH = "i686" ]] && strip $STRIP_BINARIES usr/bin/lddlibc4
 
-  strip ${STRIP_STATIC} usr/lib/*.a \
-                      lib/{{ld,libpthread}-"${pkgver}",libthread_db-1.0}.so
+  strip ${STRIP_STATIC} usr/lib/*.a
 
-  strip ${STRIP_SHARED} lib/{libanl,libBrokenLocale,libc,libcidn,libcrypt}-"${pkgver}".so \
+  strip ${STRIP_SHARED} lib/{libanl,libBrokenLocale,libcidn,libcrypt}-"${pkgver}".so \
                       lib/libnss_{compat,dns,files,hesiod,nis,nisplus}-"${pkgver}".so \
                       lib/{libdl,libm,libnsl,libresolv,librt,libutil}-"${pkgver}".so \
                       lib/{libmemusage,libpcprofile,libSegFault}.so \
