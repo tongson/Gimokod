@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=gtk3
-pkgver=3.2.2
-pkgrel=4
+pkgver=3.2.3
+pkgrel=1
 pkgdesc="The GTK+ Toolkit (v3)"
 arch=('i686' 'x86_64')
 url="http://www.gtk.org/"
@@ -11,12 +11,8 @@ depends=('glib' 'atk' 'cairo' 'gtk-update-icon-cache' 'libxfixes' 'libxcursor' '
 options=('!libtool' '!docs')
 license=('LGPL')
 source=(http://ftp.gnome.org/pub/gnome/sources/gtk+/3.2/gtk+-${pkgver}.tar.xz
-        filechooserdefault_do_not_unref_value_twice.patch
-        moveresize.patch
         settings.ini)
-sha256sums=('f7ec82de393cd7ae2aa45022576400941704709d1f0f35fb0b17f3be1f2e7d84'
-            '0d6b04d5fc12b7c08e0cff4b94d001d5c167a944b72579fb14fd6de2ee4ad9e6'
-            '627f430ccecc95ec61d9a83607469e71e95568c077f7bda849a7fe1c02d0bea7'
+sha256sums=('e2cf20f2510ebbc7be122a1a33dd1f472a7d06aaf16b4f2a63eb048cd9141d3d'
             'c214d3dcdcadda3d642112287524ab3e526ad592b70895c9f3e3733c23701621')
 
 _strip_builddir() {
@@ -29,8 +25,6 @@ _strip_builddir() {
 
 build() {
   cd "${srcdir}/gtk+-${pkgver}"
-  patch -Np1 -i "$srcdir/filechooserdefault_do_not_unref_value_twice.patch"
-  Patch moveresize.patch
   _strip_builddir SRC_SUBDIRS tests Makefile.am
   _strip_builddir SRC_SUBDIRS tests Makefile.in
   _strip_builddir SRC_SUBDIRS demos Makefile.am
