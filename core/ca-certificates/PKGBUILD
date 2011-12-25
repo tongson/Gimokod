@@ -1,5 +1,5 @@
 pkgname=ca-certificates
-pkgver=20111025
+pkgver=20111211
 pkgrel=1
 pkgdesc='Common CA certificates'
 arch=('any')
@@ -33,6 +33,6 @@ package() {
   rmdir "${pkgdir}/usr/sbin"
 }
 source=("http://ftp.debian.org/debian/pool/main/c/${pkgname}/${pkgname}_${pkgver}_all.deb")
-sha256sums=('7d743b307ab31138176d6da4fff1f4c7f6bd246b42698662894bfb1b74e55647')
+sha256sums=('0ec173492418b32b07e400d4822ec9812e04207af7e6ea1f5064505ca9b80f3f')
 
 
