@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=lcms2
-pkgver=2.2
+pkgver=2.3
 pkgrel=1
 pkgdesc="Small-footprint color management engine, version 2"
 arch=('i686' 'x86_64')
@@ -9,7 +9,7 @@ depends=('libtiff' 'libjpeg' 'zlib')
 url="http://www.littlecms.com"
 options=('!libtool')
 source=(http://downloads.sourceforge.net/sourceforge/lcms/${pkgname}-${pkgver}.tar.gz)
-md5sums=('aaf33c7c25675e6163189ba488ae20f5')
+sha1sums=('67d5fabda2f5777ca8387766539b9c871d993133')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
