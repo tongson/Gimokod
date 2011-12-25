@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=xorg-xinit
 pkgver=1.3.1
-pkgrel=2
+pkgrel=3
 pkgdesc="X.Org initialisation program "
 arch=('i686' 'x86_64')
 license=('custom')
@@ -9,12 +9,14 @@ url="http://xorg.freedesktop.org/"
 depends=('libx11' 'xorg-xauth')
 makedepends=('xorg-util-macros')
 source=(${url}/releases/individual/app/xinit-${pkgver}.tar.bz2
+        fs25361.patch
         06_move_serverauthfile_into_tmp.diff
         xinitrc
         xsession
         xserverrc)
 options=('!emptydirs')
 md5sums=('ee234056d8a3dbf37b61b4bcb35b88e4'
+         '73a597d3fb7f5b9487318ac8cfd4bedf'
          'abd072ec435ce084cf4e89c58f83d45c'
          'c7b406c3c5c1e8011b3ac7d6b29c1a2c'
          '7873d97db30d6c279ed37e3559e7c59d'
@@ -23,6 +25,7 @@ md5sums=('ee234056d8a3dbf37b61b4bcb35b88e4'
 build() {
   cd "${srcdir}/xinit-${pkgver}"
   patch -Np1 -i "${srcdir}/06_move_serverauthfile_into_tmp.diff"
+  Patch fs25361.patch
   sed -i -e 's/XSLASHGLOB.sh/XSLASHGLOB/' xinitrc.cpp
   ./configure --prefix=/usr \
               --build=${CBUILD} \
