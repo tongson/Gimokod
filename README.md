@@ -79,6 +79,7 @@ failures:
     libevent
     icu
     libxml2
+    libjpeg-turbo (libjpeg)
 
 
 ## MISCELLANEOUS FEATURES (to be documented)
