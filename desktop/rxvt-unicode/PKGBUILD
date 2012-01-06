@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=rxvt-unicode
-pkgver=9.12
-pkgrel=1
+pkgver=9.14
+pkgrel=2
 pkgdesc="An unicode enabled rxvt-clone terminal emulator (urxvt)"
 arch=('i686' 'x86_64')
 url="http://software.schmorp.de/pkg/rxvt-unicode.html"
@@ -9,10 +9,12 @@ license=('GPL')
 depends=('libx11' 'libxrender' 'ncurses' 'perl' 'gcc-libs')
 makedepends=('pkg-config' 'xproto')
 source=(http://dist.schmorp.de/rxvt-unicode/${pkgname}-${pkgver}.tar.bz2)
-md5sums=('945af37d661c8c45a7cac292160e7c70')
+sha256sums=('29928a33be6b3fb0edd126df2c3d35e1900f8268b546ce54430780c550fa1d52')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
+  Patch rxvt-unicode-9.14-clear.patch
+  Patch rxvt-unicode-9.14-secondary-wheel.patch
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
@@ -41,3 +43,11 @@ package() {
   export TERMINFO="${pkgdir}/usr/share/terminfo"
   make DESTDIR="${pkgdir}" install
 }
+
+source=(${source[@]-}
+        rxvt-unicode-9.14-clear.patch
+        rxvt-unicode-9.14-secondary-wheel.patch)
+
+sha256sums=(${sha256sums[@]-}
+            'c1010b15d74f56671351e8314264d76f638230e94d4e334691af29a9353a9540'
+            '95965a8c245b5de04af2c1806718f38c3f8d320395991fffeb9a935e9bf37b76')
