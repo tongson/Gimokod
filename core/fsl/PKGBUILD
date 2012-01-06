@@ -1,6 +1,6 @@
 pkgname=fsl
 _pkgname=fossil
-pkgver=20111021125253
+pkgver=20111213135356
 pkgrel=1
 pkgdesc="Simple, high-reliability, distributed SCM (installed as fsl)"
 arch=('i686' 'x86_64')
@@ -8,14 +8,11 @@ license=('BSD')
 groups=('base')
 url="http://www.fossil-scm.org/"
 makedepends=('dietlibc' 'zlib')
-source=("http://www.fossil-scm.org/download/fossil-src-${pkgver}.tar.gz"
-         fossil-betterstash.diff)
-sha256sums=('636f201f236178ce9a3a9987ed43b0ce849021b2ae872ad71c5ee5780e9fe554'
-            '0aaffa62b8ca5d237d86b57495e0d9e72e98ea2b8f36834fa9f9e240398897e6')
+source=("http://www.fossil-scm.org/download/fossil-src-${pkgver}.tar.gz")
+sha256sums=('c98556cd1fa6abc2e02aa38de1af425fa9ff09247e72f631c9ff6c239c46e71d')
 
 build() {
   cd "${_pkgname}-src-${pkgver}"
-  Patch fossil-betterstash.diff
   ./configure --prefix=/usr \
               --static \
               --disable-lineedit \
