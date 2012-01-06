@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=ffmpeg
 pkgver=20111211
-pkgrel=1
+pkgrel=2
 pkgdesc="Complete and free Internet live audio and video broadcasting solution for Linux/Unix"
 arch=('i686' 'x86_64')
 url="http://ffmpeg.org/"
@@ -48,10 +48,11 @@ build() {
     --disable-indev=v4l \
     --disable-outdev=oss \
     --disable-outdev=alsa \
+    --disable-outdev=sdl \
     --disable-debug \
     --disable-ffplay \
     --disable-doc \
-    --disable-network\
+    --disable-network \
     --disable-static
   sed -i -e 's:^HTMLPAGES.*$::' \
          -e 's:^MANPAGES.*$::' \
