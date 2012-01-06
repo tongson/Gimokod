@@ -17,7 +17,7 @@ build() {
   sed -i 's:^docs\/.*$::' configure.ac
   Patch glib-2.30.1-external-gdbus-codegen.patch
   Patch glib-2.30.2-machine-id.patch
-  ln -sfn /bin/true py-compile
+  ln -sfn /bin/true py-compile # echo '#!/usr/bin/env sh' > py-compile 1.11.2
   AT_M4DIR="${srcdir}/${pkgname}-${pkgver}" autoreconf -v
   export DBUS1_CFLAGS="-I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include"
   export DBUS1_LIBS="-ldbus-1"
