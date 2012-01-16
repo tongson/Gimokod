@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=db
-pkgver=5.2.28
+pkgver=5.3.15
 pkgrel=1
 pkgdesc="The Berkeley DB embedded database system"
 arch=('i686' 'x86_64')
@@ -9,7 +9,7 @@ license=('custom')
 groups=('base-devel')
 options=('!libtool')
 source=(http://download.oracle.com/berkeley-db/db-${pkgver}.tar.gz)
-sha1sums=('e6572e3356cf8bc998da4e889db3b12638833435')
+sha1sums=('7683b632a01ff3543c379a120809a942ec457738')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}/build_unix"
@@ -27,7 +27,7 @@ build() {
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}/build_unix"
   make DESTDIR="${pkgdir}" install
-  rm -rf "${pkgdir}"/usr/docs
+  rm -r "${pkgdir}"/usr/docs
   install -Dm644 "${srcdir}"/"${pkgname}"-"${pkgver}"/LICENSE \
     "${pkgdir}"/usr/share/licenses/"${pkgname}"/LICENSE
 }
