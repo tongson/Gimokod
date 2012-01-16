@@ -1,26 +1,29 @@
 pkgname=systemd-units
-pkgver=2011.12
-pkgrel=1
+pkgver=2012.01
+pkgrel=3
 pkgdesc="Systemd units for the base system"
 arch=('any')
 url="http://localhost.localdomain"
 license=('ISC')
 groups=('base')
 install=systemd-units.install
+
 package() {
   cd ${srcdir}
   for s in *.service ; do
     install -D -m0644 ${s} "${pkgdir}/usr/lib/systemd/system/${s}"
   done
 }
+
 source=(${source[@]-}
         colorum.service
         crond.service
         klogd.service
         lvm2.service
         network-dhcp@.service
+        network-gateway.service
         network-lxc.service
-        network-static.service
+        network-static@.service
         nscd.service
         ntpd.service
         remountrw.service
@@ -35,8 +38,9 @@ sha256sums=(${sha256sums[@]-}
             '3c1a0ed5349ef4cbf3841cab90b47aa158c302f88b27a9e18e0e5289d3fc8580'
             '5af54b553bf7bf979f456dc181ba1c6fc44d6befc89bebec22679c145cd4cefa'
             '21e9a0774e66ec170b01564de52a21120ead8f220559d0d90f0823334ea87b42'
+            'e2bff5628590ad82bf0d7024bcdd30239248a1e99cc61ed387f66f2158c35b01'
             '25a61c7b17379b2f547ab6cf9d54de71e7c93d6939fa9240959cdac76f596c81'
-            'fce52b10ebf40a8dd6e077210a2fa3c6b1bc5e7a549092916727be2a37c5fc15'
+            '0dcb25dc55e5f4136911fad3ef36c0d2ab0605b4cd378182bc3ae4b9f570beca'
             '03fa9230c54be68cd883e84886880d2d774b3511be2efa8f777d3c7a5ea01bbf'
             '59cdc236a82272083651e8c35a21834ff8018e050f8893aa0e0763540d751b3e'
             '52e93de032f2b4007c38b5e4e928768932993ca3a8e0dff17086c81bd09d05c1'

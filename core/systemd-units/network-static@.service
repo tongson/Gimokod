@@ -1,0 +1,8 @@
+[Unit]
+Description=Static network configuration
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/conf.d/net
+ExecStart=/usr/bin/ip addr flush dev %I scope global
+ExecStart=/usr/bin/ip addr add $%I dev %I
