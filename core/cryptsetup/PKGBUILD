@@ -1,21 +1,20 @@
 pkgname=cryptsetup
-pkgver=1.4.0
+pkgver=1.4.1
 pkgrel=1
 pkgdesc='Userspace setup tool for transparent encryption of block devices'
 arch=(i686 x86_64)
 url='http://code.google.com/p/cryptsetup/'
 license=('GPL')
 groups=('base')
-depends=('device-mapper' 'popt' 'openssl' 'udev')
+depends=('device-mapper' 'popt' 'openssl' 'udev' 'zlib')
 makedepends=('device-mapper' 'popt' 'openssl' 'udev' 'pkg-config')
 options=('!libtool' '!emptydirs')
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  Patch cryptsetup-fix-crypt_get_volume_key_size-for-plain-device.patch
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
-              --enable-static-cryptsetup \
+              --disable-static-cryptsetup \
               --sbindir=/usr/bin \
               --libdir=/usr/lib \
               --disable-nls \
@@ -32,7 +31,7 @@ package() {
 }
 
 source=(http://cryptsetup.googlecode.com/files/${pkgname}-${pkgver}.tar.bz2
-        cryptsetup-fix-crypt_get_volume_key_size-for-plain-device.patch)
+        http://cryptsetup.googlecode.com/files/${pkgname}-${pkgver}.tar.bz2.asc)
 
-sha256sums=('96d682853c8019cfeae0b21250cd2d00af42e46251807e8dbda2ff8427c2e9ed'
-            '6fa1d3172014ba3ba96f7a67acbcae7f26b24a61abb84b3917f526a54f81dd87')
+sha256sums=('82b143328c2b427ef2b89fb76c701d311c95b54093c21bbf22342f7b393bddcb'
+            '71c6506d4b6d0b22b9b6c2a68e604959e4c072af04680ed6acc0126c97bdbc88')
