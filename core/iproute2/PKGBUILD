@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=iproute2
-pkgver=2.6.39
+pkgver=3.2.0
 pkgrel=1
 pkgdesc="IP Routing Utilities"
 arch=('i686' 'x86_64')
@@ -10,9 +10,9 @@ groups=('base')
 options=('!makeflags')
 makedepends=('bison' 'flex')
 install=iproute2.install
-source=(http://devresources.linux-foundation.org/dev/iproute2/download/iproute2-${pkgver}.tar.gz
-        iproute2-fhs.patch)
-sha1sums=('9044ad0b4a34a377a54197724373330294d743c7'
+source=(http://www.kernel.org/pub/linux/utils/net/$pkgname/$pkgname-$pkgver.tar.xz
+       iproute2-fhs.patch)
+sha1sums=('1e217f22b0bbfc870ddf746de883ee375cd9e533'
           '78d6d2cb17b33ac89094aa3ed4810d81bb43c3d9')
 
 build() {
