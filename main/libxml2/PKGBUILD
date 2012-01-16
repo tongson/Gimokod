@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=libxml2
 pkgver=2.7.8
-pkgrel=1
+pkgrel=2
 pkgdesc="XML parsing library, version 2"
 arch=(i686 x86_64)
 license=('custom')
@@ -19,6 +19,7 @@ build() {
   patch -Np1 -i "${srcdir}/shared_library_versionning.patch"
 
   # Gentoo
+  Patch libxml2-2.7.8-allocation-error-copying-entities.patch
   patch -Np1 -i ../libxml2-2.7.8-xpath-memory.patch
   patch -Np1 -i ../libxml2-2.7.8-xpath-freeing.patch
   patch -Np1 -i ../libxml2-2.7.8-xpath-freeing2.patch
@@ -40,7 +41,7 @@ build() {
               --with-output \
               --without-readline \
               --without-history \
-              --with-python=/usr/bin/python2.7 \
+              --with-python=/usr/bin/python \
               --without-run-debug \
               --with-icu \
               --without-docbook \
@@ -64,6 +65,7 @@ package() {
 
 source=(${source[@]-}
         largefile64.patch
+        libxml2-2.7.8-allocation-error-copying-entities.patch
         libxml2-2.7.8-disable_static_modules.patch
         libxml2-2.7.8-error-xpath.patch
         libxml2-2.7.8-hardening-xpath.patch
@@ -76,6 +78,7 @@ source=(${source[@]-}
 
 sha256sums=(${sha256sums[@]-}
             '7ccd86fc493af76244e655b0f8a0c4b2df0bc5ef15856b07903f409f52bb0cde'
+            'ae2554dd8a4a59f10e446996dfc299f8077ed3623cf50ab7e756734875a4faa8'
             '2f2ade9ee034af32cbd6600d45b2e23d3153dd9bb57a07a9f364836d24b189df'
             '2b2ee18463baa212539f1c8747e549e6ed18e49989ebaa42843729524f1cf253'
             '7eac2cd552158347244806730e2b8a4c09e39cddfcf67ed74a5ec989763abbfe'
