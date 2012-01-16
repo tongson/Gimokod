@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=ffmpeg
-pkgver=20111211
-pkgrel=2
+pkgver=20120111
+pkgrel=1
 pkgdesc="Complete and free Internet live audio and video broadcasting solution for Linux/Unix"
 arch=('i686' 'x86_64')
 url="http://ffmpeg.org/"
@@ -9,12 +9,14 @@ license=('GPL')
 depends=('bzip2' 'vo-aacenc' 'lame' 'libvorbis' 'xvidcore' 'zlib' 'x264' 'libtheora'
          'schroedinger' 'speex' 'libvpx' 'openjpeg' 'rtmpdump')
 makedepends=('yasm')
-source=(ftp://ftp.archlinux.org/other/ffmpeg/${pkgname}-${pkgver}.tar.xz)
-md5sums=('75d512bf5137d0b055e54313702ef5fc')
+source=(ftp://ftp.archlinux.org/other/ffmpeg/${pkgname}-${pkgver}.tar.xz
+        revert-enabling-threads.patch)
+md5sums=('7a54b2b1af86a746696d1c0b2a79979c'
+         '79cc22bc2ac3e67d96c340cb7061e64d')
 
 build() {
   cd "${srcdir}/${pkgname}"
-
+  patch -Np1 -R -i "${srcdir}/revert-enabling-threads.patch"
   ./configure \
     --prefix=/usr \
     --enable-libmp3lame \
