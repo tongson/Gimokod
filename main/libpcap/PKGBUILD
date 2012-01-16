@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=libpcap
-pkgver=1.1.1
+pkgver=1.2.1
 pkgrel=1
 pkgdesc="A system-independent interface for user-level packet capture"
 arch=('i686' 'x86_64')
@@ -8,8 +8,10 @@ url="http://www.tcpdump.org/"
 license=('BSD')
 depends=('libnl')
 makedepends=('flex' 'bison')
-source=(http://www.tcpdump.org/release/libpcap-${pkgver}.tar.gz)
-sha256sums=('508cca15547e55d1318498b838456a21770c450beb2dc7d7d4a96d90816e5a85')
+source=(http://www.tcpdump.org/release/libpcap-${pkgver}.tar.gz
+        http://www.tcpdump.org/release/libpcap-${pkgver}.tar.gz.sig)
+sha256sums=('a135a6ef7e539729a57c7ed345bdb9b64159e13404174006a7972eb33f00debd'
+            'dc82ca7e7f737885969af0f78ad0f0eef8206062087e0261ca2799ef26d569b4')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
