@@ -1,13 +1,13 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=ethtool
-pkgver=3.1
+pkgver=3.2
 pkgrel=1
 pkgdesc="Utility for controlling network drivers and hardware"
 arch=('i686' 'x86_64')
 url="http://www.kernel.org/pub/software/network/ethtool/"
 license=('GPL')
-source=(http://ftp.kernel.org/pub/software/network/ethtool/ethtool-3.1.tar.gz)
-md5sums=('b613ac903356fa63de74a9008ef3470b')
+source=(http://ftp.kernel.org/pub/software/network/ethtool/ethtool-${pkgver}.tar.xz)
+md5sums=('4ed4a9dfd2039aa416176a9c06497b00')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
