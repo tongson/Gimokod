@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=unrar
-pkgver=4.1.3
+pkgver=4.1.4
 pkgrel=1
 pkgdesc="The RAR uncompression program"
 arch=('i686' 'x86_64')
@@ -8,7 +8,7 @@ url="http://www.rarlab.com/"
 license=('custom')
 depends=('gcc-libs')
 source=("http://www.rarlab.com/rar/unrarsrc-${pkgver}.tar.gz")
-md5sums=('0cc7562737e7440f4fe611bdd5b56628')
+md5sums=('808c92a661820a637ca1330cf40c18e4')
 
 build() {
   cd "${srcdir}/${pkgname}"
