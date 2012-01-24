@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=perl
 pkgver=5.14.2
-pkgrel=3
+pkgrel=4
 pkgdesc="A highly capable, feature-rich programming language"
 arch=(i686 x86_64)
 license=('GPL' 'PerlArtistic')
@@ -10,6 +10,7 @@ groups=('base-devel')
 depends=('gdbm' 'db')
 changelog=ChangeLog
 source=(http://www.cpan.org/src/5.0/perl-${pkgver}.tar.bz2
+        digest_eval_hole.diff
         strippm.sh
         perlbin.sh
         perlbin.csh
@@ -17,6 +18,7 @@ source=(http://www.cpan.org/src/5.0/perl-${pkgver}.tar.bz2
 install=perl.install
 options=('!makeflags' '!purge')
 md5sums=('04a4c5d3c1f9f19d77daff8e8cd19a26'
+         '490852b3d77c3b3866d0d75f5fbf5c5d'
          '74a952f1277f770d9c552a46ddf0fca0'
          '5ed2542fdb9a60682f215bd33701e61a'
          '1f0cbbee783e8a6d32f01be5118e0d5e'
@@ -56,6 +58,7 @@ build() {
     -Dman1ext=1perl -Dman3ext=3perl ${arch_opts} \
     -Dlddlflags="-shared ${LDFLAGS}" -Dldflags="${LDFLAGS}"
   patch -Np1 -i "${srcdir}"/0001-Append-CFLAGS-and-LDFLAGS-to-their-Config.pm-counter.patch
+  Patch digest_eval_hole.diff
   make
 }
 
