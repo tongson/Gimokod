@@ -1,5 +1,5 @@
 pkgname=pax-utils
-pkgver=0.2.3
+pkgver=0.3.0
 pkgrel=1
 pkgdesc="ELF related utils for ELF 32/64 binaries that can check files for security relevant properties"
 arch=('i686' 'x86_64')
@@ -9,7 +9,7 @@ groups=('base-devel')
 depends=('libcap')
 makedepends=('libcap')
 source=(http://dev.gentoo.org/~vapier/dist/${pkgname}-${pkgver}.tar.xz)
-sha256sums=('b2cdc20a0c67b78753ff4c4cbaa84b8175b0e2eb926de7390daef34a19297285')
+sha256sums=('d6d2992a40d89ab02d39a90d3c88ef553ecf1c9b93bae82efe16453b9152696a')
 
 build() {
   cd "$srcdir/$pkgname-$pkgver"
