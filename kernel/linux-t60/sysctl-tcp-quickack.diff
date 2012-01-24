@@ -1,0 +1,47 @@
+diff --git a/include/net/inet_connection_sock.h b/include/net/inet_connection_sock.h
+index b6d3b55..da2fbaf 100644
+--- a/include/net/inet_connection_sock.h
++++ b/include/net/inet_connection_sock.h
+@@ -170,9 +170,12 @@ static inline int inet_csk_ack_scheduled(const struct sock *sk)
+ 	return inet_csk(sk)->icsk_ack.pending & ICSK_ACK_SCHED;
+ }
+ 
++extern int sysctl_tcp_quickack;
++
+ static inline void inet_csk_delack_init(struct sock *sk)
+ {
+ 	memset(&inet_csk(sk)->icsk_ack, 0, sizeof(inet_csk(sk)->icsk_ack));
++	inet_csk(sk)->icsk_ack.pingpong = sysctl_tcp_quickack ? 0 : 1;
+ }
+ 
+ extern void inet_csk_delete_keepalive_timer(struct sock *sk);
+diff --git a/net/ipv4/sysctl_net_ipv4.c b/net/ipv4/sysctl_net_ipv4.c
+index d96c1da..8923ca8 100644
+--- a/net/ipv4/sysctl_net_ipv4.c
++++ b/net/ipv4/sysctl_net_ipv4.c
+@@ -394,6 +394,13 @@ static struct ctl_table ipv4_table[] = {
+ 		.proc_handler	= proc_dointvec
+ 	},
+ 	{
++		.procname	= "tcp_quickack",
++		.data		= &sysctl_tcp_quickack,
++		.maxlen		= sizeof(int),
++		.mode		= 0644,
++		.proc_handler	= proc_dointvec
++	},
++	{
+ 		.procname	= "tcp_mem",
+ 		.data		= &sysctl_tcp_mem,
+ 		.maxlen		= sizeof(sysctl_tcp_mem),
+diff --git a/net/ipv4/tcp.c b/net/ipv4/tcp.c
+index 176e11a..5161689 100644
+--- a/net/ipv4/tcp.c
++++ b/net/ipv4/tcp.c
+@@ -279,6 +279,8 @@
+ 
+ int sysctl_tcp_fin_timeout __read_mostly = TCP_FIN_TIMEOUT;
+ 
++int sysctl_tcp_quickack __read_mostly = 1;
++
+ struct percpu_counter tcp_orphan_count;
+ EXPORT_SYMBOL_GPL(tcp_orphan_count);
