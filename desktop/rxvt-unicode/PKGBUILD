@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=rxvt-unicode
-pkgver=9.14
-pkgrel=2
+pkgver=9.15
+pkgrel=1
 pkgdesc="An unicode enabled rxvt-clone terminal emulator (urxvt)"
 arch=('i686' 'x86_64')
 url="http://software.schmorp.de/pkg/rxvt-unicode.html"
@@ -9,7 +9,7 @@ license=('GPL')
 depends=('libx11' 'libxrender' 'ncurses' 'perl' 'gcc-libs')
 makedepends=('pkg-config' 'xproto')
 source=(http://dist.schmorp.de/rxvt-unicode/${pkgname}-${pkgver}.tar.bz2)
-sha256sums=('29928a33be6b3fb0edd126df2c3d35e1900f8268b546ce54430780c550fa1d52')
+sha256sums=('ec1aa2932da844979ed8140bd92223defb12042aa5e877e05ac31139ca81f2b1')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
