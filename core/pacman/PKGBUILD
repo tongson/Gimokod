@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=pacman
-pkgver=4.0.0
-pkgrel=3
+pkgver=4.0.1
+pkgrel=1
 pkgdesc="A library-based package manager with dependency support"
 arch=('i686' 'x86_64')
 url="http://www.archlinux.org/pacman/"
@@ -11,15 +11,12 @@ depends=('libarchive' 'gpgme' 'gimokod-keyring')
 install=pacman.install
 options=(!libtool)
 source=(ftp://ftp.archlinux.org/other/pacman/"${pkgname}"-"${pkgver}".tar.gz)
-sha256sums=('c83bbb8d386b492f9d00a6944c8bcaf84a4372a5f1111d3014638af02abed23e')
+sha256sums=('04f6822b31022100de6cd0a1905b199bbd1eaf878ef0726b6242ee032f3c33b1')
 
 PKGEXT='.pkg.tar.gz'
 
 build() {
   cd "${srcdir}"/"${pkgname}"-"${pkgver}"
-  Patch 0d9e7da309f27c099814232d0f1be1b2ae884b2a.diff
-  Patch 571f2f78141a5c13aaf90cfbfe99c04af8158e4e.diff
-  Patch pacman-4.0.0-dload_h.diff
   Patch pacman-4.0.0-makepkg.diff
   Patch pacman-4.0.0-PKGNAME.diff
   Patch pacman-4.0.0-usrmove.diff
@@ -70,23 +67,17 @@ package() {
 }
 
 source=(${source[@]-}
-        0d9e7da309f27c099814232d0f1be1b2ae884b2a.diff
-        571f2f78141a5c13aaf90cfbfe99c04af8158e4e.diff
         makepkg.conf
         pacman-4.0.0-PKGNAME.diff
-        pacman-4.0.0-dload_h.diff
         pacman-4.0.0-makepkg.diff
         pacman-4.0.0-usrmove.diff
         pacman.conf
         pacman.conf.x86_64)
 
 sha256sums=(${sha256sums[@]-}
-            'da9824dd4d7b38b50d7ecf604f4a81da35329a1aa2c0e6a6d1ed1bb0449de578'
-            '27e9e6877fd8b5cf9ceb3a0be4299c0969e01a0b713d64e619cacd5fe2c21da7'
             '049491c1e3749cffb8033f7c757866490af836697fc5ce7bfbeb66596b9b0bc9'
             '56ee72e2fbc53b5d3201895a167b40295e638aaae93adb8cb3b9c8d0d6f4442a'
-            '8e84d5873b8891cd4fe2b5bdfcb65c6bad4072fa4e488732cc45d12630464def'
-            '058c9d1dafebadf4e579b84bbf4a79193d9677df987f124a8cdb42558b63cd63'
+            'b6e0c32fac51225e90cd2da100a1af728cc9e91295ecdaa54fe9e8241bed96d0'
             '5840250463cfa7889e4a1629af9d0436fc6fd903e87ff0e712ebf9b0473b609e'
             '2f3916158d489f567670bb54de932419244d368fc33b0eefa3587ca8316904f3'
             '17cda5f057d2137427437afe13544ed88c51a52dd8725fbb0bc707c38d786569')
