@@ -1,5 +1,5 @@
 pkgname=gnupg
-pkgver=1.4.11
+pkgver=1.4.12
 pkgrel=1
 pkgdesc="GNU Privacy Guard - a PGP replacement tool"
 arch=('i686' 'x86_64')
@@ -43,4 +43,4 @@ package () {
 }
 
 source=(ftp://ftp.gnupg.org/gcrypt/gnupg/${pkgname}-${pkgver}.tar.bz2)
-sha256sums=('d18ceeac16e554a501170b9bfde611625252d0fe9448685a69c93bf149ee6ef6')
+sha256sums=('4f03ca6902aaee79d0eda00eea0fefde7db9eb005d8ffd54fac9806bc24050ec')
