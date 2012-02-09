@@ -1,18 +1,17 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=x264
-pkgver=20111030
+pkgver=20120204
 pkgrel=1
 pkgdesc="free library for encoding H264/AVC video streams"
 arch=('i686' 'x86_64')
 url="http://www.videolan.org/developers/x264.html"
 license=('GPL')
 makedepends=('yasm')
-source=(ftp://ftp.videolan.org/pub/videolan/x264/snapshots/x264-snapshot-${pkgver}-2245.tar.bz2)
-md5sums=('fa52ad09dcb7d4e1a66adcaa2dab26bc')
+source=(ftp://ftp.videolan.org/pub/videolan/x264/snapshots/x264-snapshot-$pkgver-2245-stable.tar.bz2)
+md5sums=('4d793ecc4f9d308724ea47edf400f312')
 
 build() {
-  cd "${srcdir}/${pkgname}-snapshot-${pkgver}-2245"
-
+  cd "$srcdir/$pkgname-snapshot-$pkgver-2245-stable"
   ./configure --host="${CHOST}" \
               --enable-shared \
               --disable-cli \
@@ -25,7 +24,7 @@ build() {
 }
 
 package() {
-  cd "${srcdir}/${pkgname}-snapshot-${pkgver}-2245"
+  cd "$srcdir/$pkgname-snapshot-$pkgver-2245-stable"
   make DESTDIR="${pkgdir}" \
        bindir=/usr/bin \
        libdir=/usr/lib \
