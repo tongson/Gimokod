@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=iproute2
 pkgver=3.2.0
-pkgrel=1
+pkgrel=2
 pkgdesc="IP Routing Utilities"
 arch=('i686' 'x86_64')
 license=('GPL2')
@@ -11,14 +11,17 @@ options=('!makeflags')
 makedepends=('bison' 'flex')
 install=iproute2.install
 source=(http://www.kernel.org/pub/linux/utils/net/$pkgname/$pkgname-$pkgver.tar.xz
+       fix-ip-l.patch
        iproute2-fhs.patch)
 sha1sums=('1e217f22b0bbfc870ddf746de883ee375cd9e533'
+          '2ec5513c44f89046438d65e2cda1a014010e3b73'
           '78d6d2cb17b33ac89094aa3ed4810d81bb43c3d9')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   sed -i '/^TARGETS=/s: arpd : :' misc/Makefile
   patch -Np1 -i "${srcdir}"/iproute2-fhs.patch
+  Patch fix-ip-l.patch
   ./configure --build=${CBUILD} --host=${CHOST}
   make
 }
