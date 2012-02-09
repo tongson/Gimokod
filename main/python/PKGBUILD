@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=python
 pkgver=2.7.2
-pkgrel=2
+pkgrel=3
 _pybasever=2.7
 pkgdesc="A high-level scripting language"
 arch=('i686' 'x86_64')
@@ -10,11 +10,13 @@ url="http://www.python.org/"
 depends=('bzip2' 'gdbm' 'openssl' 'zlib' 'expat' 'sqlite' 'libffi')
 options=('!makeflags')
 source=(http://www.python.org/ftp/python/${pkgver%rc?}/Python-${pkgver}.tar.xz
+        13156-revert-tls-changeset-subinterpreter.patch
         linux2.patch
         gdbm-magic-values.patch)
 sha1sums=('56700044141402dc35e7a0a24aa7ffda1a8c1a53'
+          'd61fa2b8efd1d08a2ee8a9aed434dc94b8297d6b'
           '937c06190899a491d662c7918658313e7640070e'
-          '0f4cd9508c9ace620a829a688a9285e0480b5fb5')
+          'ede2c991b1a91eec5a01cc2d3a11231f17d750ae')
 
 build() {
   cd "${srcdir}/Python-${pkgver}"
@@ -32,6 +34,9 @@ build() {
   # Make sure sys.platform is set to linux2, even on kernel 3.X
   # cf http://bugs.python.org/issue12325
   patch -Np1 -i ../linux2.patch
+
+  # http://bugs.python.org/issue13156
+  Patch 13156-revert-tls-changeset-subinterpreter.patch
 
   # gdbm has new magic that whichdb does not recognize
   # http://bugs.python.org/issue13007
