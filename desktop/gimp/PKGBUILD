@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=gimp
-pkgver=2.6.11
+pkgver=2.6.12
 pkgrel=1
 pkgdesc="GNU Image Manipulation Program"
 arch=('i686' 'x86_64')
@@ -12,18 +12,12 @@ makedepends=('intltool' 'gettext')
 options=('!libtool' '!makeflags')
 install=gimp.install
 source=(ftp://ftp.gimp.org/pub/gimp/v${pkgver%.*}/${pkgname}-${pkgver}.tar.bz2
-        gimp-poppler-0.18.patch
         linux.gpl)
-md5sums=('bb2939fe13e54fc7255cef5d097bb5dd'
-         'bfc73f80e911ed7a7d500d80973469f1'
-         'bb27bc214261d36484093e857f015f38')
-sha1sums=('2f9d596e727bdbf304fa78257c1731d9faf3934c'
-          '1479a6d80be7adf74f66a3b88057a5029fe892e8'
+sha1sums=('82964e3d4eb003239f3443a1bccac53f5d780e15'
           '110ce9798173b19a662d086ed7b882b4729f06cf')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  patch -Np1 < ../gimp-poppler-0.18.patch
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST}  \
