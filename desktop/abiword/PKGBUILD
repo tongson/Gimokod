@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=abiword
 pkgver=2.8.6
-pkgrel=1
+pkgrel=2
 arch=('i686' 'x86_64')
 license=('GPL')
 url="http://www.abisource.com"
@@ -10,14 +10,17 @@ depends=('boost' 'fribidi' 'wv' 'libxslt' 'glib' 'freetype' 'zlib'
          'libpng' 'libjpeg' 'cairo' 'gtk2' 'libxml2' 'gcc-libs')
 options=('!makeflags' '!libtool')
 source=("http://www.abisource.com/downloads/${pkgname}/${pkgver}/source/${pkgname}-${pkgver}.tar.gz"
-        abiword-2.8.6-no-undefined.patch)
-sha1sums=('998f69d038000b3fc027d4259548f02d67c8d0df'
-          '159b1cd0b9354868ab86f851b64a03dae7d254dc')
+        'abiword-2.8.6-no-undefined.patch'
+        'abiword-2.8.6-libpng15.patch')
+md5sums=('f883b0a7f26229a9c66fd6a1a94381aa'
+         '42e2614b6e0aad457d91f6ce20b6f225'
+         '40e370e7e88c5437140ef18037abfbd3')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   # fix a gcc 4.6.x build issue, patch from Fedora
   Patch abiword-2.8.6-no-undefined.patch
+  Patch abiword-2.8.6-libpng15.patch
   libtoolize --force
   autoreconf
 
