@@ -1,26 +1,22 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgbase=gmp
 pkgname=('gmp' 'gmp-cxx')
-pkgver=5.0.2
+pkgver=5.0.3
 pkgrel=1
 pkgdesc="A free library for arbitrary precision arithmetic"
 arch=('i686' 'x86_64')
 url="http://gmplib.org/"
 license=('LGPL3')
 options=('!libtool' '!makeflags')
-source=(ftp://ftp.gnu.org/gnu/gmp/gmp-${pkgver}.tar.bz2
-        gmp-4.1.4-noexecstack.patch
-        538dfce27f41.patch)
-md5sums=('0bbaedc82fb30315b06b1588b9077cd3'
-         '13c34f00e77ded6673270cfea06c35c3'
-         'a769be9c41618ca9c35d83375e7097d0')
+source=(ftp://ftp.gnu.org/gnu/gmp/gmp-${pkgver}.tar.xz{,.sig}
+        gmp-4.1.4-noexecstack.patch)
+md5sums=('1e8edebe33bc3ac6de17df3201732825'
+         '9efbe14533ded9cd3ae4e998ee0efc98'
+         '13c34f00e77ded6673270cfea06c35c3')
 
 build() {
   cd "${srcdir}/${pkgbase}-${pkgver}"
-
-  patch -Np1 -i "${srcdir}"/538dfce27f41.patch
   patch -Np1 -i "${srcdir}"/gmp-4.1.4-noexecstack.patch
-
   [ "${CARCH}" = "i686" ] && export ABI="32"
   CFLAGS=${CFLAGS/-Os/-O2}
   CC=/usr/bin/gcc
