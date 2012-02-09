@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=jshon
 pkgver=20111222
-pkgrel=1
+pkgrel=2
 pkgdesc="A json parser for the shell."
 arch=('i686' 'x86_64')
 url="http://kmkeen.com/jshon/"
