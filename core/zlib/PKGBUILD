@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=zlib
-pkgver=1.2.5
+pkgver=1.2.6
 pkgrel=1
 pkgdesc='A compression/decompression Library'
 arch=('i686' 'x86_64')
@@ -8,18 +8,14 @@ license=('custom')
 groups=('base')
 url="http://www.zlib.net/"
 options=('!makeflags')
-source=("http://zlib.net/zlib-${pkgver}.tar.gz"
-        'zlib-1.2.5-lfs-decls.patch')
-md5sums=('c735eab2d659a96e5a594c9e8541ad63'
-         '4cb279ea3beab621f3526bf7b7ab99e5')
+source=("http://zlib.net/current/zlib-${pkgver}.tar.gz")
+md5sums=('618e944d7c7cd6521551e30b32322f4a')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
 
-  # see http://bugs.archlinux.org/task/19280
-  patch -p1 -i "${srcdir}"/zlib-1.2.5-lfs-decls.patch
   # work around gcc bug; see https://bugs.archlinux.org/task/20647
-  export CFLAGS="${CFLAGS/-O2/-O3} -fno-tree-vectorize -DUNALIGNED_OK -fPIC -DPIC"
+  # export CFLAGS="${CFLAGS/-O2/-O3} -fno-tree-vectorize -DUNALIGNED_OK -fPIC -DPIC"
   ./configure --prefix=/usr \
               --libdir=/usr/lib \
               --shared
@@ -30,7 +26,7 @@ build() {
 
 check() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  make check
+  make test
 }
 
 package() {
