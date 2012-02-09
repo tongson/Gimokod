@@ -1,16 +1,16 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=xf86-input-keyboard
-pkgver=1.6.0
+pkgver=1.6.1
 pkgrel=1
 pkgdesc="X.Org keyboard input driver"
-arch=(i686 x86_64)
+arch=('i686' 'x86_64')
 license=('custom')
 url="http://xorg.freedesktop.org/"
 makedepends=('xorg-server-devel')
 options=('!libtool')
 groups=('xorg-drivers' 'xorg')
 source=(${url}/releases/individual/driver/${pkgname}-${pkgver}.tar.bz2)
-sha1sums=('8e845086749f8c4b64fdfa852b4b26cf7bb62dc9')
+sha1sums=('ef30fecb9e846a5268ae339846401489a785e413')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
