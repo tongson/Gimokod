@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=xorg-xcursorgen
 pkgver=1.0.4
-pkgrel=1
+pkgrel=2
 pkgdesc="Create an X cursor file from PNG images"
 arch=('i686' 'x86_64')
 url="http://xorg.freedesktop.org/"
