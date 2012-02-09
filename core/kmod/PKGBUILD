@@ -1,0 +1,35 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=kmod
+pkgver=4
+pkgrel=1
+pkgdesc="Linux kernel module handling"
+arch=('i686' 'x86_64')
+url="http://git.profusion.mobi/cgit.cgi/kmod.git"
+license=('GPL2')
+depends=('zlib')
+groups=('base')
+options=('!libtool')
+source=("http://packages.profusion.mobi/"${pkgname}"/"${pkgname}"-"${pkgver}".tar.xz")
+md5sums=('e14450a066a48accd0af1995b3c0232d')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  touch libkmod/docs/gtk-doc.make
+  ./configure \
+    --sysconfdir=/etc \
+    --disable-debug \
+    --disable-gtk-doc \
+    --without-xz \
+    --enable-tools \
+    --with-rootprefix=/usr \
+    --with-zlib
+  make
+}
+
+package() {
+  make -C "${pkgname}-${pkgver}" DESTDIR="${pkgdir}" install
+  for tool in {ls,ins,rm,dep}mod mod{info,probe}; do
+    ln -s kmod "$pkgdir/usr/bin/$tool"
+  done
+}
+
