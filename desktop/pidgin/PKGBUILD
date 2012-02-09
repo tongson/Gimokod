@@ -2,7 +2,7 @@
 pkgbase=pidgin
 pkgname=('pidgin' 'libpurple')
 pkgver=2.10.1
-pkgrel=1
+pkgrel=2
 arch=('i686' 'x86_64')
 url="http://pidgin.im/"
 license=('GPL')
