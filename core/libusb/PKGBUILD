@@ -1,0 +1,25 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=libusb
+pkgver=1.0.8
+pkgrel=1
+pkgdesc="Library to enable user space application programs to communicate with USB devices."
+arch=(i686 x86_64)
+groups=('base-devel')
+url="http://libusb.sourceforge.net/"
+license=('LGPL')
+source=(http://downloads.sourceforge.net/libusb/libusb-${pkgver}.tar.bz2)
+options=(!libtool)
+md5sums=('37d34e6eaa69a4b645a19ff4ca63ceef')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST}
+  make
+}
+
+package () {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}
