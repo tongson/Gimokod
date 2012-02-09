@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=feh
-pkgver=2.2
-pkgrel=1
+pkgver=2.3
+pkgrel=2
 pkgdesc='Fast and light imlib2-based image viewer'
 arch=('i686' 'x86_64')
 url='http://feh.finalrewind.org/'
@@ -9,7 +9,7 @@ license=('MIT')
 depends=('giblib' 'libxinerama')
 makedepends=('libxt')
 source=("${url}${pkgname}-${pkgver}.tar.bz2")
-sha1sums=('655db5f558cdb268ff55cb088994d78331bd39aa')
+sha1sums=('9f42ba920baeb405777f834546223a9ff9eb43e7')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
