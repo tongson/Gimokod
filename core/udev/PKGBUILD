@@ -1,22 +1,22 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=udev
-pkgver=175
-pkgrel=2
-arch=(i686 x86_64)
+pkgver=180
+pkgrel=1
+arch=('i686' 'x86_64')
 url="http://www.kernel.org/pub/linux/utils/kernel/hotplug/udev.html"
 license=('GPL')
 groups=('base')
 options=('!makeflags' '!libtool')
 install=udev.install
-source=(http://people.freedesktop.org/~kay/udev/$pkgname-$pkgver.tar.bz2
-        udev-173-no-docs.patch)
-
-md5sums=('2fc9c1efcbde98e3d73ffee7a77aea47'
-         '9033a9ea911f471b3278dbaf288cd0b3')
+depends=('kmod')
+source=(ftp://ftp.kernel.org/pub/linux/utils/kernel/hotplug/$pkgname-$pkgver.tar.xz
+        udev-180-nodocs.diff)
+md5sums=('1cf124ab5a124ea35d4748ea414926ec'
+         '6e8f82d61287f2a46116a29239f0bcc8')
 
 build() {
   cd "${srcdir}/$pkgbase-${pkgver}"
-  Patch udev-173-no-docs.patch
+  Patch udev-180-nodocs.diff
   cd rules/rules.d
   sed -i 's:/sbin:/usr/bin:g' * >/dev/null 2>&1
   sed -i '5s:modprobe -bv:echo:' 80-drivers.rules
@@ -25,7 +25,7 @@ build() {
               --host=${CHOST} \
               --sysconfdir=/etc \
               --with-rootlibdir=/usr/lib \
-              --libexecdir=/usr/lib/udev \
+              --libexecdir=/usr/lib \
               --sbindir=/usr/bin \
               --with-systemdsystemunitdir=/usr/lib/systemd/system \
               --enable-gtk-doc-html=no \
@@ -33,7 +33,6 @@ build() {
               --disable-udev_acl \
               --enable-logging \
               --enable-static \
-              --disable-hwdb \
               --disable-gudev \
               --disable-introspection \
               --disable-keymap \
