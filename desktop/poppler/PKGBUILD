@@ -2,7 +2,7 @@
 pkgbase=poppler
 pkgname=('poppler' 'poppler-glib')
 pkgver=0.18.3
-pkgrel=1
+pkgrel=2
 arch=('i686' 'x86_64')
 license=('GPL')
 makedepends=('glib' 'cairo' 'libjpeg' 'libpng' 'gcc-libs' 'fontconfig' 'openjpeg' 'pkg-config' 'lcms')
