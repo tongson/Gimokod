@@ -1,6 +1,6 @@
 pkgname=mupdf
 pkgver=0.9
-pkgrel=2
+pkgrel=4
 pkgdesc="lightweight PDF viewer and toolkit written in portable C"
 arch=('i686' 'x86_64')
 url="http://mupdf.com"
