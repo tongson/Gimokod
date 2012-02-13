@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=xorg-mkfontdir
-pkgver=1.0.6
+pkgver=1.0.7
 pkgrel=1
 pkgdesc="Create an index of X font files in a directory"
 arch=('any')
@@ -10,7 +10,7 @@ depends=('xorg-mkfontscale')
 makedepends=('xorg-util-macros')
 groups=('xorg' 'xorg-apps')
 source=(http://xorg.freedesktop.org/archive/individual/app/mkfontdir-${pkgver}.tar.bz2)
-sha1sums=('c2b504f5a019777f2f0d3c2fc635b114c7924804')
+sha1sums=('3c06dad8a5fbf7362b51fb7d6b1ab805eba40336')
 
 build() {
   cd "${srcdir}/mkfontdir-${pkgver}"
