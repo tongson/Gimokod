@@ -1,24 +1,22 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=chromium
-pkgver=16.0.912.77
-pkgrel=2
+pkgver=17.0.963.46
+pkgrel=1
 pkgdesc="The open-source project behind Google Chrome browser"
 arch=('i686' 'x86_64')
 url="http://www.chromium.org/"
 license=('BSD')
 depends=('zlib' 'gtk2' 'dbus-glib' 'nss' 'nss-freebl' 'alsa-lib' 'xdg-utils' 'bzip2' 'libevent'
          'libxss' 'libgcrypt' 'ttf-dejavu' 'desktop-file-utils' 'libxml2' 'icu'
-         'hicolor-icon-theme' 'libwebp' 'flac' 'libpng' 'libjpeg' 'speex'
+         'hicolor-icon-theme' 'libwebp' 'flac' 'libpng' 'speex'
          'libxslt')
 makedepends=('python' 'perl' 'gperf' 'yasm' 'mesa')
 install=chromium.install
 source=(http://commondatastorage.googleapis.com/chromium-browser-official/$pkgname-$pkgver.tar.bz2)
-sha256sums=('fc84e9a96d00a95c44beb6539b9ffe7224dc3ca51afef6486e0e7ad705445a32')
+sha256sums=('9f9a3799dee3f998b8e629edeb686976567fc145d659e5bb744af8a425d26879')
 
 build() {
   cd "${srcdir}/chromium-${pkgver}"
-
-  Patch fix_compilation_without_cups.diff
 
   # NaCL build remains faily
   cp "${srcdir}/nacl.gypi" chrome/
@@ -103,7 +101,7 @@ build() {
     -Duse_system_bzip2=1 \
     -Duse_system_ffmpeg=0 \
     -Duse_system_libevent=1 \
-    -Duse_system_libjpeg=1 \
+    -Duse_system_libjpeg=0 \
     -Duse_system_libpng=1 \
     -Duse_system_libxml=1 \
     -Duse_system_icu=1 \
