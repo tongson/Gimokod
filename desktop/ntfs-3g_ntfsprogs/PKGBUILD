@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgbase=ntfs-3g_ntfsprogs
 pkgname=('ntfs-3g' 'ntfsprogs')
-pkgver=2011.4.12
+pkgver=2012.1.15
 pkgrel=1
 license=('GPL2')
 depends=('fuse')
@@ -9,8 +9,8 @@ arch=('i686' 'x86_64')
 url="http://www.tuxera.com/"
 makedepends=('pkg-config')
 options=('!libtool')
-source=(http://tuxera.com/opensource/${pkgbase}-${pkgver}.tgz)
-sha1sums=('a4340ae611a3f26089f7d5601a86a5847517bff7')
+source=(http://tuxera.com/opensource/$pkgbase-$pkgver.tgz)
+sha1sums=('8d55cf49afde172fefa369a0a85289e09c4d7bbb')
 
 build() {
   cd "${srcdir}/${pkgbase}-${pkgver}"
