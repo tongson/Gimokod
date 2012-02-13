@@ -1,0 +1,97 @@
+# HG changeset patch
+# User Chris Coulson <chris.coulson@canonical.com>
+# Date 1326235060 -46800
+# Node ID 912022fc07417a32adb048fee36fd93ab35d73c0
+# Parent  9a6371bdb362e27f7afb54f23e494e8eaa1c00a6
+Bug 635918 part 2 - Provide additional recommended properties when playing samples via libcanberra r=kinetik
+
+diff --git a/widget/src/gtk2/Makefile.in b/widget/src/gtk2/Makefile.in
+--- a/widget/src/gtk2/Makefile.in
++++ b/widget/src/gtk2/Makefile.in
+@@ -126,17 +126,17 @@ CFLAGS          += $(MOZ_GTK2_CFLAGS) $(
+ CXXFLAGS        += $(MOZ_CAIRO_CFLAGS) $(MOZ_GTK2_CFLAGS) $(MOZ_STARTUP_NOTIFICATION_CFLAGS)
+ 
+ ifdef MOZ_PLATFORM_MAEMO
+ ifdef MOZ_ENABLE_GCONF
+ CXXFLAGS += $(MOZ_GCONF_CFLAGS)
+ endif
+ endif
+ 
+-DEFINES		+= -DCAIRO_GFX
++DEFINES		+= -DCAIRO_GFX -DMOZ_APP_NAME='"$(MOZ_APP_NAME)"'
+ 
+ INCLUDES	+= \
+ 		-I$(srcdir)/../xpwidgets \
+ 		-I$(srcdir)/../shared \
+ 		-I$(topsrcdir)/layout/generic \
+ 		-I$(topsrcdir)/layout/xul/base/src \
+ 		-I$(topsrcdir)/other-licenses/atk-1.0 \
+ 		$(NULL)
+diff --git a/widget/src/gtk2/nsSound.cpp b/widget/src/gtk2/nsSound.cpp
+--- a/widget/src/gtk2/nsSound.cpp
++++ b/widget/src/gtk2/nsSound.cpp
+@@ -50,16 +50,19 @@
+ #include "nsIFileURL.h"
+ #include "nsNetUtil.h"
+ #include "nsCOMPtr.h"
+ #include "nsAutoPtr.h"
+ #include "nsString.h"
+ #include "nsDirectoryService.h"
+ #include "nsDirectoryServiceDefs.h"
+ #include "mozilla/FileUtils.h"
++#include "mozilla/Services.h"
++#include "nsIStringBundle.h"
++#include "nsIXULAppInfo.h"
+ 
+ #include <stdio.h>
+ #include <unistd.h>
+ 
+ #include <gtk/gtk.h>
+ static PRLibrary *libcanberra = nsnull;
+ 
+ /* used to play sounds with libcanberra. */
+@@ -143,16 +146,42 @@ ca_context_get_default()
+         g_object_get(settings, "gtk-sound-theme-name", &sound_theme_name, NULL);
+ 
+         if (sound_theme_name) {
+             ca_context_change_props(ctx, "canberra.xdg-theme.name", sound_theme_name, NULL);
+             g_free(sound_theme_name);
+         }
+     }
+ 
++    nsCOMPtr<nsIStringBundleService> bundleService =
++        mozilla::services::GetStringBundleService();
++    if (bundleService) {
++        nsCOMPtr<nsIStringBundle> brandingBundle;
++        bundleService->CreateBundle("chrome://branding/locale/brand.properties",
++                                    getter_AddRefs(brandingBundle));
++        if (brandingBundle) {
++            nsAutoString wbrand;
++            brandingBundle->GetStringFromName(NS_LITERAL_STRING("brandShortName").get(),
++                                              getter_Copies(wbrand));
++            NS_ConvertUTF16toUTF8 brand(wbrand);
++
++            ca_context_change_props(ctx, "application.name", brand.get(), NULL);
++        }
++    }
++
++    nsCOMPtr<nsIXULAppInfo> appInfo = do_GetService("@mozilla.org/xre/app-info;1");
++    if (appInfo) {
++        nsCAutoString version;
++        appInfo->GetVersion(version);
++
++        ca_context_change_props(ctx, "application.version", version.get(), NULL);
++    }
++
++    ca_context_change_props(ctx, "application.icon_name", MOZ_APP_NAME, NULL);
++
+     return ctx;
+ }
+ 
+ static void
+ ca_finish_cb(ca_context *c,
+              uint32_t id,
+              int error_code,
+              void *userdata)
+
+

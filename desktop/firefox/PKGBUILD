@@ -1,6 +1,6 @@
-# Based upon the PKGBUILD from Arch Linux
+# Based upon the PKGBUILD from Arch Linux and ebuild from Gentoo
 pkgname=firefox
-pkgver=9.0.1
+pkgver=10.0
 pkgrel=1
 pkgdesc="Standalone web browser from mozilla.org (unofficial build)"
 arch=('i686' 'x86_64')
@@ -10,7 +10,6 @@ depends=('gtk2' 'mozilla-common' 'nss' 'libxt' 'hunspell' 'startup-notification'
          'hicolor-icon-theme' 'libffi' 'bzip2' 'zlib' 'nspr' 'libpng' 'libjpeg' 'libidl' 'pixman')
 makedepends=('unzip' 'zip' 'pkg-config' 'yasm' 'mesa' 'autoconf21')
 url="http://www.mozilla.org/projects/firefox"
-install=firefox.install
 source=(ftp://ftp.mozilla.org/pub/mozilla.org/firefox/releases/${pkgver}/source/firefox-${pkgver}.source.tar.bz2)
 sha256sums=('f852011c28b00b26803b4618b52de79c705204b2f4eadba08092a379f94babae')
 
@@ -18,20 +17,21 @@ build() {
   cd "${srcdir}/mozilla-release"
 
   Patch 1001-fix_jemalloc_vs_aslr.patch
-  Patch 2001-gentoo_no_app_updates.patch
+  Patch 1002-fix_jemalloc_vs_aslr_part2.patch
+  Patch 2002_fix-preferences-gentoo.patch
   Patch 2003_fix_system_hunspell_dict_detection.patch
   Patch 5001_fix-title-backspace.patch
   Patch 5002_allow_locked_prefs.patch
   Patch 5003_avoid_spurious_run_items_in_application_handlers.patch
   Patch 5004_properly_launch_applications_set_in_home.patch
   Patch 5005_use_resource_urls_appropriately.patch
-  Patch 5007_fix_libpr0n_nsPNGDecoder.patch
-  Patch 5008_revert_bug_468730.patch
-  Patch 6003_revert_bug_164580.patch
+  Patch 5007_bug_709259_fix_cursor_support.patch
+  Patch 5008_part1_bug_635918_libcanberra.patch
+  Patch 5009_part2_bug_635918_libcanberra.patch
   Patch 6008_fix_build_failure_on_platforms_without_yarr_support.patch
   Patch 6010_avoid_invalid_conversions.patch
-  Patch firefox-destdir.patch
-  Patch mozilla-firefox-1.0-lang.patch
+  Patch firefox-install-dir.patch
+  Patch libvpx.patch
 
   sed -i -e "s:gnomevfs::" browser/confvars.sh \
          -e "s:gnomevfs::" xulrunner/confvars.sh
@@ -60,6 +60,8 @@ package() {
   cd "${srcdir}/mozilla-release"
   make -j1 -f client.mk DESTDIR="${pkgdir}" install
 
+  install -m644 "${srcdir}"/vendor.js "${pkgdir}/usr/lib/firefox/defaults/pref"
+
   for i in 16 32 48; do
       install -Dm644 browser/branding/unofficial/default${i}.png \
         "${pkgdir}/usr/share/icons/hicolor/${i}x${i}/apps/tumucumaque.png"
@@ -85,43 +87,44 @@ package() {
 
 source=(${source[@]-}
         1001-fix_jemalloc_vs_aslr.patch
-        2001-gentoo_no_app_updates.patch
+        1002-fix_jemalloc_vs_aslr_part2.patch
+        2002_fix-preferences-gentoo.patch
         2003_fix_system_hunspell_dict_detection.patch
         5001_fix-title-backspace.patch
         5002_allow_locked_prefs.patch
         5003_avoid_spurious_run_items_in_application_handlers.patch
         5004_properly_launch_applications_set_in_home.patch
         5005_use_resource_urls_appropriately.patch
-        5007_fix_libpr0n_nsPNGDecoder.patch
-        5008_revert_bug_468730.patch
-        5009_revert_bug_708572.patch
-        6003_revert_bug_164580.patch
+        5007_bug_709259_fix_cursor_support.patch
+        5008_part1_bug_635918_libcanberra.patch
+        5009_part2_bug_635918_libcanberra.patch
         6008_fix_build_failure_on_platforms_without_yarr_support.patch
         6010_avoid_invalid_conversions.patch
         as-needed_1_5_26.patch
         as-needed_2_2_6.patch
-        firefox-destdir.patch
-        mozconfig
-        mozilla-firefox-1.0-lang.patch)
+        libvpx.patch
+        firefox-install-dir.patch
+        vendor.js
+        mozconfig)
 
 sha256sums=(${sha256sums[@]-}
             '08e2d2db0964c86026ecf7ea9cf6473dfb6b0b55fe1d1cee7a5f308daf91acef'
-            'dc216c4ca8b886ad076d94a28dff9e3edc7936c0b2a308584f75d870f4afd9a1'
-            '98de5a5359f2a337b9533e8032e885f583c9c8e2c2ff9a0cdaea7d1f65b1528e'
+            'dfe33ff9cc24a1795bfb0fb0ea35438588accbb43dc7d918c2e9bf13410a2286'
+            '7edae5ea1efb042412d02ef00c51f5e55c4499751c240b48c7b07f69cc420d94'
+            'abe9fedabbc842a903f8923517457b05d39eb3a97145adc9437ec25e023b9aae'
             '72fb887a845de23ceb6f300415df0182eebfd4d29d46adc9b06d850e5315dc7a'
-            'e04b3769480d36795c4f5030a22744707275aefc15878a55f68d5605ad59bbb3'
-            '9c015b4d22d45c92dfb46a7edd0ac69b4f5e259d07af0a0743fb184f111c6eb8'
-            '0e06da54ff82bf9d87363d3e3cf661d56d35832d2b8fed718aec99f7cdc637c4'
+            'a8afd44bff5f86b967528c67a71d3310ea0365709d11a0c8d7fb4cedf9c46c98'
+            'b8777d76ef03563da1403a6f5f1c94ce072f4aaebf0f130890c3345e99e7ff3b'
+            '1a80f6844ac985cef488e20c918a3e619ada9d29410a7f2c00c9b2205067a1c6'
             '530f58f06bdd7129df589fb447c35306ece9297a67365fff76afc8ec4f2c62a9'
-            '1631d34838e7bbab1ecec33d1ec965fb13a1b366647f575d0d4669cb4cdb1684'
-            '297566f4c162ee13a1198aed60fab7b9e3576a863b52d631f0ddd19c4aff4555'
-            'a6004d281d914b601247d46eed21323473e6f138c0a33c61f16a71c7fdc03612'
-            'bd2e1c7f8cd5f59cd4ed686176019a6fb992f8faff530f22875cb8a02fc35f55'
-            '46711d091b1414d65fdd61cff659f20405efad1fb2b63d35513e502f4cc79f13'
-            '8ba97e0fe5823423771506abd88e63e14571b37f32c815d82017df1cfad8f65a'
+            '668b2b319954a6498f815ca423b78473ee3c8e2b99ed019780336041fea117b6'
+            '58f044cfbf8281e8593dc30c32071efbc074ee0ac8e717a58819d54a83fc1a47'
+            'b48438d55fceafe0d31fc35054188d9ff8a0c8855d5f2cda872651d0a261e47b'
+            '2c6b6c89abdbd54399bc3088c02b90b2d08f9968f76398029a757508626eaa9e'
+            '1b6555142ce168e1c7e71d1a2edf5acecf4537cb34dafe0069c91d147c1ba03a'
             '3060597dcc5801273a2c36ad534a4da76518769c80637803048d041873aa1d28'
             '76e379383f80a463201fe864c1e35c3cd4858b71f26c55b3a5dcb2648e383258'
+            'ff330d7a8888336c9c3aaccc47fde257fda58a1d98be9b2d5f448f027072c4c1'
             '3db7fa9de38b21da92eb3fe2923cd23584c526c6174d984ff7a777fb04a1270b'
-            '59c1c4d8d86ae82c07ea10f119e7554192173af65ec69fe862b8a62d813e0399'
-            '0ca095ff2af57297f615877a7e79ddc84d1a3f62509a8af6ca50aad7a8671f6a')
-
+            '4b50e9aec03432e21b44d18c4c97b2630bace606b033f7d556c9d3e3eb0f4fa4'
+            '59c1c4d8d86ae82c07ea10f119e7554192173af65ec69fe862b8a62d813e0399')
