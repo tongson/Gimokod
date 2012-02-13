@@ -19,54 +19,14 @@ getpkgbin() {
 }
 
 getpkgnames() {
-  local pkgname pkg pkgbuild
+  local pkgbuild
   pkgbuild="${build}/${pwd##*/}/$1/PKGBUILD"
-  if [[ $(grep -q pkgbase ${pkgbuild}; echo $?) -eq 0 ]]; then
-    pkgname="$(sed -n '/^pkgname=(/,/)/p' ${pkgbuild} |
-              tr -d '\n' |
-              tr -d '\047' |
-              tr -d '\050' |
-              tr -d '\051' |
-              tr -s '\040')"
-    for pkg in $(echo -n "${pkgname#*=}"); do
-      echo -n "${pkg}" ; echo -n " "
-    done
-  else
-    pkgname="$(grep -E "^pkgname" ${pkgbuild})"
-    echo -n "${pkgname#*=}" ; echo -n " "
-  fi
-}
-
-getdepends() {
-  sed -ne "/^depends=(/,/)/p" -e "/^makedepends=(/,/)/p" $1 |
-  sed -e "s:makedepends=::" \
-      -e "s:depends=::" \
-      -e "s:['()]::g" |
-  tr '\n' '\000' |
-  tr ' ' '\000' |
-  sort -zu |
-  tr '\000' ' ' |
-  sed -e 's:device-mapper:lvm2:' \
-      -e 's:gcc-libs:gcc:' \
-      -e 's:boost-libs:boost:' \
-      -e 's:libltdl:libtool:' \
-      -e 's:libjpeg:libjpeg-turbo:' \
-      -e 's:libgl:mesa:' \
-      -e 's:libglapi:mesa:' \
-      -e 's:libegl:mesa:' \
-      -e 's:ati-dri:mesa:' \
-      -e 's:intel-dri:mesa:' \
-      -e 's:nouveau-dri:mesa:' \
-      -e 's:khrplatform-devel:mesa:' \
-      -e 's:libpurple:pidgin:' \
-      -e 's:xorg-server-xvfb:xorg-server:' \
-      -e 's:xorg-server-common:xorg-server:' \
-      -e 's:xorg-server-devel:xorg-server:'
+  ../getpkgnames.lua "${pkgbuild}"
 }
 
 getdep() {
   local dep
-  for dep in $(getdepends ${build}/${pwd##*/}/$1/PKGBUILD); do
+  for dep in $(../getdepends.lua {build}/${pwd##*/}/$1/PKGBUILD); do
     # if matching binary package is found then
     # use the binary package file name
     # else if it matches a dir then use that
