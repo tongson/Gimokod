@@ -1,20 +1,17 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=pixman
-pkgver=0.24.2
+pkgver=0.24.4
 pkgrel=1
 pkgdesc="Pixman library"
 arch=(i686 x86_64)
 url="http://xorg.freedesktop.org"
 license=('custom')
 options=('!libtool')
-source=(http://xorg.freedesktop.org/releases/individual/lib/${pkgname}-${pkgver}.tar.bz2
-        revert-reject-trapezoids-where-top-is-above-the-edges.patch)
-sha1sums=('233eed3cd16ee1b2a842140477503d2c68b74418'
-          'ee36251d47ccefd5e276cabdba9917fbb2be787a')
+source=(http://xorg.freedesktop.org/releases/individual/lib/${pkgname}-${pkgver}.tar.bz2)
+sha1sums=('683450f917015366ac7918fc517c76801aeff374')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  Patch revert-reject-trapezoids-where-top-is-above-the-edges.patch
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
