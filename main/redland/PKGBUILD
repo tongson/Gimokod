@@ -38,7 +38,7 @@ build() {
 }
 
 package() {
-  cd "${srcdir}"/${pkgbase}-${pkgver}
+  cd "${srcdir}"/${pkgname}-${pkgver}
   make DESTDIR="${pkgdir}" install
   rm -rf "${pkgdir}"/usr/lib/redland
 }
