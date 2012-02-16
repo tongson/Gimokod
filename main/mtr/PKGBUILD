@@ -14,7 +14,7 @@ md5sums=('10601ea543fda3e51545c4bce195b64c')
 build() {
   install -d "${srcdir}/"mtr-cli
   cd "${srcdir}/mtr-cli"
-  ../${pkgbase}-${pkgver}/configure --enable-ipv6 \
+  ../${pkgname}-${pkgver}/configure --enable-ipv6 \
               --prefix=/usr \
               --sbindir=/usr/bin \
               --build=${CBUILD} \
