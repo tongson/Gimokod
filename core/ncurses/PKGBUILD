@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=ncurses
 pkgver=5.9
-pkgrel=1
+pkgrel=2
 pkgdesc="System V Release 4.0 curses emulation library"
 arch=('i686' 'x86_64')
 url="http://www.gnu.org/software/ncurses/"
@@ -25,6 +25,7 @@ build() {
                                     --without-ada \
                                     --with-install-prefix="${pkgdir}" \
                                     --enable-widec \
+                                    --enable-pc-files \
                                     --without-cxx-binding
   # add --enable-ext-colors with next soname bump
   make
@@ -55,17 +56,17 @@ package() {
   done
   ln -sf libncurses++w.a "${pkgdir}"/usr/lib/libncurses++.a
 
+  for lib in ncurses ncurses++ form panel menu; do
+    ln -s ${lib}w.pc ${pkgdir}/usr/lib/pkgconfig/${lib}.pc
+  done
+
   # Some packages look for -lcurses during build
-  rm -f "${pkgdir}"/usr/lib/libcursesw.so
   echo "INPUT(-lncursesw)" >${pkgdir}/usr/lib/libcursesw.so
-  ln -sf libncurses.so "${pkgdir}"/usr/lib/libcurses.so
-  ln -sf libncursesw.a "${pkgdir}"/usr/lib/libcursesw.a
-  ln -sf libncurses.a "${pkgdir}"/usr/lib/libcurses.a
 
   # non-widec compatibility library
   cd "${srcdir}"/ncurses-build
   install -Dm755 lib/libncurses.so.${pkgver} "${pkgdir}"/usr/lib/libncurses.so."${pkgver}"
-  ln -sf libncurses.so.${pkgver} "${pkgdir}"/usr/lib/libncurses.so.5
+  ln -s libncurses.so.${pkgver} ${pkgdir}/usr/lib/libncurses.so.5
 
   # install license, rip it from the readme
   cd "${srcdir}/${pkgname}-${pkgver}"
