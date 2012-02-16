@@ -1,9 +1,9 @@
 pkgname=filesystem
-pkgver=2011.12
-pkgrel=1
-pkgdesc='Filesystem layout'
+pkgver=2012.02
+pkgrel=2
+pkgdesc='Filesystem hier'
 arch=('any')
-url='http://localhost.localdomain'
+url='http://gimokod.org'
 license=('LGPL3')
 groups=('base')
 install=filesystem.install
@@ -24,14 +24,12 @@ package() {
       install -d -m755 "${pkgdir}"/etc/${d}
     done
 
-    for f in fstab group host.conf hosts hostname issue inputrc ld.so.conf locale.conf motd \
-    nsswitch.conf passwd securetty shells profile vconsole.conf os-release; do
+    for f in fstab host.conf hosts hostname issue inputrc ld.so.conf locale.conf motd \
+    nsswitch.conf securetty shells profile vconsole.conf os-release; do
       install -m0644 "${srcdir}"/${f} "${pkgdir}"/etc/
     done
 
-    install -m0600 "${srcdir}/gshadow" "${pkgdir}/etc/gshadow"
     install -d -m0710 -o 0 -g 42 "${pkgdir}/etc/tcb"
-    install -d -m02710 -o 0 -g 164 "${pkgdir}/etc/tcb/root"
     install -d -m02710 -o 1 -g 164 "${pkgdir}/etc/tcb/bin"
     install -d -m02710 -o 2 -g 164 "${pkgdir}/etc/tcb/daemon"
     install -d -m02710 -o 8 -g 164 "${pkgdir}/etc/tcb/mail"
@@ -48,12 +46,11 @@ package() {
     install -d -m02710 -o 188 -g 164 "${pkgdir}/etc/tcb/dhcp"
     install -d -m02710 -o 800 -g 164 "${pkgdir}/etc/tcb/rngd"
 
-    for id in root bin daemon mail ftp sshd nscd http dbus nobody crond klogd syslogd ntpd dhcp rngd; do
+    for id in bin daemon mail ftp sshd nscd http dbus nobody crond klogd syslogd ntpd dhcp rngd; do
       echo "${id}:!:-1::::::" > "${pkgdir}/etc/tcb/${id}/shadow"
       chmod 0640 "${pkgdir}/etc/tcb/${id}/shadow"
     done
 
-    chown 0:164 "${pkgdir}/etc/tcb/root/shadow"
     chown 1:164 "${pkgdir}/etc/tcb/bin/shadow"
     chown 2:164 "${pkgdir}/etc/tcb/daemon/shadow"
     chown 8:164 "${pkgdir}/etc/tcb/mail/shadow"
@@ -100,10 +97,9 @@ package() {
     install -D -m0644 "${srcdir}/scm_upgrade" "${pkgdir}/usr/share/pacman/scm_upgrade"
     install -D -m0644 "${srcdir}/ignore-glob" "${pkgdir}/etc/.fossil-settings/ignore-glob"
 }
+
 source=(${source[@]-}
         fstab
-        group
-        gshadow
         host.conf
         hostname
         hosts
@@ -117,7 +113,6 @@ source=(${source[@]-}
         net
         nsswitch.conf
         os-release
-        passwd
         profile
         protocols
         scm_install
@@ -129,12 +124,10 @@ source=(${source[@]-}
 
 sha256sums=(${sha256sums[@]-}
             '797dbd2f4f22ea9a8f8d1bb4142b66f64dd220888ebd89829adf8e1a456a0432'
-            '91412d24e52467d9a3ce4ca3a0a345e17244a2e308c84cde500333b35723a754'
-            'a61c3909666b8db0dc0ca71738cdedc79b3850a81cf21fb07c02460c39357a22'
             'f0709706ce9bf46c58358e040d7eaa96994767438bab274ee5239ac19b0b814b'
             'ab014e33cfd4212e76d000310534b7528f0e2a39ee8e78660a0d9cfcdbac4e4b'
             'e3414c188757954ee34da03cf324fc9864b1758dc472cfe36884ce6415bbdbd3'
-            '0663104887922cde326c9c3a65ea6c13ffc19f9e680aa94cf6ab070c1c2e6fb5'
+            'f0da792787b1b82ae7226667efc052b5e623834d458c2aa3b164d4315e1ce8b9'
             '17d0662466fa27b8a08e101d3cf8725b99d35715f7455f4c8b343752194ee5b9'
             'ad3883d3b55169ae863134331fa044a36094989dfae555bbe79f7fe6818b68b1'
             '413db0af7ebad9c727023c33b593914f04e1e4735d54dce71d8fd7009e8ffba1'
@@ -144,11 +137,10 @@ sha256sums=(${sha256sums[@]-}
             '60f67c19e5a3299e0e07d9bb64f05ad9869761158e32982da334e2c4d0c36550'
             'a1e248357083b55d83659ab50f32c94bf1bcf0825470ccb41702dad3cff712c7'
             'ac6f2cbf709ef493c59d64affce7b99f13ac1f740f745c6417f8437b7bec0944'
-            '61bd19c2821ef89fa0854a80854d78f5ad5dd38472e95a2bd219fb3f3a4d69b0'
             '953e8ee622553d473b89da59324f604b88918f0d9cc37faedb7671bee6160d87'
             '9b0d54d258b62c437aefe09e9c3e4e9307051b749e680024bc353f0eb92eb486'
             'b444ab0db948fc08af57880a210c903f166a885b46309065d5922f8ef5af4410'
-            'b5d3fbe3e4401c39bd18a09240b80a3c6930b2ab4ddb559d0e0e9441f8635e1e'
+            '53b0628c2e9c7b67951d20723e1f4abc49b8a1fc06ebef82eb402f350aa88c1b'
             '845fec1cf9b279b2d94eb7d49f1c117d3c58c3cafa6ae4dec20ed62b91c9fb67'
             'e96af627f7774e8c87b0de843556a355fea6150c4d64fa4e2ff2c5fd610e7a79'
             '612d1ba19c101dcce254dba0f566a624d42b434e10eeb1feb1e5800f69989e63'

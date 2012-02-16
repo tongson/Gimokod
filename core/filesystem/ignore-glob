@@ -37,3 +37,4 @@ profile.d
 ld.so.conf.d
 conky
 qemu
+fuse.conf

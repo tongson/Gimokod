@@ -1,3 +1,4 @@
 cd etc
+/usr/bin/fsl addremove
 /usr/bin/fsl stash save -m "${PKGNAME} upgraded to ${1}"
 echo "Run 'fsl stash ls' in /etc for possible changes"
