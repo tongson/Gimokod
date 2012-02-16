@@ -9,40 +9,40 @@ repo="/home/abs/gimokod/${pwd##*/}"
 # Helper functions should not echo \n. Main script handles EOLs.
 
 getpkgbin() {
-  local pkg pkgbin
-  for pkg in $(echo -n ${repo}/$1-*-*-*.pkg.tar.??); do
-    pkgbin="${pkg##*/}"
-    if [[ "${pkgbin%-*-*-*.pkg.tar.??}" = "$1" ]]; then
-      [[ -f ${pkg} ]] && echo -n "${pkg}"
-    fi
-  done
+    local pkg pkgbin
+    for pkg in $(echo -n ${repo}/$1-*-*-*.pkg.tar.??); do
+        pkgbin="${pkg##*/}"
+        if [[ "${pkgbin%-*-*-*.pkg.tar.??}" = "$1" ]]; then
+            [[ -f ${pkg} ]] && echo -n "${pkg}"
+        fi
+    done
 }
 
 getpkgnames() {
-  local pkgbuild
-  pkgbuild="${build}/${pwd##*/}/$1/PKGBUILD"
-  ../getpkgnames.lua "${pkgbuild}"
+    local pkgbuild
+    pkgbuild="${build}/${pwd##*/}/$1/PKGBUILD"
+    ../scripts/getpkgnames.lua "${pkgbuild}"
 }
 
 getdep() {
-  local dep
-  for dep in $(../getdepends.lua {build}/${pwd##*/}/$1/PKGBUILD); do
-    # if matching binary package is found then
-    # use the binary package file name
-    # else if it matches a dir then use that
-    if [[ $(getpkgbin ${dep})>/dev/null ]]; then
-      getpkgbin ${dep} ; echo -n ' '
-    else
-      [[ -d ./${dep} ]] && echo -n "${dep} "
-    fi
-  done
+    local dep
+    for dep in $(../scripts/getdepends.lua ${build}/${pwd##*/}/$1/PKGBUILD); do
+        # if matching binary package is found then
+        # use the binary package file name
+        # else if it matches a dir then use that
+        if [[ $(getpkgbin ${dep})>/dev/null ]]; then
+            getpkgbin ${dep} ; echo -n ' '
+        else
+            [[ -d ./${dep} ]] && echo -n "${dep} "
+        fi
+    done
 }
 
 pwddirs() {
-  local dir
-  for dir in *; do
-    [[ -d ./${dir} ]] && echo -n "${dir} "
-  done
+    local dir
+    for dir in *; do
+        [[ -d ./${dir} ]] && echo -n "${dir} "
+    done
 }
 
 echo "all:V: $(pwddirs)"

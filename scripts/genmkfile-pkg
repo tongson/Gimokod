@@ -7,12 +7,12 @@ add=""
 
 echo "${database}: ${packages}"
 for pkg in ${packages}; do
-  if [[ ${pkg} -nt ${database} ]]; then
-    echo "  /usr/bin/repo-remove ${database} ${pkg%-*-*-*.pkg.tar.??} || true"
-    add="${add} ${pkg}"
-  fi
+    if [[ ${pkg} -nt ${database} ]]; then
+        echo "  /usr/bin/repo-remove ${database} ${pkg%-*-*-*.pkg.tar.??} || true"
+        add="${add} ${pkg}"
+    fi
 done
 if [[ ${add} != "" ]]; then
-  echo "  /usr/bin/repo-add -s ${database} ${add}"
+    echo "  /usr/bin/repo-add -s ${database} ${add}"
 fi
 

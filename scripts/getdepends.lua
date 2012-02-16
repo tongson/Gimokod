@@ -3,12 +3,12 @@ io.input(arg[1])
 pkgbuild=io.read("*all")
 
 function table.contains(table, element)
-  for _, value in pairs(table) do
-    if value == element then
-      return true
+    for _, value in pairs(table) do
+        if value == element then
+            return true
+        end
     end
-  end
-  return false
+    return false
 end
 
 depends = string.match(pkgbuild, "depends=%(.-%)")
@@ -33,24 +33,24 @@ sub["xorg-server-common"] = "xorg-server"
 sub["xorg-server-devel"]  = "xorg-server"
 
 if string.find(pkgbuild, "depends") then
-  for x in string.gmatch(depends, "'([%a-]+)'" ) do
-    if table.contains(fulldepends, x) == false then
-      fulldepends[#fulldepends+1] = x
+    for x in string.gmatch(depends, "'([%a-_]+)'" ) do
+        if table.contains(fulldepends, x) == false then
+            fulldepends[#fulldepends+1] = x
+        end
     end
-  end
 end
 
 if string.find(pkgbuild, "makedepends") then
-  for y in string.gmatch(makedepends, "'([%a-]+)'" ) do
-    if table.contains(fulldepends, y) == false then
-      fulldepends[#fulldepends+1] = y
+    for y in string.gmatch(makedepends, "'([%a-_]+)'" ) do
+        if table.contains(fulldepends, y) == false then
+            fulldepends[#fulldepends+1] = y
+        end
     end
-  end
 end
 
 for i = 1, #fulldepends do
-  output = string.gsub(fulldepends[i], "([%a-]+)", sub)
-  io.write(string.format("%s ", output ))
+    output = string.gsub(fulldepends[i], "([%a-_]+)", sub)
+    io.write(string.format("%s ", output ))
 end
 
 
