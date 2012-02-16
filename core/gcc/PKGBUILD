@@ -1,4 +1,5 @@
 # Based upon the PKGBUILD from Arch Linux
+pkgbase=gcc
 pkgname=('gcc' 'gcc-libs')
 pkgver=4.6.2
 pkgrel=1
