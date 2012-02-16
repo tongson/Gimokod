@@ -1,15 +1,14 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=chromium
 pkgver=17.0.963.46
-pkgrel=1
+pkgrel=2
 pkgdesc="The open-source project behind Google Chrome browser"
 arch=('i686' 'x86_64')
 url="http://www.chromium.org/"
 license=('BSD')
 depends=('zlib' 'gtk2' 'dbus-glib' 'nss' 'nss-freebl' 'alsa-lib' 'xdg-utils' 'bzip2' 'libevent'
-         'libxss' 'libgcrypt' 'ttf-dejavu' 'desktop-file-utils' 'libxml2' 'icu'
-         'hicolor-icon-theme' 'libwebp' 'flac' 'libpng' 'speex'
-         'libxslt')
+         'libxss' 'libgcrypt' 'ttf-dejavu' 'desktop-file-utils' 'libxml2'
+         'hicolor-icon-theme' 'libwebp' 'libpng' 'speex' 'libxslt')
 makedepends=('python' 'perl' 'gperf' 'yasm' 'mesa')
 install=chromium.install
 source=(http://commondatastorage.googleapis.com/chromium-browser-official/$pkgname-$pkgver.tar.bz2)
@@ -18,20 +17,12 @@ sha256sums=('9f9a3799dee3f998b8e629edeb686976567fc145d659e5bb744af8a425d26879')
 build() {
   cd "${srcdir}/chromium-${pkgver}"
 
-  # NaCL build remains faily
+  # NaCL disabled
   cp "${srcdir}/nacl.gypi" chrome/
 
   # Fix build with gcc 4.6
   # http://code.google.com/p/chromium/issues/detail?id=80071
   patch -Np0 -i "${srcdir}/gcc-4.6.patch"
-
-  # Fix build with CUPS 1.5
-  # sed -i '/#include <cups\/cups.h>/ a #include <cups/ppd.h>' \
-  #  chrome/browser/ui/webui/print_preview_handler.cc
-
-  #mkdir "${srcdir}/python-path"
-  ##ln -s /usr/bin/python "${srcdir}/python-path/python"
-  #export PATH="${srcdir}/python-path:${PATH}"
 
   # We need to disable system_ssl until "next protocol negotiation" support is
   # available in our nss package.
@@ -47,17 +38,20 @@ build() {
     \! -path 'third_party/cld/*' \
     \! -path 'third_party/expat/*' \
     \! -path 'third_party/ffmpeg/*' \
-    \! -path 'third_party/flac/flac.h' \
+    \! -path 'third_party/flac/*' \
     \! -path 'third_party/gpsd/*' \
     \! -path 'third_party/harfbuzz/*' \
     \! -path 'third_party/hunspell/*' \
     \! -path 'third_party/iccjpeg/*' \
+    \! -path 'third_party/icu/*' \
+    \! -path 'third_party/jsoncpp/*' \
     \! -path 'third_party/launchpad_translations/*' \
     \! -path 'third_party/leveldb/*' \
     \! -path 'third_party/leveldatabase/*' \
     \! -path 'third_party/libjingle/*' \
     \! -path 'third_party/libphonenumber/*' \
     \! -path 'third_party/libvpx/*' \
+    \! -path 'third_party/khronos/*' \
     \! -path 'third_party/mesa/*' \
     \! -path 'third_party/modp_b64/*' \
     \! -path 'third_party/mongoose/*' \
@@ -101,10 +95,8 @@ build() {
     -Duse_system_bzip2=1 \
     -Duse_system_ffmpeg=0 \
     -Duse_system_libevent=1 \
-    -Duse_system_libjpeg=0 \
-    -Duse_system_libpng=1 \
     -Duse_system_libxml=1 \
-    -Duse_system_icu=1 \
+    -Duse_system_icu=0 \
     -Duse_system_ssl=0 \
     -Duse_system_yasm=1 \
     -Duse_system_zlib=1 \
@@ -124,7 +116,7 @@ build() {
     -Duse_system_libpng=1 \
     -Duse_system_libjpeg=1 \
     -Ddisable_sse2=1 \
-    -Duse_system_flac=1 $([[ $CARCH == i686 ]] && echo '-Dtarget_arch=ia32') $([[ $CARCH == x86_64 ]] && echo '-Dtarget_arch=x64')
+    -Duse_system_flac=0 $([[ $CARCH == i686 ]] && echo '-Dtarget_arch=ia32') $([[ $CARCH == x86_64 ]] && echo '-Dtarget_arch=x64')
 
   make chrome chrome_sandbox BUILDTYPE=Release V=1
 }
