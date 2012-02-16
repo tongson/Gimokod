@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=kmod
-pkgver=4
+pkgver=5
 pkgrel=1
 pkgdesc="Linux kernel module handling"
 arch=('i686' 'x86_64')
@@ -10,7 +10,7 @@ depends=('zlib')
 groups=('base')
 options=('!libtool')
 source=("http://packages.profusion.mobi/"${pkgname}"/"${pkgname}"-"${pkgver}".tar.xz")
-md5sums=('e14450a066a48accd0af1995b3c0232d')
+md5sums=('b271c2ec54aba1c67bda63c8579d8c15')
 
 build() {
   cd "${pkgname}-${pkgver}"
