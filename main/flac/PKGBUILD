@@ -15,7 +15,7 @@ sha1sums=('bd54354900181b59db3089347cc84ad81e410b38'
           '7e9f8c2ef4d9daf5ddd20df63b608fe19b8c1560')
 
 build() {
-  cd "${srcdir}/${pkgbase}-${pkgver}"
+  cd "${srcdir}/${pkgname}-${pkgver}"
   patch -Np1 -i "${srcdir}/flac-1.2.1-gcc-4.3-includes.patch"
   ./configure --prefix=/usr \
               --build=${CBUILD} \
@@ -34,7 +34,7 @@ build() {
 }
 
 package() {
-  cd "${srcdir}/${pkgbase}-${pkgver}"
+  cd "${srcdir}/${pkgname}-${pkgver}"
   make DESTDIR="${pkgdir}" install
   install -D -m644 COPYING.Xiph "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }
