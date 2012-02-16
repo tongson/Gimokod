@@ -38,7 +38,7 @@ build() {
 }
 
 package() {
-  cd "${srcdir}/${pkgbase}-${pkgver//_/-}"
+  cd "${srcdir}/${pkgname}-${pkgver//_/-}"
   make DESTDIR="${pkgdir}" install-nodoc
   install -D -m644 COPYING "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
   install -D -m644 BSDL "${pkgdir}/usr/share/licenses/${pkgname}/BSDL"
