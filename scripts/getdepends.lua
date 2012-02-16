@@ -33,7 +33,7 @@ sub["xorg-server-common"] = "xorg-server"
 sub["xorg-server-devel"]  = "xorg-server"
 
 if string.find(pkgbuild, "depends") then
-    for x in string.gmatch(depends, "'([%a-_]+)'" ) do
+    for x in string.gmatch(depends, "'([%w%p]+)'" ) do
         if table.contains(fulldepends, x) == false then
             fulldepends[#fulldepends+1] = x
         end
@@ -41,7 +41,7 @@ if string.find(pkgbuild, "depends") then
 end
 
 if string.find(pkgbuild, "makedepends") then
-    for y in string.gmatch(makedepends, "'([%a-_]+)'" ) do
+    for y in string.gmatch(makedepends, "'([%w%p]+)'" ) do
         if table.contains(fulldepends, y) == false then
             fulldepends[#fulldepends+1] = y
         end
@@ -49,7 +49,7 @@ if string.find(pkgbuild, "makedepends") then
 end
 
 for i = 1, #fulldepends do
-    output = string.gsub(fulldepends[i], "([%a-_]+)", sub)
+    output = string.gsub(fulldepends[i], "([%w%p]+)", sub)
     io.write(string.format("%s ", output ))
 end
 
