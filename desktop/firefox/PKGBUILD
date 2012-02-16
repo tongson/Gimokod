@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux and ebuild from Gentoo
 pkgname=firefox
-pkgver=10.0
+pkgver=10.0.1
 pkgrel=1
 pkgdesc="Standalone web browser from mozilla.org (unofficial build)"
 arch=('i686' 'x86_64')
@@ -11,7 +11,7 @@ depends=('gtk2' 'mozilla-common' 'nss' 'libxt' 'hunspell' 'startup-notification'
 makedepends=('unzip' 'zip' 'pkg-config' 'yasm' 'mesa' 'autoconf21')
 url="http://www.mozilla.org/projects/firefox"
 source=(ftp://ftp.mozilla.org/pub/mozilla.org/firefox/releases/${pkgver}/source/firefox-${pkgver}.source.tar.bz2)
-sha256sums=('f852011c28b00b26803b4618b52de79c705204b2f4eadba08092a379f94babae')
+sha256sums=('d06dc35607e354d4c1524ca3344cd316a6d7a38c8c0578a52caee6a3adb054f5')
 
 build() {
   cd "${srcdir}/mozilla-release"
