@@ -1,6 +1,5 @@
-Good start for the great UsrMove
---- pacman-4.0.0/lib/libalpm/trans.c
-+++ pacman-4.0.0/lib/libalpm/trans.c
+--- pacman-4.0.2/lib/libalpm/trans.c
++++ pacman-4.0.2/lib/libalpm/trans.c
 @@ -345,7 +345,7 @@
  
  	_alpm_log(handle, ALPM_LOG_DEBUG, "executing \"%s\"\n", cmdline);
@@ -10,9 +9,9 @@ Good start for the great UsrMove
  
  cleanup:
  	if(scriptfn && unlink(scriptfn)) {
---- pacman-4.0.0/lib/libalpm/util.c
-+++ pacman-4.0.0/lib/libalpm/util.c
-@@ -621,10 +621,10 @@
+--- pacman-4.0.2/lib/libalpm/util.c
++++ pacman-4.0.2/lib/libalpm/util.c
+@@ -619,10 +619,10 @@
  
  	snprintf(line, PATH_MAX, "%setc/ld.so.conf", handle->root);
  	if(access(line, F_OK) == 0) {
@@ -20,8 +19,8 @@ Good start for the great UsrMove
 +		snprintf(line, PATH_MAX, "%susr/bin/ldconfig", handle->root);
  		if(access(line, X_OK) == 0) {
  			char *argv[] = { "ldconfig", NULL };
--			_alpm_run_chroot(handle, "/sbin/ldconfig", argv);
-+			_alpm_run_chroot(handle, "/usr/bin/ldconfig", argv);
+-			return _alpm_run_chroot(handle, "/sbin/ldconfig", argv);
++			return _alpm_run_chroot(handle, "/usr/bin/ldconfig", argv);
  		}
  	}
  

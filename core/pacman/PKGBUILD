@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=pacman
-pkgver=4.0.1
+pkgver=4.0.2
 pkgrel=1
 pkgdesc="A library-based package manager with dependency support"
 arch=('i686' 'x86_64')
@@ -11,7 +11,7 @@ depends=('libarchive' 'gpgme' 'gimokod-keyring')
 install=pacman.install
 options=(!libtool)
 source=(ftp://ftp.archlinux.org/other/pacman/"${pkgname}"-"${pkgver}".tar.gz)
-sha256sums=('04f6822b31022100de6cd0a1905b199bbd1eaf878ef0726b6242ee032f3c33b1')
+sha256sums=('b53d03b29d5ea41efecd39e1fc3a6c9549d3f23a14d2d7fd540996bc4f8931e5')
 
 PKGEXT='.pkg.tar.gz'
 
@@ -19,7 +19,7 @@ build() {
   cd "${srcdir}"/"${pkgname}"-"${pkgver}"
   Patch pacman-4.0.0-makepkg.diff
   Patch pacman-4.0.0-PKGNAME.diff
-  Patch pacman-4.0.0-usrmove.diff
+  Patch pacman-4.0.2-usrmove.diff
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
@@ -32,6 +32,11 @@ build() {
               --with-gpgme
   make
 }
+
+check() {
+  make -C "$pkgname-$pkgver" check
+}
+
 
 package() {
   cd "${srcdir}"/"${pkgname}"-"${pkgver}"
@@ -70,7 +75,7 @@ source=(${source[@]-}
         makepkg.conf
         pacman-4.0.0-PKGNAME.diff
         pacman-4.0.0-makepkg.diff
-        pacman-4.0.0-usrmove.diff
+        pacman-4.0.2-usrmove.diff
         pacman.conf
         pacman.conf.x86_64)
 
@@ -78,6 +83,6 @@ sha256sums=(${sha256sums[@]-}
             '049491c1e3749cffb8033f7c757866490af836697fc5ce7bfbeb66596b9b0bc9'
             '56ee72e2fbc53b5d3201895a167b40295e638aaae93adb8cb3b9c8d0d6f4442a'
             'b6e0c32fac51225e90cd2da100a1af728cc9e91295ecdaa54fe9e8241bed96d0'
-            '5840250463cfa7889e4a1629af9d0436fc6fd903e87ff0e712ebf9b0473b609e'
+            '7ddd5c009d5f6a033be3c284310190ff457357963b83d77a117929a0ccef68e3'
             '2f3916158d489f567670bb54de932419244d368fc33b0eefa3587ca8316904f3'
             '17cda5f057d2137427437afe13544ed88c51a52dd8725fbb0bc707c38d786569')
