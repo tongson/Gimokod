@@ -1,13 +1,13 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=systemd
-pkgver=37
-pkgrel=4
+pkgver=43
+pkgrel=1
 pkgdesc="Session and Startup manager"
 arch=('i686' 'x86_64')
 url="http://www.freedesktop.org/wiki/Software/systemd"
 license=('GPL2')
-depends=('dbus-core' 'kbd' 'libcap' 'cryptsetup' 'udev')
-makedepends=('cryptsetup' 'intltool' 'gettext' 'gperf')
+depends=('dbus-core' 'kbd' 'libcap' 'cryptsetup' 'udev' 'kmod' 'xz')
+makedepends=('gperf' 'intltool' 'gettext')
 groups=('base')
 options=('!libtool' '!strip')
 install=systemd.install
@@ -31,10 +31,9 @@ build() {
               --sysconfdir=/etc \
               --with-udevrulesdir=/usr/lib/udev/rules.d \
               --with-pamlibdir=/usr/lib/security \
-              --libexecdir=/usr/lib/systemd \
+              --libexecdir=/usr/lib \
               --libdir=/usr/lib \
               --localstatedir=/var \
-              --with-rootdir=/usr \
               --with-rootlibdir=/usr/lib \
               --disable-audit \
               --disable-tcpwrap \
@@ -50,24 +49,27 @@ build() {
               --disable-timedated \
               --disable-hostnamed \
               --disable-localed \
+              --disable-quotacheck \
+              --disable-manpages \
               --disable-nls
 
   make
 
   # fix .so links in manpages
-  sed -i 's|\.so halt\.8|.so systemd.halt.8|' man/{halt,poweroff}.8
+  # sed -i 's|\.so halt\.8|.so systemd.halt.8|' man/{halt,poweroff}.8
 }
 
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   make DESTDIR="${pkgdir}" install
+  install -dm755 "${pkgdir}/var/lib/systemd"
   printf "d /run/console 755 root root\n" > "${pkgdir}/usr/lib/tmpfiles.d/console.conf"
   pushd "${pkgdir}/usr/lib/systemd/system"
     sed -i 's:/sbin:/usr/bin:g' *.service >/dev/null 2>&1
   popd
 }
 
-source=("http://www.freedesktop.org/software/${pkgname}/${pkgname}-${pkgver}.tar.bz2")
-sha256sums=('b38492bde73649cc3520953354ef446c268169c1d342614183655e9ee1a1bbc5')
+source=("http://www.freedesktop.org/software/${pkgname}/${pkgname}-${pkgver}.tar.xz")
+sha256sums=('3070e48e43bc0811fa8da5ba4832a11dac73b1625db94d42d4c15dc279335dd7')
 
 

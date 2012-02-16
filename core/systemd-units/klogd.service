@@ -1,9 +1,0 @@
-[Unit]
-Description=BusyBox klogd
-
-[Service]
-Restart=always
-CapabilityBoundingSet=CAP_SYSLOG
-ExecStart=/usr/bin/klogd -n
-StandardOutput=null
-
