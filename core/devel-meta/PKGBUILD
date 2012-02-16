@@ -1,6 +1,6 @@
 pkgname=devel-meta
-pkgver=2011.10
-pkgrel=2
+pkgver=2012.02
+pkgrel=1
 pkgdesc="base-devel meta package"
 arch=('any')
 url="http://gimokod.org"
@@ -24,6 +24,7 @@ depends=(
   gperf
   guile
   jansson
+  kmod
   libtool
   linux-headers
   m4
@@ -35,4 +36,5 @@ depends=(
   pkg-config
   sudo
   tcl
+  usbutils
 )
