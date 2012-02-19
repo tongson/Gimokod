@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=multipath-tools
 pkgver=0.4.9
-pkgrel=1
+pkgrel=2
 pkgdesc="Multipath Tools For Linux"
 arch=('i686' 'x86_64')
 url="http://christophe.varoqui.free.fr/"
@@ -24,9 +24,14 @@ package() {
   cd "${srcdir}"
   make DESTDIR="${pkgdir}" install
   # install -D -m 644 "${srcdir}"/multipath.conf "${pkgdir}"/etc/multipath.conf
+
+  # UsrMove
   mkdir "${pkgdir}/usr/bin"
+  mkdir "${pkgdir}/usr/lib"
   mv "${pkgdir}"/sbin/* "${pkgdir}/usr/bin"
+  mv "${pkgdir}"/lib/* "${pkgdir}/usr/lib"
   rmdir "${pkgdir}/sbin"
+  rmdir "${pkgdir}/lib"
 }
 
 source=(${source[@]-}
