@@ -1,6 +1,6 @@
 pkgname=busybox
 pkgver=1.19.3
-pkgrel=1
+pkgrel=2
 pkgdesc='Utilities for rescue, embedded and minimal systems'
 arch=('i686' 'x86_64')
 url='http://busybox.net'
@@ -72,7 +72,6 @@ symlinks=(/usr/bin/uuencode
           /usr/bin/klogd
           /usr/bin/logread
           /usr/bin/ntpd
-          /usr/bin/strings
           /usr/bin/udhcpc
           /usr/bin/ifenslave)
 
@@ -96,13 +95,13 @@ package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   make install
   rm _install/bin/busybox
-  tar -cf busybox-links.tar -C _install .
-  install -D -m0755 busybox "${pkgdir}"/bin/busybox
-  install -D -m0644 busybox-links.tar "${pkgdir}/usr/share/busybox/busybox-links.tar"
-  install -m0755 -d "${pkgdir}"/usr/bin
+  #tar -cf busybox-links.tar -C _install .
+  install -D -m0755 busybox "${pkgdir}"/usr/bin/busybox
+  #install -D -m0644 busybox-links.tar "${pkgdir}/usr/share/busybox/busybox-links.tar"
+  #install -m0755 -d "${pkgdir}"/usr/bin
 
   for x in $(seq 0 $((${#symlinks[@]} - 1))); do
-    ln -sf /bin/busybox "${pkgdir}"/${symlinks[$x]}
+    ln -sf /usr/bin/busybox "${pkgdir}"/${symlinks[$x]}
   done
 
   install -o 160 -g 16 -m0750 -d "${pkgdir}"/var/spool/cron
@@ -127,9 +126,10 @@ package() {
   fi
 }
 
-source=(${url}/downloads/${pkgname}-${pkgver}.tar.bz2{,.sign})
-sha256sums=('a1a9a35732c719ef384f02b6e357c324d8be25bc154af91a48c4264b1e6038f0'
-            '04526172ae950625388bde790f1b78ab126307a6396f80e9548e54621b513171')
+source=(${url}/downloads/${pkgname}-${pkgver}.tar.bz2)
+#{,.sign})
+sha256sums=('a1a9a35732c719ef384f02b6e357c324d8be25bc154af91a48c4264b1e6038f0')
+#            '04526172ae950625388bde790f1b78ab126307a6396f80e9548e54621b513171')
 
 source=(${source[@]-}
         busybox-1.19.2-bb.patch
