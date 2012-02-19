@@ -11,7 +11,7 @@ chmod 600 _FOSSIL_
 . /usr/share/pacman/scm_install
 
 install -d -m02710 -o 0 -g 164 /etc/tcb/root
-echo "root:!:-1::::::" > "/etc/tcb/root/shadow/"
+echo "root:!:-1::::::" > "/etc/tcb/root/shadow"
 chmod 0640 /etc/tcb/root/shadow
 chown 0:165 /etc/tcb/root/shadow
 
