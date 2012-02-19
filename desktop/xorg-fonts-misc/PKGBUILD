@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=xorg-fonts-misc
 pkgver=1.0.1
-pkgrel=1
+pkgrel=2
 pkgdesc="X.org misc fonts"
 arch=(any)
 url="http://xorg.freedesktop.org/"
@@ -38,7 +38,6 @@ md5sums=('817ceb99636c873ad7679fe2a468678d'
 
 build() {
   cd "${srcdir}"
-  install -m755 -d "${pkgdir}/usr/share/licenses/${pkgname}"
   for dir in *; do
     if [ -d "${dir}" ]; then
       pushd "${dir}"
@@ -47,10 +46,22 @@ build() {
                   --host=${CHOST} \
                   --with-fontdir=/usr/share/fonts/misc
       make
-      make DESTDIR="${pkgdir}" install
-      install -m644 COPYING "${pkgdir}"/usr/share/licenses/${pkgname}/LICENSE.${dir%-*}
       popd
     fi
   done
-  rm -f "${pkgdir}"/usr/share/fonts/*/fonts.*
 }
+
+package() {
+  cd "${srcdir}"
+  install -m755 -d "${pkgdir}/usr/share/licenses/${pkgname}"
+  for dir in *; do
+    if [ -d "${dir}" ]; then
+      pushd "${dir}"
+      make DESTDIR="${pkgdir}" install
+      install -m644 COPYING ${pkgdir}/usr/share/licenses/${pkgname}/LICENSE.${dir%-*}
+      popd
+    fi
+  done
+  rm -f ${pkgdir}/usr/share/fonts/*/fonts.*
+}
+
