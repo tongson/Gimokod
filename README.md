@@ -80,6 +80,8 @@ failures:
     icu
     libxml2
     libjpeg-turbo (libjpeg)
+    pacman
+    sudo
 
 
 ## MISCELLANEOUS FEATURES (to be documented)
