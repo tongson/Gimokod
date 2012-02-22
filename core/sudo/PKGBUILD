@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=sudo
-_ver=1.8.3p2
+_ver=1.8.4
 pkgver=${_ver/[a-z]/.${_ver//[0-9.]/}}
 pkgrel=1
 pkgdesc="Give certain users the ability to run some commands as root"
@@ -14,8 +14,8 @@ backup=('etc/sudoers' 'etc/pam.d/sudo')
 options=('!libtool' '!makeflags')
 source=(ftp://ftp.sudo.ws/pub/sudo/$pkgname-$_ver.tar.gz{,.sig}
         sudo.pam)
-md5sums=('6d4282a1530c541f7900fa8dfcf2a882'
-         '07e3c5c79d78db50674d5ad17963d631'
+md5sums=('5a54dde137618bbc1dd46bb0ef725d7d'
+         '5edb139753431bf0ccb5bd79bfae870e'
          '4e7ad4ec8f2fe6a40e12bcb2c0b256e3')
 
 build() {
@@ -35,13 +35,14 @@ build() {
   make
 }
 
+check() {
+  cd "$srcdir/$pkgname-$pkgver"
+  make check
+}
+
 package() {
   cd "${srcdir}/${pkgname}-$_ver"
-  install -dm755 "${pkgdir}/var/lib"
-
   make DESTDIR="${pkgdir}" install
-  chmod 755 "${pkgdir}/var/db"
   install -Dm644 "${srcdir}/sudo.pam" "${pkgdir}/etc/pam.d/sudo"
-
   install -Dm644 doc/LICENSE "${pkgdir}/usr/share/licenses/sudo/LICENSE"
 }
