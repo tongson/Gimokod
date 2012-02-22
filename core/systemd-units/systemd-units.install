@@ -1,4 +1,4 @@
-systemdir="../../../../lib/systemd/system"
+systemdir="../../../../usr/lib/systemd/system"
 etcsystemdir="etc/systemd/system"
 _basic() {
   for s in "${@}"; do
@@ -18,11 +18,11 @@ _shutdown() {
 }
 
 post_install() {
-  ln -s ../../../lib/systemd/system/multi-user.target ${etcsystemdir}/default.target
+  ln -s ../../../usr/lib/systemd/system/multi-user.target ${etcsystemdir}/default.target
   ln -s /dev/null ${etcsystemdir}/console-shell.service
   mkdir ${etcsystemdir}/basic.target.wants
   mkdir ${etcsystemdir}/shutdown.target.wants
-  _basic klogd lvm2 nscd rngd syslogd
+  _basic lvm2 nscd rngd
   _multiuser crond ntpd sshd
   _shutdown remountrw systemd-random-seed-save.service sync
   . /usr/share/pacman/scm_install
