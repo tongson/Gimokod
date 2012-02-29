@@ -1,6 +1,6 @@
 pkgname=systemd-units
 pkgver=2012.02
-pkgrel=1
+pkgrel=3
 pkgdesc="Systemd units for the base system"
 arch=('any')
 url="http://localhost.localdomain"
@@ -32,7 +32,7 @@ source=(${source[@]-}
 
 sha256sums=(${sha256sums[@]-}
             '99ba209ddee02295ce0702020d544a6fed2e160500123fd1f8b225223a742700'
-            '73193a22e1bbb3401c4b901c5c80a187ca42f108bc530387b90c89e2a9cd37ee'
+            '350077e244f893fa025c7999ca3c4f8c729a7646a0095dc4016550fa17fc00f4'
             '5af54b553bf7bf979f456dc181ba1c6fc44d6befc89bebec22679c145cd4cefa'
             '21e9a0774e66ec170b01564de52a21120ead8f220559d0d90f0823334ea87b42'
             'e2bff5628590ad82bf0d7024bcdd30239248a1e99cc61ed387f66f2158c35b01'
