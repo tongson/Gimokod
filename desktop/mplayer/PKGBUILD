@@ -2,7 +2,7 @@
 # no libbluray support
 pkgname=mplayer
 pkgver=34426
-pkgrel=2
+pkgrel=3
 pkgdesc="A movie player for linux"
 arch=('i686' 'x86_64')
 depends=('libxss' 'fribidi' 'a52dec' 'libvpx' 'x264' 'libdca' 'lame' 'fontconfig'
