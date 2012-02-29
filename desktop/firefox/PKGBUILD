@@ -63,15 +63,15 @@ package() {
   install -m644 "${srcdir}"/vendor.js "${pkgdir}/usr/lib/firefox/defaults/pref"
 
   for i in 16 32 48; do
-      install -Dm644 browser/branding/unofficial/default${i}.png \
-        "${pkgdir}/usr/share/icons/hicolor/${i}x${i}/apps/tumucumaque.png"
+      install -Dm644 browser/branding/aurora/default${i}.png \
+        "${pkgdir}/usr/share/icons/hicolor/${i}x${i}/apps/aurora.png"
   done
 
-  install -Dm644 browser/branding/unofficial/mozicon128.png \
-    "${pkgdir}/usr/share/icons/hicolor/128x128/apps/tumucumaque.png"
+  install -Dm644 browser/branding/aurora/mozicon128.png \
+    "${pkgdir}/usr/share/icons/hicolor/128x128/apps/aurora.png"
 
-  install -Dm644 browser/branding/unofficial/content/icon48.png \
-    "${pkgdir}/usr/share/pixmaps/tumucumaque.png"
+  install -Dm644 browser/branding/aurora/content/icon48.png \
+    "${pkgdir}/usr/share/pixmaps/aurora.png"
 
   rm -rf "$pkgdir"/usr/lib/firefox/{dictionaries,hyphenation}
   ln -sf /usr/share/hunspell "$pkgdir/usr/lib/firefox/dictionaries"
