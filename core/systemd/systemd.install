@@ -10,8 +10,8 @@ post_install() {
     bin/systemd-machine-id-setup
   fi
 
-  echo "systemd has been installed to /bin/systemd. Please ensure you append"
-  echo "init=/bin/systemd to your kernel command line in your bootloader."
+  echo "systemd has been installed to /usr/lib/systemd/systemd. Please ensure you append"
+  echo "init=/usr/lib/systemd/systemd to your kernel command line in your bootloader."
 
   unlink lib/systemd/system/default.target
   ln -s lib/systemd/system/multi-user.target lib/systemd/system/default.target
