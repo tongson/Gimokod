@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=wpa_supplicant
 pkgver=0.7.3
-pkgrel=1
+pkgrel=2
 pkgdesc="A utility providing key negotiation for WPA wireless networks"
 url="http://hostap.epitest.fi/wpa_supplicant"
 arch=('i686' 'x86_64')
@@ -11,7 +11,9 @@ source=(http://hostap.epitest.fi/releases/wpa_supplicant-"${pkgver}".tar.gz)
 sha256sums=('d0cd50caa85346ccc376dcda5ed3c258eef19a93b3cade39d25760118ad59443')
 
 build() {
-  cd "${srcdir}/${pkgname}-${pkgver}/${pkgname}"
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  Patch hostap_allow-linking-with-libnl-3.2.patch
+  cd "${pkgname}"
   cp "${srcdir}/config" ./.config
   sed -i 's@/usr/local/sbin@$(PREFIX)/bin@g' Makefile
   make
@@ -28,9 +30,11 @@ package() {
 }
 
 source=(${source[@]-}
+        hostap_allow-linking-with-libnl-3.2.patch
         config
         wpa_supplicant.service)
 
 sha256sums=(${sha256sums[@]-}
-            '1ab2c26c1b3e6d09c2da2f0b11b44b5c17514c55a18cf57dfd07b9230edd61c6'
+            'ac805bf6e5aaec733dfc2c333417e519239cd58663a6e1cb34a54fd0f2bcc3c5'
+            '07b53ed9fff7a3e3a72174235c83d3905f5f40408c28b12bbbad3fec538c39d5' 
             '447b87de8e393af70ff50f7efd010a57d8df211fe5cbb76b0a5e15e6df865107')
