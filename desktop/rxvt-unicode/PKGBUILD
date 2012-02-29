@@ -1,12 +1,12 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=rxvt-unicode
 pkgver=9.15
-pkgrel=1
+pkgrel=4
 pkgdesc="An unicode enabled rxvt-clone terminal emulator (urxvt)"
 arch=('i686' 'x86_64')
 url="http://software.schmorp.de/pkg/rxvt-unicode.html"
 license=('GPL')
-depends=('libx11' 'libxrender' 'ncurses' 'perl' 'gcc-libs')
+depends=('libxft' 'libx11' 'libxrender' 'ncurses' 'perl' 'gcc-libs')
 makedepends=('pkg-config' 'xproto')
 source=(http://dist.schmorp.de/rxvt-unicode/${pkgname}-${pkgver}.tar.bz2)
 sha256sums=('ec1aa2932da844979ed8140bd92223defb12042aa5e877e05ac31139ca81f2b1')
@@ -19,15 +19,16 @@ build() {
               --build=${CBUILD} \
               --host=${CHOST} \
               --with-terminfo=/usr/share/terminfo \
-              --disable-256-color \
+              --enable-256-color \
               --enable-font-styles \
               --enable-xim \
               --enable-keepscrolling \
+              --disable-startup-notification \
               --enable-selectionscrolling \
               --enable-smart-resize \
               --disable-pixbuf \
               --disable-transparency \
-              --disable-xft \
+              --enable-xft \
               --enable-utmp \
               --enable-wtmp \
               --enable-perl \
