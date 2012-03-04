@@ -1,75 +1,177 @@
-#!/usr/bin/env bash
-set +f
-build=/home/abs/build
-builddir=/home/abs/builddir
-packages=/home/abs/packages
-pwd=$(pwd)
-repo="/home/abs/gimokod/${pwd##*/}"
+#!/usr/bin/env lua
+-- debug.traceback = nil
+PkgbuildRepo = "/home/abs/build"
+DistroRepo = "/home/abs/gimokod"
+OutputDir = "/home/abs/packages"
+BuildDir = "/home/abs/builddir"
+pwd = os.getenv("PWD")
+concat = function (_) return table.concat(_, " ") end
+getpkgbuild = function (_) return PkgbuildRepo.."/"..stripl(pwd).."/".._.."/PKGBUILD" end
 
-# Helper functions should not echo \n. Main script handles EOLs.
+function stripl(arg)                        -- STRING
+    for f in string.gmatch(arg, "[^%/%c]+") do
+        output = f
+    end
+    return output
+end
 
-getpkgbin() {
-    local pkg pkgbin
-    for pkg in $(echo -n ${repo}/$1-*-*-*.pkg.tar.??); do
-        pkgbin="${pkg##*/}"
-        if [[ "${pkgbin%-*-*-*.pkg.tar.??}" = "$1" ]]; then
-            [[ -f ${pkg} ]] && echo -n "${pkg}"
-        fi
-    done
-}
+function getpopen(cmd)                      -- TABLE
+    local _, f = pcall(io.popen, cmd, 'r')
+    local out = {}
+    for lines in string.gmatch(f:read("*all"), "[%C]+") do
+        out[#out+1] = lines
+    end
+    f:close()
+    return out
+end
 
-getpkgnames() {
-    local pkgbuild
-    pkgbuild="${build}/${pwd##*/}/$1/PKGBUILD"
-    ../scripts/getpkgnames.lua "${pkgbuild}"
-}
+function isdir(arg)                         -- BOOLEAN
+    local p, f = pcall(io.open, arg, 'r')
+    if f == nil then return false end
+    local ok, error, code = f:read(1)
+    f:close()
+    if code == 21 then return true end
+    return false
+end
 
-getdep() {
-    local dep
-    for dep in $(../scripts/getdepends.lua ${build}/${pwd##*/}/$1/PKGBUILD); do
-        # if matching binary package is found then
-        # use the binary package file name
-        # else if it matches a dir then use that
-        if [[ $(getpkgbin ${dep})>/dev/null ]]; then
-            getpkgbin ${dep} ; echo -n ' '
+function isfile(arg)                        -- BOOLEAN
+    local p, f = pcall(io.open, arg, 'r')
+    if f == nil then return false end
+    local ok, error, code = f:read(1)
+    f:close()
+    if code == nil then return true end
+    return false
+end
+
+function table.contains(table, element)     -- BOOLEAN
+    for _, value in pairs(table) do
+        if value == element then
+            return true
+        end
+    end
+    return false
+end
+
+function getpkgbin(arg)                     -- STRING
+    local dir = DistroRepo.."/"..stripl(pwd).."/"
+    local cmd = "echo "..dir..arg.."-*-*-*.pkg.tar.??"
+    local pkgname = string.gsub(arg, "-", "%%-")
+    local pattern = pkgname.."%-[%a%d%_%.]+%-[%d]+%-[%a%d%_]+%.pkg%.tar%.%w+"
+    for _, line in pairs(getpopen(cmd)) do
+        for p in string.gmatch(line, "[^%c%z%s]+") do
+            if string.find(stripl(p), pattern) then
+                pkgbin = stripl(p)
+                if isfile(dir..pkgbin) then
+                    return pkgbin
+                else
+                    return false
+                end
+            end
+        end
+    end
+end
+
+function getdepends(arg)                    -- TABLE
+    local f = io.input(getpkgbuild(arg))
+    local pkgbuild = io.read("*all")
+    f:close()
+    local depends = string.match(pkgbuild, "depends=%(.-%)")
+    local makedepends = string.match(pkgbuild, "makedepends=%(.-%)")
+    local fulldepends = {}
+    local sub = {}
+    sub["device-mapper"]      = "lvm2"
+    sub["gcc-libs"]           = "gcc"
+    sub["boost-libs"]         = "boost"
+    sub["libltdl"]            = "libtool"
+    sub["libjpeg"]            = "libjpeg-turbo"
+    sub["libgl"]              = "mesa"
+    sub["libglapi"]           = "mesa"
+    sub["libegl"]             = "mesa"
+    sub["ati-dri"]            = "mesa"
+    sub["intel-dri"]          = "mesa"
+    sub["nouveau-dri"]        = "mesa"
+    sub["khrplatform-devel"]  = "mesa"
+    sub["xorg-server-xvfb"]   = "xorg-server"
+    sub["xorg-server-common"] = "xorg-server"
+    sub["xorg-server-devel"]  = "xorg-server"
+    if string.find(pkgbuild, "depends") then
+        for x in string.gmatch(depends, "'([%w%p]+)'" ) do
+            if not table.contains(fulldepends, x) then
+                fulldepends[#fulldepends+1] = string.gsub(x, "([%w%p]+)", sub)
+            end
+        end
+    end
+    if string.find(pkgbuild, "makedepends") then
+        for y in string.gmatch(makedepends, "'([%w%p]+)'" ) do
+            if not table.contains(fulldepends, y) then
+                fulldepends[#fulldepends+1] = string.gsub(y, "([%w%p]+)", sub)
+            end
+        end
+    end
+    return fulldepends
+end
+
+function getpkgnames(arg)                   -- TABLE
+    local f = io.input(getpkgbuild(arg))
+    local pkgbuild=io.read("*all")
+    local pkgnames = {}
+    f:close()
+    if string.find(pkgbuild, "pkgbase") then
+        pkgname = string.match(pkgbuild, "pkgname=%(.-%)")
+        for w in string.gmatch(pkgname, "'([%w%p]+)'" ) do
+            pkgnames[#pkgnames+1] = w
+        end
+    else
+        pkgnames[#pkgnames+1] = string.match(pkgbuild, "pkgname=([%w%p]+)")
+    end
+    return pkgnames
+end
+
+function getdep(arg)                        -- STRING
+    local deps = {}
+    for _,dep in pairs(getdepends(arg)) do
+        if getpkgbin(dep) then
+            deps[#deps+1] = dep
+        elseif isdir(dep) then
+            deps[#deps+1] = dep
+        end
+    end
+    return concat(deps)
+end
+
+do
+   local printf = function (...) io.write(string.format(...)) end
+    local dirs = {}
+    for _, d in pairs(getpopen("sh -c 'for i in *;do echo $i;done'")) do
+        if isdir(d) then
+            dirs[#dirs+1] = d
+        end
+    end
+    printf("all:V: %s \n", concat(dirs))
+
+    for _,pkg in pairs(dirs) do
+        if getpkgbin(pkg) then
+            printf("%s:V: %s %s \n", pkg, getpkgbin(pkg), getdep(pkg))
+            printf("%s: %s \n" , getpkgbin(pkg), getpkgbuild(pkg))
+            printf("        rm -rf %s/* \n", BuildDir)
+            printf("        cd %s/%s \n", pwd, pkg)
+            printf("        /usr/bin/makepkg --nocheck --noconfirm -ci \n")
+            for _,oldpkg in pairs(getpkgnames(pkg)) do
+                printf("        rm -f %s/%s{,.sig} \n", DistroRepo, getpkgbin(oldpkg))
+            end
+            for _,newpkg in pairs(getpkgnames(pkg)) do
+                printf("        mv %s/%s-*-*-*.pkg.tar.??{,.sig} %s\n", OutputDir, newpkg, DistroRepo)
+            end
         else
-            [[ -d ./${dep} ]] && echo -n "${dep} "
-        fi
-    done
-}
+            printf("%s:V: %s \n", pkg, getdep(pkg))
+            printf("        rm -rf %s/* \n", BuildDir)
+            printf("        cd %s/%s \n", pwd, pkg)
+            printf("        /usr/bin/makepkg --nocheck --noconfirm -ci \n")
+            for _,newpkg in pairs(getpkgnames(pkg)) do
+                printf("        mv %s/%s-*-*-*.pkg.tar.??{,.sig} %s\n", OutputDir, newpkg, DistroRepo)
+            end
+        end
+    end
+end
 
-pwddirs() {
-    local dir
-    for dir in *; do
-        [[ -d ./${dir} ]] && echo -n "${dir} "
-    done
-}
 
-echo "all:V: $(pwddirs)"
-(
-for pkg in $(pwddirs); do
-  if [[ $(getpkgbin ${pkg}) ]]; then
-    echo -n "${pkg}:V: $(getpkgbin ${pkg}) " ; getdep "${pkg}" ; echo
-    echo "$(getpkgbin ${pkg}): ${build}/${pwd##*/}/${pkg}/PKGBUILD"
-    echo "      rm -rf ${builddir}/*"
-    echo "      cd $(pwd)/${pkg}"
-    echo "      /usr/bin/makepkg --nocheck --noconfirm -ci"
-    for oldpkg in $(getpkgnames ${pkg}); do
-      echo "      rm -f $(getpkgbin ${oldpkg}){,.sig}"
-    done
-    for newpkg in $(getpkgnames ${pkg}); do
-      newbin="${newpkg##*/}"
-      echo "      mv ${packages}/${newbin%-*-*-*.pkg.tar.??}-*-*-*.pkg.tar.??{,.sig} ${repo} || true "
-    done
-  else
-    echo -n "${pkg}:V: " ; getdep "${pkg}" ; echo
-    echo "      rm -rf ${builddir}/*"
-    echo "      cd $(pwd)/${pkg}"
-    echo "      /usr/bin/makepkg --nocheck --noconfirm -ci"
-    for newpkg in $(getpkgnames ${pkg}); do
-      newbin="${newpkg##*/}"
-      echo "      mv ${packages}/${newbin%-*-*-*.pkg.tar.??}-*-*-*.pkg.tar.??{,.sig} ${repo} || true "
-    done
-  fi
-done
-)
