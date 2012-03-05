@@ -8,25 +8,25 @@ pwd = os.getenv("PWD")
 concat = function (_) return table.concat(_, " ") end
 getpkgbuild = function (_) return PkgbuildRepo.."/"..stripl(pwd).."/".._.."/PKGBUILD" end
 
-function stripl(arg)                        -- STRING
-    for f in string.gmatch(arg, "[^%/%c]+") do
+function stripl(param)                        -- STRING
+    for f in string.gmatch(param, "[^%/%c]+") do
         output = f
     end
     return output
 end
 
-function getpopen(cmd)                      -- TABLE
+function getpopen(cmd)                        -- TABLE
     local _, f = pcall(io.popen, cmd, 'r')
     local out = {}
-    for lines in string.gmatch(f:read("*all"), "[%C]+") do
+    for lines in string.gmatch(f:read('*all'), "[%C]+") do
         out[#out+1] = lines
     end
     f:close()
     return out
 end
 
-function isdir(arg)                         -- BOOLEAN
-    local p, f = pcall(io.open, arg, 'r')
+function isdir(param)                         -- BOOLEAN
+    local p, f = pcall(io.open, param, 'r')
     if f == nil then return false end
     local ok, error, code = f:read(1)
     f:close()
@@ -34,8 +34,8 @@ function isdir(arg)                         -- BOOLEAN
     return false
 end
 
-function isfile(arg)                        -- BOOLEAN
-    local p, f = pcall(io.open, arg, 'r')
+function isfile(param)                        -- BOOLEAN
+    local p, f = pcall(io.open, param, 'r')
     if f == nil then return false end
     local ok, error, code = f:read(1)
     f:close()
@@ -43,7 +43,7 @@ function isfile(arg)                        -- BOOLEAN
     return false
 end
 
-function table.contains(table, element)     -- BOOLEAN
+function table.contains(table, element)       -- BOOLEAN
     for _, value in pairs(table) do
         if value == element then
             return true
@@ -52,10 +52,10 @@ function table.contains(table, element)     -- BOOLEAN
     return false
 end
 
-function getpkgbin(arg)                     -- STRING
+function getpkgbin(param)                     -- STRING
     local dir = DistroRepo.."/"..stripl(pwd).."/"
-    local cmd = "echo "..dir..arg.."-*-*-*.pkg.tar.??"
-    local pkgname = string.gsub(arg, "-", "%%-")
+    local cmd = "echo "..dir..param.."-*-*-*.pkg.tar.??"
+    local pkgname = string.gsub(param, "-", "%%-")
     local pattern = pkgname.."%-[%a%d%_%.]+%-[%d]+%-[%a%d%_]+%.pkg%.tar%.%w+"
     for _, line in pairs(getpopen(cmd)) do
         for p in string.gmatch(line, "[^%c%z%s]+") do
@@ -71,65 +71,67 @@ function getpkgbin(arg)                     -- STRING
     end
 end
 
-function getdepends(arg)                    -- TABLE
-    local f = io.input(getpkgbuild(arg))
-    local pkgbuild = io.read("*all")
+function getdepends(param)                    -- TABLE
+    local f = io.input(getpkgbuild(param))
+    local pkgbuild = io.read('*all')
     f:close()
-    local depends = string.match(pkgbuild, "depends=%(.-%)")
-    local makedepends = string.match(pkgbuild, "makedepends=%(.-%)")
+    local rdep = {}
+    local cdep = {}
+    local targets = {"depends", "makedepends"}
     local fulldepends = {}
-    local sub = {}
-    sub["device-mapper"]      = "lvm2"
-    sub["gcc-libs"]           = "gcc"
-    sub["boost-libs"]         = "boost"
-    sub["libltdl"]            = "libtool"
-    sub["libjpeg"]            = "libjpeg-turbo"
-    sub["libgl"]              = "mesa"
-    sub["libglapi"]           = "mesa"
-    sub["libegl"]             = "mesa"
-    sub["ati-dri"]            = "mesa"
-    sub["intel-dri"]          = "mesa"
-    sub["nouveau-dri"]        = "mesa"
-    sub["khrplatform-devel"]  = "mesa"
-    sub["xorg-server-xvfb"]   = "xorg-server"
-    sub["xorg-server-common"] = "xorg-server"
-    sub["xorg-server-devel"]  = "xorg-server"
-    if string.find(pkgbuild, "depends") then
-        for x in string.gmatch(depends, "'([%w%p]+)'" ) do
-            if not table.contains(fulldepends, x) then
-                fulldepends[#fulldepends+1] = string.gsub(x, "([%w%p]+)", sub)
-            end
-        end
-    end
-    if string.find(pkgbuild, "makedepends") then
-        for y in string.gmatch(makedepends, "'([%w%p]+)'" ) do
-            if not table.contains(fulldepends, y) then
-                fulldepends[#fulldepends+1] = string.gsub(y, "([%w%p]+)", sub)
+    rdep["device-mapper"]           = "lvm2"
+    rdep["gcc-libs"]                = "gcc"
+    rdep["boost-libs"]              = "boost"
+    rdep["libltdl"]                 = "libtool"
+    rdep["libjpeg"]                 = "libjpeg-turbo"
+    rdep["libgl"]                   = "mesa"
+    rdep["libglapi"]                = "mesa"
+    rdep["libegl"]                  = "mesa"
+    rdep["ati-dri"]                 = "mesa"
+    rdep["intel-dri"]               = "mesa"
+    rdep["nouveau-dri"]             = "mesa"
+    rdep["khrplatform-devel"]       = "mesa"
+    rdep["xorg-server-xvfb"]        = "xorg-server"
+    rdep["xorg-server-common"]      = "xorg-server"
+    rdep["xorg-server-devel"]       = "xorg-server"
+    rdep["poppler-glib"]            = "poppler"
+    rdep["gtk-update-icon-cache"]   = "gtk2"
+    cdep["gmp"]                     = "gcc"
+    for _, y in ipairs(targets) do
+        if string.find(pkgbuild, y) then
+            for x in string.gmatch(string.match(pkgbuild, y.."=%b()"), "'([%w%-%_]*[%'%<%>]-)'" ) do
+                pattern = string.gsub(x, "-", "%%-")
+                if table.contains(rdep, rdep[x]) then
+                    x = string.gsub(x, pattern, rdep[x])
+                end
+                if not table.contains(fulldepends, x) and x ~= param and x ~= cdep[param] then
+                    fulldepends[#fulldepends+1] = x
+                end
             end
         end
     end
     return fulldepends
 end
 
-function getpkgnames(arg)                   -- TABLE
-    local f = io.input(getpkgbuild(arg))
-    local pkgbuild=io.read("*all")
+function getpkgnames(param)                   -- TABLE
+    local f = io.input(getpkgbuild(param))
+    local pkgbuild=io.read('*all')
     local pkgnames = {}
     f:close()
     if string.find(pkgbuild, "pkgbase") then
-        pkgname = string.match(pkgbuild, "pkgname=%(.-%)")
-        for w in string.gmatch(pkgname, "'([%w%p]+)'" ) do
+        pkgname = string.match(pkgbuild, "pkgname=%b()")
+        for w in string.gmatch(pkgname, "'([%w%-%_]*)'" ) do
             pkgnames[#pkgnames+1] = w
         end
     else
-        pkgnames[#pkgnames+1] = string.match(pkgbuild, "pkgname=([%w%p]+)")
+        pkgnames[#pkgnames+1] = string.match(pkgbuild, "pkgname=([%w%-%_]*)")
     end
     return pkgnames
 end
 
-function getdep(arg)                        -- STRING
+function getdep(param)                        -- STRING
     local deps = {}
-    for _,dep in pairs(getdepends(arg)) do
+    for _,dep in pairs(getdepends(param)) do
         if getpkgbin(dep) then
             deps[#deps+1] = dep
         elseif isdir(dep) then
@@ -140,9 +142,11 @@ function getdep(arg)                        -- STRING
 end
 
 do
-   local printf = function (...) io.write(string.format(...)) end
+    local printf = function (...) io.write(string.format(...)) end
     local dirs = {}
-    for _, d in pairs(getpopen("sh -c 'for i in *;do echo $i;done'")) do
+    local pwd = stripl(pwd)
+    local DistroRepo = DistroRepo.."/"..pwd
+    for _, d in pairs(getpopen("for i in *;do echo $i;done")) do
         if isdir(d) then
             dirs[#dirs+1] = d
         end
@@ -151,10 +155,10 @@ do
 
     for _,pkg in pairs(dirs) do
         if getpkgbin(pkg) then
-            printf("%s:V: %s %s \n", pkg, getpkgbin(pkg), getdep(pkg))
-            printf("%s: %s \n" , getpkgbin(pkg), getpkgbuild(pkg))
+            printf("%s:V: %s/%s %s \n", pkg, DistroRepo, getpkgbin(pkg), getdep(pkg))
+            printf("%s/%s: %s \n" , DistroRepo, getpkgbin(pkg), getpkgbuild(pkg))
             printf("        rm -rf %s/* \n", BuildDir)
-            printf("        cd %s/%s \n", pwd, pkg)
+            printf("        cd %s \n", pkg)
             printf("        /usr/bin/makepkg --nocheck --noconfirm -ci \n")
             for _,oldpkg in pairs(getpkgnames(pkg)) do
                 printf("        rm -f %s/%s{,.sig} \n", DistroRepo, getpkgbin(oldpkg))
@@ -165,7 +169,7 @@ do
         else
             printf("%s:V: %s \n", pkg, getdep(pkg))
             printf("        rm -rf %s/* \n", BuildDir)
-            printf("        cd %s/%s \n", pwd, pkg)
+            printf("        cd %s \n", pkg)
             printf("        /usr/bin/makepkg --nocheck --noconfirm -ci \n")
             for _,newpkg in pairs(getpkgnames(pkg)) do
                 printf("        mv %s/%s-*-*-*.pkg.tar.??{,.sig} %s\n", OutputDir, newpkg, DistroRepo)
