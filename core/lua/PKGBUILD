@@ -7,6 +7,7 @@ pkgdesc="A powerful light-weight programming language designed for extending app
 arch=('i686' 'x86_64')
 url="http://www.lua.org/"
 license=('MIT')
+groups=('base')
 options=('!makeflags' '!emptydirs')
 source=(http://www.lua.org/ftp/${pkgname}-${pkgver}.tar.gz
         http://www.lua.org/ftp/patch-lua-${_patchver})
