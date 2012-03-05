@@ -6,6 +6,7 @@ pkgdesc="Common C routines used by GTK+ and other libs"
 url="http://www.gtk.org/"
 arch=(i686 x86_64)
 license=('LGPL')
+groups=('base-devel')
 depends=('zlib' 'libffi')
 makedepends=('zlib' 'libffi' 'gettext')
 options=('!libtool' '!docs')
