@@ -6,7 +6,7 @@ pkgdesc="X Rendering Extension client library"
 arch=(i686 x86_64)
 url="http://xorg.freedesktop.org/"
 license=('custom')
-depends=('libx11>=1.3.4' 'renderproto')
+depends=('libx11' 'renderproto')
 makedepends=('pkg-config')
 options=('!libtool')
 source=(${url}/releases/individual/lib/libXrender-${pkgver}.tar.bz2)
