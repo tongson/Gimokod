@@ -1,5 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
-pkgbase=ntfs-3g_ntfsprogs
+pkgbase=ntfs-3g
+_pkgbase=ntfs-3g_ntfsprogs
 pkgname=('ntfs-3g' 'ntfsprogs')
 pkgver=2012.1.15
 pkgrel=1
@@ -9,11 +10,11 @@ arch=('i686' 'x86_64')
 url="http://www.tuxera.com/"
 makedepends=('pkg-config')
 options=('!libtool')
-source=(http://tuxera.com/opensource/$pkgbase-$pkgver.tgz)
+source=(http://tuxera.com/opensource/$_pkgbase-$pkgver.tgz)
 sha1sums=('8d55cf49afde172fefa369a0a85289e09c4d7bbb')
 
 build() {
-  cd "${srcdir}/${pkgbase}-${pkgver}"
+  cd "${srcdir}/${_pkgbase}-${pkgver}"
   ac_cv_path_LDCONFIG=/usr/bin/true ./configure \
               --prefix=/usr \
               --sbindir=/usr/bin \
@@ -39,7 +40,7 @@ package_ntfs-3g() {
   pkgdesc="Stable read and write NTFS driver"
 
   for DIR in src libntfs-3g include; do
-    cd "${srcdir}/${pkgbase}-${pkgver}/${DIR}"
+    cd "${srcdir}/${_pkgbase}-${pkgver}/${DIR}"
     make DESTDIR="${pkgdir}" install
   done
   mv "${pkgdir}"/sbin/* "${pkgdir}"/usr/bin
@@ -54,7 +55,7 @@ package_ntfsprogs() {
   pkgdesc="NTFS filesystem utilities"
   depends=('util-linux' 'ntfs-3g')
 
-  cd "${srcdir}/${pkgbase}-${pkgver}/ntfsprogs"
+  cd "${srcdir}/${_pkgbase}-${pkgver}/ntfsprogs"
   make DESTDIR="${pkgdir}" install
   mv "${pkgdir}"/sbin/* "${pkgdir}"/usr/bin
   rmdir "${pkgdir}/sbin"
