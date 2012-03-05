@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=scite
-pkgver=3.0.2
+pkgver=3.0.3
 pkgrel=1
 pkgdesc='Editor with facilities for building and running programs.'
 arch=('i686' 'x86_64')
@@ -8,7 +8,7 @@ url='http://www.scintilla.org/SciTE.html'
 license=('custom:scite')
 depends=('gtk2' 'glib' 'cairo')
 source=("http://downloads.sourceforge.net/sourceforge/scintilla/${pkgname}${pkgver//./}.tgz")
-sha256sums=('a5687faaa201c39a4ec9608e8a77e418e259f525b21871a5c9f1282c62e58eaa')
+sha256sums=('0d02b81f6f182366abe8133f4e727d802b756d33e9eeba5fe9ac69c4a17286fd')
 
 build() {
   sed "s/CXXTFLAGS=-DNDEBUG -Os $(CXXBASEFLAGS)/CXXTFLAGS=-DNDEBUG ${CXXFLAGS} $(CXXBASEFLAGS)/" -i scite/gtk/makefile
