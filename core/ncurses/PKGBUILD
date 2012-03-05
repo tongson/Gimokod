@@ -1,17 +1,21 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=ncurses
 pkgver=5.9
-pkgrel=2
+pkgrel=3
 pkgdesc="System V Release 4.0 curses emulation library"
 arch=('i686' 'x86_64')
 url="http://www.gnu.org/software/ncurses/"
 license=('MIT')
 groups=('base')
-source=(ftp://ftp.gnu.org/pub/gnu/${pkgname}/${pkgname}-${pkgver}.tar.gz)
-md5sums=('8cb9c412e5f2d96bc6f459aa8c6282a1')
+source=(ftp://ftp.gnu.org/pub/gnu/${pkgname}/${pkgname}-${pkgver}.tar.gz
+        ncurses-5.9-rxvt-unicode-9.15.patch)
+md5sums=('8cb9c412e5f2d96bc6f459aa8c6282a1'
+         'da9ffd52d5826c661aa02be2bf1fa8c1')
 
 build() {
-  cd "${srcdir}"/
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  Patch ncurses-5.9-rxvt-unicode-9.15.patch
+  cd "${srcdir}"
   mkdir ncurses{,w}-build
 
   cd "${srcdir}"/ncursesw-build
