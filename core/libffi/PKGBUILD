@@ -6,6 +6,7 @@ pkgdesc="A portable, high level programming interface to various calling convent
 arch=('i686' 'x86_64')
 url="http://sourceware.org/libffi"
 license=('MIT')
+groups=('base-devel')
 options=('!libtool')
 source=(ftp://sourceware.org/pub/libffi/libffi-${pkgver}.tar.gz)
 md5sums=('79390673f5d07a8fb342bc09b5055b6f')
