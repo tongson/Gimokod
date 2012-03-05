@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=openssh
 pkgver=5.9p1
-pkgrel=3
+pkgrel=4
 pkgdesc='The OpenSSH implementation of SSH protocol versions 1 and 2'
 arch=('i686' 'x86_64')
 license=('custom:BSD')
@@ -10,11 +10,9 @@ url='http://www.openssh.org/portable.html'
 depends=('openssl' 'pam' 'pam_userpass' 'pam_mktemp')
 install=openssh.install
 source=("ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/${pkgname}-${pkgver}.tar.gz"
-        'sshd.confd'
         'sshd.pam')
 sha1sums=('ac4e0055421e9543f0af5da607a72cf5922dcc56'
-          'ec102deb69cad7d14f406289d2fc11fee6eddbdd'
-          '807049143a94c28a39b19de2cc867ff038828939')
+          '41468c1e9d0764eaaf4b2336a84fb8672c664b7b')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
@@ -40,8 +38,7 @@ package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   make DESTDIR="${pkgdir}" install
 
-  install -Dm644 ../sshd.pam "${pkgdir}"/etc/pam.d/sshd
-  install -Dm644 ../sshd.confd "${pkgdir}"/etc/conf.d/sshd
+  install -Dm640 -o 0 -g 42 ../sshd.pam "${pkgdir}"/etc/pam.d/sshd
   install -Dm644 LICENCE "${pkgdir}/usr/share/licenses/${pkgname}/LICENCE"
 
   rm "${pkgdir}"/usr/share/man/man1/slogin.1
