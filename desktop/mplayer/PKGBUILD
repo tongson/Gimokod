@@ -1,8 +1,8 @@
 # Based upon the PKGBUILD from Arch Linux
 # no libbluray support
 pkgname=mplayer
-pkgver=34426
-pkgrel=3
+pkgver=34799
+pkgrel=1
 pkgdesc="A movie player for linux"
 arch=('i686' 'x86_64')
 depends=('libxss' 'fribidi' 'a52dec' 'libvpx' 'x264' 'libdca' 'lame' 'fontconfig'
@@ -15,12 +15,15 @@ makedepends=( 'libxxf86vm' 'libmad' 'libcdio' 'libxinerama' 'lame' 'libtheora' '
 license=('GPL')
 url="http://www.mplayerhq.hu/"
 options=('!buildflags' '!emptydirs')
-source=(ftp://ftp.archlinux.org/other/${pkgname}/${pkgname}-${pkgver}.tar.xz)
-md5sums=('ff81117293e76b59e54debc439d8e612')
+source=(ftp://ftp.archlinux.org/other/${pkgname}/${pkgname}-${pkgver}.tar.xz
+        live-media.patch)
+md5sums=('e8bd960bcdb48fdc5a1f45390dc13c53'
+         'b6c057633ff7001ee0c102b5f81ec1e3')
+
 
 build() {
     cd "${srcdir}/${pkgname}"
-
+    Patch live-media.patch
     ./configure --enable-runtime-cpudetection \
                 --confdir=/etc/mplayer \
                 --enable-fribidi \
