@@ -6,6 +6,7 @@ arch=('i686' 'x86_64')
 url="http://www.etalabs.net/musl/"
 license=('LGPL2')
 makedepends=('make')
+groups=('base-devel')
 options=('!binchecks')
 source=(http://www.etalabs.net/musl/releases/"${pkgname}"-"${pkgver}".tar.gz)
 sha256sums=('dec431b7a10f0c9f4f4a22659946146e8b5ede08a70765b398994f41174b4ffc')
