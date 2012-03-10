@@ -7,7 +7,7 @@ sd_booted() {
 post_install() {
 
   if [ ! -f etc/machine-id ]; then
-    bin/systemd-machine-id-setup
+    /usr/bin/systemd-machine-id-setup
   fi
 
   echo "systemd has been installed to /usr/lib/systemd/systemd. Please ensure you append"
@@ -21,11 +21,11 @@ post_install() {
 post_upgrade() {
 
   if [ ! -f etc/machine-id ]; then
-    bin/systemd-machine-id-setup
+    /usr/bin/systemd-machine-id-setup
   fi
 
   if sd_booted; then
-    bin/systemctl daemon-reexec >/dev/null
+    /usr/bin/systemctl daemon-reexec >/dev/null
   fi
 
   newpkgver=${1%-*}
@@ -35,7 +35,7 @@ post_upgrade() {
   if [ "$newpkgver" -ge 31 ] && [ "$oldpkgver" -lt 31 ]; then
     # but only if systemd is running
     if sd_booted; then
-      bin/systemctl try-restart systemd-logind.service
+      /usr/bin/systemctl try-restart systemd-logind.service
     fi
   fi
   . /usr/share/pacman/scm_upgrade

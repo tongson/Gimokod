@@ -2,7 +2,7 @@
 pkgbase=systemd
 pkgname=('systemd' 'libsystemd')
 pkgver=43
-pkgrel=3
+pkgrel=6
 pkgdesc="Session and Startup manager"
 arch=('i686' 'x86_64')
 url="http://www.freedesktop.org/wiki/Software/systemd"
@@ -11,7 +11,6 @@ makedepends=('gperf' 'intltool' 'gettext' 'linux-headers' 'dbus-core' 'kbd' 'lib
              'cryptsetup' 'udev' 'kmod' 'xz')
 groups=('base')
 options=('!libtool' '!strip')
-install=systemd.install
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
@@ -57,6 +56,7 @@ build() {
 package_systemd() {
   pkgdesc="systemd and service manager"
   depends=('dbus-core' 'kbd' 'libcap' 'cryptsetup' 'udev' 'kmod' 'xz' 'libsystemd')
+  install=systemd.install
   cd "${srcdir}/${pkgname}-${pkgver}"
   make DESTDIR="${pkgdir}" install
   install -dm755 "${pkgdir}/var/lib/systemd"
