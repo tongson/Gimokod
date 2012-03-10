@@ -99,7 +99,7 @@ function getdepends(param)                    -- TABLE
     cdep["gmp"]                     = "gcc"
     for _, y in ipairs(targets) do
         if string.find(pkgbuild, y) then
-            for x in string.gmatch(string.match(pkgbuild, y.."=%b()"), "'([%w%-%_]*[%'%<%>]-)'" ) do
+            for x in string.gmatch(string.match(pkgbuild, y.."=%b()"), "'([%w%-%_]*[%=%'%<%>]-)'" ) do
                 pattern = string.gsub(x, "-", "%%-")
                 if table.contains(rdep, rdep[x]) then
                     x = string.gsub(x, pattern, rdep[x])
