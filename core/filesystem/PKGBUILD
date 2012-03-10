@@ -1,6 +1,6 @@
 pkgname=filesystem
-pkgver=2012.02
-pkgrel=2
+pkgver=2012.03
+pkgrel=3
 pkgdesc='Filesystem hier'
 arch=('any')
 url='http://gimokod.org'
@@ -123,7 +123,7 @@ source=(${source[@]-}
         vconsole.conf)
 
 sha256sums=(${sha256sums[@]-}
-            '797dbd2f4f22ea9a8f8d1bb4142b66f64dd220888ebd89829adf8e1a456a0432'
+            '366c663134b0a0c1ce655b8b8774732fab287d7f140c85c460808d448eea0782'
             'f0709706ce9bf46c58358e040d7eaa96994767438bab274ee5239ac19b0b814b'
             'ab014e33cfd4212e76d000310534b7528f0e2a39ee8e78660a0d9cfcdbac4e4b'
             'e3414c188757954ee34da03cf324fc9864b1758dc472cfe36884ce6415bbdbd3'
@@ -134,10 +134,10 @@ sha256sums=(${sha256sums[@]-}
             '27d7ebd402e1b9a20fd3a0663ccc10e1b1feff2d9dfb1ad7dd12bb76cfe0880a'
             '586ae0a486992c367e38ee8e103a92ad2b0baeb3a8b9898f2e4e7e0c63e5c112'
             'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
-            '60f67c19e5a3299e0e07d9bb64f05ad9869761158e32982da334e2c4d0c36550'
+            'b9c40f13de41eac91fb3f2aabf575bc6e7e42a6e88cc5fdecd4fb373de2113d9'
             'a1e248357083b55d83659ab50f32c94bf1bcf0825470ccb41702dad3cff712c7'
             'ac6f2cbf709ef493c59d64affce7b99f13ac1f740f745c6417f8437b7bec0944'
-            '953e8ee622553d473b89da59324f604b88918f0d9cc37faedb7671bee6160d87'
+            '28dc5110bc5cf90d330d5f29c0dc01edba0925cfba89d50eb8b15769b847638b'
             '9b0d54d258b62c437aefe09e9c3e4e9307051b749e680024bc353f0eb92eb486'
             'b444ab0db948fc08af57880a210c903f166a885b46309065d5922f8ef5af4410'
             '53b0628c2e9c7b67951d20723e1f4abc49b8a1fc06ebef82eb402f350aa88c1b'

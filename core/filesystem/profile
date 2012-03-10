@@ -16,7 +16,7 @@ unset MANPATH
 export PATH="/usr/bin"
 export EDITOR=${EDITOR:-/usr/bin/vi}
 export PAGER=${PAGER:-/usr/bin/less}
-export LANG=${LANG:-en_US}
+export LANG=${LANG:-en_US.UTF-8}
 umask 022
 
 
