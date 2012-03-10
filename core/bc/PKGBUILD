@@ -4,6 +4,7 @@ pkgrel=1
 pkgdesc="An arbitrary precision calculator language"
 arch=('i686' 'x86_64')
 url="http://www.gnu.org/software/bc/"
+groups=('base-devel')
 license=('GPL')
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
