@@ -8,6 +8,7 @@ license=('GPL2')
 url='http://www.netfilter.org/projects/iptables/index.html'
 makedepends=('linux-headers' 'automake')
 options=('!libtool')
+groups=('base')
 source=("http://www.iptables.org/projects/iptables/files/${pkgname}-${pkgver}.tar.bz2")
 sha256sums=('77e6581f21f15946a814fa311236e5f3f7c6593180f9d695cea06aa95e464aba')
 
