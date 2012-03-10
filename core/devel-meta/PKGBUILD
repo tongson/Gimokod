@@ -1,5 +1,5 @@
 pkgname=devel-meta
-pkgver=2012.02
+pkgver=2012.03
 pkgrel=1
 pkgdesc="base-devel meta package"
 arch=('any')
@@ -20,11 +20,14 @@ depends=(
   flex
   gawk
   gcc
+  glib
   gnuconfig
   gperf
   guile
   jansson
   kmod
+  libffi
+  libltdl
   libtool
   linux-headers
   m4
@@ -32,9 +35,9 @@ depends=(
   musl
   patch
   pax-utils
+  perl
   perl-xml-parser
   pkg-config
-  sudo
   tcl
   usbutils
 )
