@@ -22,7 +22,7 @@ post_install() {
   ln -s /dev/null ${etcsystemdir}/console-shell.service
   mkdir ${etcsystemdir}/basic.target.wants
   mkdir ${etcsystemdir}/shutdown.target.wants
-  _basic lvm2 nscd rngd
+  _basic lvm2 nscd rngd network-lxc
   _multiuser crond ntpd sshd
   _shutdown remountrw systemd-random-seed-save.service sync
   . /usr/share/pacman/scm_install
