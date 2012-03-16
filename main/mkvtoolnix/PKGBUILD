@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=mkvtoolnix
-pkgver=5.2.1
+pkgver=5.4.0
 pkgrel=1
 arch=('i686' 'x86_64')
 license=('GPL')
@@ -9,7 +9,7 @@ depends=('libmatroska' 'expat' 'flac' 'libvorbis' 'file' 'boost-libs' 'zlib')
 makedepends=('libmatroska' 'flac' 'libvorbis' 'file'
              'boost-libs' 'boost' 'rake')
 source=("http://www.bunkus.org/videotools/${pkgname}/sources/${pkgname}-${pkgver}.tar.bz2")
-md5sums=('d4942dc6427935838e914b8b7b83021a')
+md5sums=('52c0d7f0df55b86022d9d6ed985fd803')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
