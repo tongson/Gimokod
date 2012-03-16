@@ -1,16 +1,16 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=xf86-input-evdev
-pkgver=2.6.0
-pkgrel=1
+pkgver=2.7.0
+pkgrel=2
 pkgdesc="X.org evdev input driver"
-arch=(i686 x86_64)
+arch=('x86_64')
 url="http://xorg.freedesktop.org/"
 license=('custom')
 makedepends=('xorg-server-devel')
 options=('!libtool' '!makeflags')
 groups=('xorg-drivers' 'xorg')
 source=(${url}/releases/individual/driver/${pkgname}-${pkgver}.tar.bz2)
-sha1sums=('fb6f7a6f5168ae07efe890e4ace9fb8af1d4e1e0')
+sha1sums=('f0cb2d8400c33e8e83b538b53512e77ba73367fa')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
