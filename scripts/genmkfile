@@ -1,12 +1,12 @@
 #!/usr/bin/env lua
 -- debug.traceback = nil
-PkgbuildRepo = "/home/abs/build"
-DistroRepo = "/home/abs/gimokod"
-OutputDir = "/home/abs/packages"
-BuildDir = "/home/abs/builddir"
+pkgbuildrepo = "/home/abs/build"
+distrorepo = "/home/abs/gimokod"
+outputdir = "/home/abs/packages"
+builddir = "/home/abs/builddir"
 pwd = os.getenv("PWD")
 concat = function (_) return table.concat(_, " ") end
-getpkgbuild = function (_) return PkgbuildRepo.."/"..stripl(pwd).."/".._.."/PKGBUILD" end
+getpkgbuild = function (_) return pkgbuildrepo.."/"..stripl(pwd).."/".._.."/PKGBUILD" end
 
 function stripl(param)                        -- STRING
     for f in string.gmatch(param, "[^%/%c]+") do
@@ -53,7 +53,7 @@ function table.contains(table, element)       -- BOOLEAN
 end
 
 function getpkgbin(param)                     -- STRING
-    local dir = DistroRepo.."/"..stripl(pwd).."/"
+    local dir = distrorepo.."/"..stripl(pwd).."/"
     local cmd = "echo "..dir..param.."-*-*-*.pkg.tar.??"
     local pkgname = string.gsub(param, "-", "%%-")
     local pattern = pkgname.."%-[%a%d%_%.]+%-[%d]+%-[%a%d%_]+%.pkg%.tar%.%w+"
@@ -63,8 +63,6 @@ function getpkgbin(param)                     -- STRING
                 pkgbin = stripl(p)
                 if isfile(dir..pkgbin) then
                     return pkgbin
-                else
-                    return false
                 end
             end
         end
@@ -77,7 +75,7 @@ function getdepends(param)                    -- TABLE
     f:close()
     local rdep = {}
     local cdep = {}
-    local targets = {"depends", "makedepends"}
+    local targets = {"makedepends", "depends"}
     local fulldepends = {}
     rdep["device-mapper"]           = "lvm2"
     rdep["gcc-libs"]                = "gcc"
@@ -145,7 +143,7 @@ do
     local printf = function (...) io.write(string.format(...)) end
     local dirs = {}
     local pwd = stripl(pwd)
-    local DistroRepo = DistroRepo.."/"..pwd
+    local distrorepo = distrorepo.."/"..pwd
     for _, d in pairs(getpopen("for i in *;do echo $i;done")) do
         if isdir(d) then
             dirs[#dirs+1] = d
@@ -155,24 +153,24 @@ do
 
     for _,pkg in pairs(dirs) do
         if getpkgbin(pkg) then
-            printf("%s:V: %s/%s %s \n", pkg, DistroRepo, getpkgbin(pkg), getdep(pkg))
-            printf("%s/%s: %s \n" , DistroRepo, getpkgbin(pkg), getpkgbuild(pkg))
-            printf("        rm -rf %s/* \n", BuildDir)
+            printf("%s:V: %s/%s %s \n", pkg, distrorepo, getpkgbin(pkg), getdep(pkg))
+            printf("%s/%s: %s \n" , distrorepo, getpkgbin(pkg), getpkgbuild(pkg))
+            printf("        rm -rf %s/* \n", builddir)
             printf("        cd %s \n", pkg)
             printf("        /usr/bin/makepkg --nocheck --noconfirm -ci \n")
             for _,oldpkg in pairs(getpkgnames(pkg)) do
-                printf("        rm -f %s/%s{,.sig} \n", DistroRepo, getpkgbin(oldpkg))
+                printf("        mv %s/%s{,.sig} %s/../backup \n", distrorepo, getpkgbin(oldpkg), distrorepo)
             end
             for _,newpkg in pairs(getpkgnames(pkg)) do
-                printf("        mv %s/%s-*-*-*.pkg.tar.??{,.sig} %s\n", OutputDir, newpkg, DistroRepo)
+                printf("        mv %s/%s-*-*-*.pkg.tar.??{,.sig} %s\n", outputdir, newpkg, distrorepo)
             end
         else
             printf("%s:V: %s \n", pkg, getdep(pkg))
-            printf("        rm -rf %s/* \n", BuildDir)
+            printf("        rm -rf %s/* \n", builddir)
             printf("        cd %s \n", pkg)
             printf("        /usr/bin/makepkg --nocheck --noconfirm -ci \n")
             for _,newpkg in pairs(getpkgnames(pkg)) do
-                printf("        mv %s/%s-*-*-*.pkg.tar.??{,.sig} %s\n", OutputDir, newpkg, DistroRepo)
+                printf("        mv %s/%s-*-*-*.pkg.tar.??{,.sig} %s\n", outputdir, newpkg, distrorepo)
             end
         end
     end
