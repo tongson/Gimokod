@@ -1,16 +1,16 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=libxv
-pkgver=1.0.6
+pkgver=1.0.7
 pkgrel=1
 pkgdesc="X11 Video extension library"
-arch=(i686 x86_64)
+arch=('i686' 'x86_64')
 license=('custom')
 url="http://xorg.freedesktop.org/"
 depends=('libxext' 'videoproto')
 makedepends=('pkg-config')
 options=('!libtool')
 source=(${url}/releases/individual/lib/libXv-${pkgver}.tar.bz2)
-sha1sums=('9ebb6d7936a7b247b9b0f6dc81def39a18e4214c')
+sha1sums=('49c87e0ccb999966b7b1b4e72cb927f05e0835bd')
 
 build() {
   cd "${srcdir}/libXv-${pkgver}"
