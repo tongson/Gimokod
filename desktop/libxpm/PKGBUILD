@@ -1,16 +1,16 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=libxpm
-pkgver=3.5.9
+pkgver=3.5.10
 pkgrel=1
 pkgdesc="X11 pixmap library"
-arch=(i686 x86_64)
+arch=('i686' 'x86_64')
 license=('custom')
 url="http://xorg.freedesktop.org/"
 depends=('libxt' 'libxext')
 makedepends=('xorg-util-macros' 'gettext')
 options=('!libtool')
 source=(${url}/releases/individual/lib/libXpm-${pkgver}.tar.bz2)
-sha1sums=('38258a1d589d3f157e0338d0fd13eec11bc4a39b')
+sha1sums=('eca9dbfa6253f7d6cc7d593dc83110c6c4876d7c')
 
 build() {
   cd "${srcdir}/libXpm-${pkgver}"
