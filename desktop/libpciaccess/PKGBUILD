@@ -1,15 +1,15 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=libpciaccess
-pkgver=0.12.1
+pkgver=0.13
 pkgrel=1
 pkgdesc="X11 PCI access library"
-arch=(i686 x86_64)
+arch=('x86_64')
 license=('custom')
 url="http://xorg.freedesktop.org/"
 makedepends=('pkg-config' 'xorg-util-macros')
 options=('!libtool')
 source=(${url}/releases/individual/lib/${pkgname}-${pkgver}.tar.bz2)
-sha1sums=('4933bda545df37395e57ff6b4bd61e17a5431770')
+sha1sums=('7ddd8e1de27326f6f4a3ac6b4d2241fe77ef5353')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
