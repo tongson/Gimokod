@@ -1,7 +1,8 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=xf86-input-synaptics
-pkgver=1.5.0
+pkgver=1.5.99
 pkgrel=1
+_gitver=dfc3a8ed713c2878407c6443c4d3092da3125e0c
 pkgdesc="Synaptics driver for notebook touchpads"
 arch=('i686' 'x86_64')
 license=('custom')
@@ -10,11 +11,14 @@ depends=('libxtst')
 makedepends=('xorg-server-devel' 'libxi' 'libx11')
 groups=('xorg-drivers' 'xorg')
 options=('!libtool')
-source=(http://xorg.freedesktop.org/releases/individual/driver/${pkgname}-${pkgver}.tar.bz2)
-sha1sums=('7373c1e3f02bf7e18f71b65762a982d907b4a053')
+source=(#http://xorg.freedesktop.org/releases/individual/driver/${pkgname}-${pkgver}.tar.bz2
+        http://cgit.freedesktop.org/xorg/driver/xf86-input-synaptics/snapshot/xf86-input-synaptics-${_gitver}.tar.gz)
+md5sums=('5e21cc5c7f61802ac340968caf9db7de')
 
 build() {
-  cd "${srcdir}/${pkgname}-${pkgver}"
+#  cd "${srcdir}/${pkgname}-${pkgver}"
+  cd ${srcdir}/${pkgname}*
+  autoreconf -fi
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST}
@@ -22,7 +26,8 @@ build() {
 }
 
 package() {
-  cd "${srcdir}/${pkgname}-${pkgver}"
+#  cd "${srcdir}/${pkgname}-${pkgver}"
+  cd ${srcdir}/${pkgname}*
   make DESTDIR="${pkgdir}" install
   install -m755 -d "${pkgdir}/usr/share/licenses/${pkgname}"
   install -m644 COPYING "${pkgdir}/usr/share/licenses/${pkgname}/"
