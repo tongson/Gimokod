@@ -1,16 +1,16 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=libxrender
-pkgver=0.9.6
+pkgver=0.9.7
 pkgrel=1
 pkgdesc="X Rendering Extension client library"
-arch=(i686 x86_64)
+arch=('i686' 'x86_64')
 url="http://xorg.freedesktop.org/"
 license=('custom')
 depends=('libx11' 'renderproto')
 makedepends=('pkg-config')
 options=('!libtool')
 source=(${url}/releases/individual/lib/libXrender-${pkgver}.tar.bz2)
-sha1sums=('65bd96dc17da6b064f95109da02d9c9d14cb06dc')
+sha1sums=('6e4d75d8316d5217324258f555eba3a5d383feb2')
 
 build() {
   cd "${srcdir}/libXrender-${pkgver}"
