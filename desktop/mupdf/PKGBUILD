@@ -1,6 +1,6 @@
 pkgname=mupdf
 pkgver=0.9
-pkgrel=4
+pkgrel=5
 pkgdesc="lightweight PDF viewer and toolkit written in portable C"
 arch=('i686' 'x86_64')
 url="http://mupdf.com"
@@ -10,6 +10,8 @@ source=("http://mupdf.com/download/${pkgname}-${pkgver}-source.tar.gz")
 sha256sums=('abed825cb1d73e0e28f0a7ee72b5d7a451ba41d21b0c55837ed2a212f3b16b2d')
 
 build() {
+  CFLAGS+=" -fPIC"
+  CXXFLAGS+=" -fPIC"
   cd "${srcdir}/${pkgname}-${pkgver}"
   Patch mupdf-0.8.165-buildsystem.patch
   Patch mupdf-0.8.165-zoom.patch
@@ -26,12 +28,13 @@ package() {
   # Rename executables to avoid conflicts
   msg "Renaming executables"
   cd "${pkgdir}/usr/bin"
-  for i in pdf*; do 
+  for i in pdf*; do
     mv "$i" "mupdf_$i";
   done
 
   cd "$srcdir/$pkgname-$pkgver/debian"
   install -Dm644 mupdf.pc "${pkgdir}/usr/lib/pkgconfig/mudpdf.pc"
+  chmod 644 $pkgdir/usr/lib/{libmuxps.a,libfitz.a,libmupdf.a}
 }
 
 
