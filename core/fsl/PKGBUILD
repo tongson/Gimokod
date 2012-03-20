@@ -1,27 +1,29 @@
 pkgname=fsl
 _pkgname=fossil
-pkgver=20111213135356
-pkgrel=1
+pkgver=20120317175325
+pkgrel=4
 pkgdesc="Simple, high-reliability, distributed SCM (installed as fsl)"
-arch=('i686' 'x86_64')
+arch=('x86_64')
 license=('BSD')
 groups=('base')
 url="http://www.fossil-scm.org/"
-makedepends=('dietlibc' 'zlib')
+makedepends=('musl' 'zlib')
 source=("http://www.fossil-scm.org/download/fossil-src-${pkgver}.tar.gz")
-sha256sums=('c98556cd1fa6abc2e02aa38de1af425fa9ff09247e72f631c9ff6c239c46e71d')
+sha256sums=('8ea3462a29e645fe0bd062d5742de4e1921a38acced5107d08465821d95aa9b0')
 
 build() {
   cd "${_pkgname}-src-${pkgver}"
   ./configure --prefix=/usr \
               --static \
+              --json \
               --disable-lineedit \
               --with-openssl=none \
+              --with-zlib=/usr/lib \
               --build=${CBUILD}
 
   cp /usr/include/{zlib,zconf}.h src
-  export CFLAGS="${CFLAGS} -nostdinc"
-  make TCC="/usr/lib/diet/bin/diet gcc" LIB="${LDFLAGS} -static -lz"
+  export CFLAGS="${CFLAGS} -nostdinc -fPIC -fno-strict-aliasing -Wa,--noexecstack"
+  make TCC="/usr/lib/musl/bin/musl-gcc -D_GNU_SOURCE -D__musl__"
 }
 
 package() {
