@@ -5,7 +5,7 @@ Gimokod -- a lightweight Linux distribution for servers
 ## DESCRIPTION
 
   A modern distribution geared towards virtual machines and servers. Currently
-only x86-64 is supported but there are plans to support i686 and ARM. Pacman is
+only x86-64 is supported but there is interest to support ARM. Pacman is
 used for package management but this is not a fork of Arch Linux. The filesystem
 hierarchy is completely different and packages are not compatible. Pkgin/Pkgsrc
 was considered but Pacman and the Arch Build System was easier to work with. As
@@ -49,12 +49,6 @@ Fedora and openSUSE are also monitored for updates and useful patches. Relevant
 channels are monitored for security vulnerabilities affecting supported
 packages. Keeping the base system small has the added benefit of needing less
 work with keeping abreast with essential updates.
-
-  The `core` and `main` repositories are meant to host stable packages. Packages
-will only be updated (or preferrably patched) immediately if any serious security
-vulnerabilities are reported. The `testing` repository will contain updated
-versions of packages. This policy will be put into practice once Gimokod is used
-in production systems.
 
   Built-in tests of the following packages are run and checked for 0 unexpected
 failures:
