@@ -1,8 +1,8 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=udev
 pkgver=181
-pkgrel=1
-arch=('i686' 'x86_64')
+pkgrel=2
+arch=('x86_64')
 url="http://git.kernel.org/?p=linux/hotplug/udev.git;a=summary"
 license=('GPL')
 groups=('base')
@@ -11,13 +11,16 @@ install=udev.install
 depends=('util-linux' 'kmod')
 makedepends=('gperf' 'libxslt' 'usbutils' 'kmod' 'glib')
 source=(ftp://ftp.kernel.org/pub/linux/utils/kernel/hotplug/$pkgname-$pkgver.tar.xz
+        0001-reinstate-TIMEOUT-handling.patch
         udev-180-nodocs.diff)
 md5sums=('0d7af750702620a871b9f9b98d8ad859'
+         'f758b3e62ab77a1a6b7be12bb900cb2d'
          '6e8f82d61287f2a46116a29239f0bcc8')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   Patch udev-180-nodocs.diff
+  Patch 0001-reinstate-TIMEOUT-handling.patch
   cd rules/rules.d
   sed -i 's:/sbin:/usr/bin:g' * >/dev/null 2>&1
   sed -i '5s:modprobe -bv:echo:' 80-drivers.rules
