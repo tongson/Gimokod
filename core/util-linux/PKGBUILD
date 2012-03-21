@@ -1,16 +1,18 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=util-linux
-pkgver=2.20.1
+pkgver=2.21
 pkgrel=1
 pkgdesc="Miscellaneous system utilities for Linux"
-url="http://userweb.kernel.org/~kzak/util-linux-ng/"
-arch=('i686' 'x86_64')
+url="http://www.kernel.org/pub/linux/utils/util-linux/"
+arch=('x86_64')
 groups=('base')
 license=('GPL2')
 depends=('ncurses' 'zlib')
 options=('!libtool')
-source=(ftp://ftp.infradead.org/pub/${pkgname}/v2.20/${pkgname}-${pkgver}.tar.bz2)
-md5sums=('079b37517fd4e002a2e6e992e8b4e361')
+source=(ftp://ftp.kernel.org/pub/linux/utils/${pkgname}/v${pkgver}/${pkgname}-${pkgver}.tar.xz
+        stable-fixes-2.21.patch)
+md5sums=('208aa058f4117759d2939d1be7d662fc'
+         '415b850a4efa9174cd9c34022949f177')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
@@ -36,9 +38,11 @@ build() {
 
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-
-  install -dm755 "${pkgdir}/var/lib/hwclock"
   make DESTDIR="${pkgdir}" install
+
+  cd "${pkgdir}"
+  install -dm755 "${pkgdir}/var/lib/hwclock"
+  rm -rf usr/share/man/ru
   chmod 0700 "${pkgdir}/usr/bin/mount"
   chmod 0700 "${pkgdir}/usr/bin/umount"
   mv "${pkgdir}"/usr/sbin/* "${pkgdir}"/usr/bin
