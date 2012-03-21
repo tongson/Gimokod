@@ -1,4 +1,12 @@
 post_install() {
+for d in dev etc home usr var opt sys run media srv; do
+  install -d -m0755 ${d}
+done
+
+install -d -m0555 proc
+install -d -m0750 root
+install -d -m0700 boot
+
 cd /etc
 /usr/bin/fsl init .fossil
 chmod 600 .fossil
@@ -13,7 +21,7 @@ chmod 600 _FOSSIL_
 install -d -m02710 -o 0 -g 164 /etc/tcb/root
 echo "root:!:-1::::::" > "/etc/tcb/root/shadow"
 chmod 0640 /etc/tcb/root/shadow
-chown 0:165 /etc/tcb/root/shadow
+chown 0:164 /etc/tcb/root/shadow
 
 cat << PASSWD > /etc/passwd
 root:x:0:0:root:/root:/usr/bin/sh

@@ -1,6 +1,6 @@
 pkgname=filesystem
 pkgver=2012.03
-pkgrel=3
+pkgrel=5
 pkgdesc='Filesystem hier'
 arch=('any')
 url='http://gimokod.org'
@@ -10,15 +10,6 @@ install=filesystem.install
 
 package() {
     cd ${srcdir}
-
-    for d in dev etc home usr var opt sys run media srv; do
-      install -d -m755 "${pkgdir}"/${d}
-    done
-
-    install -d -m755 "${pkgdir}"/run/.root/etc
-    install -d -m555 "${pkgdir}"/proc
-    install -d -m0750 "${pkgdir}"/root
-    install -d -m0700 "${pkgdir}"/boot
 
     for d in ld.so.conf.d skel profile.d; do
       install -d -m755 "${pkgdir}"/etc/${d}
