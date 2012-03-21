@@ -1,9 +1,9 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=e2fsprogs
-pkgver=1.42
+pkgver=1.42.1
 pkgrel=1
 pkgdesc="Ext2/3/4 filesystem utilities"
-arch=('i686' 'x86_64')
+arch=('x86_64')
 license=('GPL' 'LGPL' 'MIT')
 url="http://e2fsprogs.sourceforge.net"
 groups=('base')
@@ -11,7 +11,7 @@ source=("http://downloads.sourceforge.net/sourceforge/${pkgname}/${pkgname}-${pk
         'e2fsprogs-1.42-no-docs-test-translations.patch'
         'MIT-LICENSE')
 install=e2fsprogs.install
-sha1sums=('e69bc63bc319e4d1e4242cc278bfd442a60646e6'
+sha1sums=('c25c73de98737b5f6fb9debec36bfb6416b0ac07'
           '2091efd26400b444bc771652574eff37fdf6029d'
           'f4a0d5b0cdb980e3fedd6f5e7dde0b0ffb7bbdfb')
 
@@ -21,7 +21,7 @@ build() {
   # Remove unnecessary init.d directory
   sed -i '/init\.d/s|^|#|' misc/Makefile.in
 
-  Patch e2fsprogs-1.42-no-docs-test-translations.patch 
+  Patch e2fsprogs-1.42-no-docs-test-translations.patch
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
