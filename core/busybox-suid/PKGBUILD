@@ -1,0 +1,42 @@
+pkgname=busybox-suid
+_pkgname=busybox
+pkgver=1.19.4
+pkgrel=2
+pkgdesc='Utilities for rescue, embedded and minimal systems'
+arch=('x86_64')
+url='http://busybox.net'
+license=('GPL')
+options=('emptydirs')
+groups=('base')
+
+symlinks=(/usr/bin/crontab
+          /usr/bin/ping
+          /usr/bin/ping6
+          /usr/bin/traceroute
+          /usr/bin/traceroute6
+          /usr/bin/arping)
+
+build() {
+  cd "${srcdir}/${_pkgname}-${pkgver}"
+  cp "${srcdir}"/config .config
+  sed -i -r \
+    -e 's:[[:space:]]?-(Werror|Os|falign-(functions|jumps|loops|labels)=1|fomit-frame-pointer)\>::g' \
+    Makefile.flags
+  sed -i '/^#error Aborting compilation./d' applets/applets.c
+  sed -i 's:-Wl,--gc-sections::' Makefile
+  make
+}
+
+package() {
+  cd "${srcdir}/${_pkgname}-${pkgver}"
+  install -D -m4755 busybox "${pkgdir}"/usr/bin/busybox.suid
+  for x in $(seq 0 $((${#symlinks[@]} - 1))); do
+    ln -sf busybox.suid "${pkgdir}"/${symlinks[$x]}
+  done
+}
+
+source=(${url}/downloads/${_pkgname}-${pkgver}.tar.bz2
+        config)
+
+sha256sums=('9b853406da61ffb59eb488495fe99cbb7fb3dd29a31307fcfa9cf070543710ee'
+            '1e6ae19f033205139cadf9e89adbb101138bf72b7c5c59e29eca0ea480d48697')
