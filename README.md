@@ -89,10 +89,10 @@ failures:
 * [UsrMove](https://fedoraproject.org/wiki/Features/UsrMove)
 
 
-## CURRENT BASE SYSTEM SIZE
+## CURRENT BASE SYSTEM SIZE (without the development toolchain ie. GCC, Binutils etc.)
 
-    As of November 2011:
-    122MB (uncompressed)
+    As of March 2012:
+    119MB (uncompressed)
 
 See the core repository for packages in the base system.
 
