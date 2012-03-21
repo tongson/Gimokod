@@ -1,13 +1,14 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=ipvsadm
 pkgver=1.26
-pkgrel=2
+pkgrel=3
 pkgdesc='The IP Virtual Server administration utility'
 arch=('x86_64')
 url='http://www.linuxvirtualserver.org/software/ipvs.html'
 license=('GPL2')
 depends=('libnl1' 'popt' 'ncurses')
 makedepends=('pkg-config')
+options=('emptydirs')
 source=(http://www.linuxvirtualserver.org/software/kernel-2.6/"${pkgname}"-"${pkgver}".tar.gz)
 sha256sums=('6d6c46fecb1c532a892616b4445c73b71730e8790d5630f60269fd9cbee0eb2d')
 
@@ -23,7 +24,11 @@ build() {
 package() {
   cd ${pkgname}-${pkgver}
   make BUILD_ROOT="${pkgdir}" MANDIR=usr/share/man install
-  mkdir "${pkgdir}/usr/bin"
+  install -d -m0755 "${pkgdir}/usr/bin"
+  install -d -m0755 "${pkgdir}/usr/lib"
+  install -d -m0755 "${pkgdir}/usr/include/ipvs"
+  install -m0644 libipvs/libipvs.so "${pkgdir}/usr/lib"
+  install -m0644 libipvs/libipvs.h libipvs/ip_vs.h "${pkgdir}/usr/include/ipvs"
   mv "${pkgdir}"/sbin/* "${pkgdir}/usr/bin"
   rmdir "${pkgdir}"/sbin
 }
