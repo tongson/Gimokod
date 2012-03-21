@@ -1,21 +1,19 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgbase=pidgin
 pkgname=('pidgin' 'libpurple')
-pkgver=2.10.1
-pkgrel=2
-arch=('i686' 'x86_64')
+pkgver=2.10.2
+pkgrel=1
+arch=('x86_64')
 url="http://pidgin.im/"
 license=('GPL')
 makedepends=('startup-notification' 'libxss' 'nss' 'libsasl' 'libsm'
               'hicolor-icon-theme' 'ca-certificates')
 options=('!libtool')
 source=(http://downloads.sourceforge.net/${pkgname}/${pkgname}-${pkgver}.tar.bz2)
-sha256sums=('2f28bddc5edcd714d607d74126c8958ae7c258602b3929e3e6e783d3cb1beac8')
+sha256sums=('e5cdd29056d36677cb81225c3b36b1bcde64605e201492f6e2fdf27ff24d32b8')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  # Pidgin doesn't explicitly link to libm
-  LDFLAGS+=' -Wl,--copy-dt-needed-entries'
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
