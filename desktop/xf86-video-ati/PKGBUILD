@@ -1,27 +1,31 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=xf86-video-ati
 pkgver=6.14.3
-pkgrel=1
+pkgrel=2
 pkgdesc="X.org ati video driver"
-arch=(i686 x86_64)
+arch=('x86_64')
 url="http://xorg.freedesktop.org/"
 license=('custom')
 depends=('libpciaccess' 'libdrm' 'udev' 'pixman' 'ati-dri')
 makedepends=('xorg-server-devel' 'libdrm' 'xf86driproto' 'mesa' 'glproto')
-groups=('xorg-drivers' 'xorg')
 options=('!libtool')
 source=(${url}/releases/individual/driver/${pkgname}-${pkgver}.tar.bz2)
 sha1sums=('db635e2e2858d5db90362f546ac0adad85474bad')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
+  cd src
+  sed -i 's:list_:xorg_list_:g' radeon_dri2.c
+  sed -i 's:struct\slist:struct\ xorg_list:g' radeon_dri2.c
+  cd ..
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
-              --enable-dri \
               --enable-kms \
-              --enable-exa
+              --enable-exa \
+              --enable-dri
   make
+
 }
 
 package() {
