@@ -1,9 +1,9 @@
 pkgname=busybox-static
 _pkgname=busybox
-pkgver=1.19.3
+pkgver=1.19.4
 pkgrel=1
 pkgdesc='Utilities for rescue, embedded and minimal systems'
-arch=('i686' 'x86_64')
+arch=('x86_64')
 url='http://busybox.net'
 license=('GPL')
 install=busybox.install
@@ -16,7 +16,6 @@ build() {
   cp "${srcdir}"/config .config
 
   Patch busybox-1.19.2-bb.patch
-  Patch busybox-1.19.2-man.patch
   Patch busybox-1.19.2-musl.patch
 
   sed -i -r \
@@ -59,9 +58,8 @@ package() {
   install -d -m0755 "${pkgdir}/etc/alternatives"
 }
 
-source=(${url}/downloads/busybox-${pkgver}.tar.bz2{,.sign})
-sha256sums=('a1a9a35732c719ef384f02b6e357c324d8be25bc154af91a48c4264b1e6038f0'
-            '04526172ae950625388bde790f1b78ab126307a6396f80e9548e54621b513171')
+source=(${url}/downloads/busybox-${pkgver}.tar.bz2)
+sha256sums=('9b853406da61ffb59eb488495fe99cbb7fb3dd29a31307fcfa9cf070543710ee')
 
 source=(${source[@]-}
         ash
@@ -73,8 +71,8 @@ source=(${source[@]-}
 
 sha256sums=(${sha256sums[@]-}
             'b86dbe888eb84ea18783ce9cbdf5baea9c6c7133dffcc9e8683cf0057ab5cf1e'
-            '98f92c2edbcf61d1bacef783ea8b08cce07051b0a4489ed3f4579296846f89f1'
+            '8a3853f73da6c4b9d19a79ccbaf935ab4228d4b695320b63aeb54180f8f4957d'
             '733e23d851e68ecd27ed8bb8f4c4b8ea27b0d143069ec49aadb04deeb65dd9f5'
             'b7a6af92ffb1879d0d947b6290a0b3109a02a71c5586bbcd19e8820aa024a0dc'
-            'a3e71b84fa9c9d225e6150f26917c584ff54873de7b6b1370a0c6e7a87cb26b8'
+            '20263e308d5d88433d98fed17a2a0f0c6770d5d688aeb5538a06904ad3be498d'
             '601ea9a5a0c6e8bace0bbf77a89c42f4534608170fdcf47f6d8a7c014b6aa470')
