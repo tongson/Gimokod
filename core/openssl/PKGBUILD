@@ -1,10 +1,10 @@
 # Significant parts from Gentoo's "openssl-1.0.0e.ebuild"
 pkgname=openssl
-_ver=1.0.0g
+_ver=1.0.0h
 pkgver=${_ver/[a-z]/.${_ver//[0-9.]/}}
-pkgrel=1
+pkgrel=2
 pkgdesc='The Open Source toolkit for Secure Sockets Layer and Transport Layer Security'
-arch=('i686' 'x86_64')
+arch=('x86_64')
 url='https://www.openssl.org'
 license=('OPENSSL')
 groups=('base')
@@ -12,7 +12,6 @@ depends=('zlib' 'gmp')
 install=openssl.install
 options=('!makeflags')
 makedepends=('perl' 'zlib' 'gmp' 'bc')
-PKGEXT='.pkg.tar.gz'
 
 build() {
   cd "${srcdir}/${pkgname}-$_ver"
@@ -29,7 +28,7 @@ build() {
          -e '/^install:/s:install_docs::' \
          Makefile.org
 
-  Patch openssl-1.0.0e-pkg-config.patch
+  Patch openssl-1.0.0h-pkg-config.patch
 
   sed -i '/^SET_X/s:=.*:=set -x:' Makefile.shared
 
@@ -48,7 +47,7 @@ build() {
               enable-camellia \
               enable-tlsext \
               no-ec \
-              no-idea \
+              enable-idea \
               no-rc5 \
               enable-gmp -lgmp \
               "${openssltarget}"
@@ -84,9 +83,9 @@ package() {
 }
 
 source=(https://www.openssl.org/source/${pkgname}-${_ver}.tar.gz
-        openssl-1.0.0e-pkg-config.patch
+        openssl-1.0.0h-pkg-config.patch
         c_rehash)
 
-sha256sums=('905106a1505e7d9f7c36ee81408d3aa3d41aac291a9603d0c290c9530c92fc2c'
-            'f506d94ee240776e3f5d93ecdaa010539aa264ec4553b09fa8093074401fe98b'
+sha256sums=('7e3dfc21aa57ed33ea673170053d1921322803b8a6a624a4f0d2e4c308bd418d'
+            '542dea12747b1cb667707250e3eb3803cbdd396bd0d8e836e48a8018417dc1b8'
             '4999ee79892f52bd6a4a7baba9fac62262454d573bbffd72685d3aae9e48cee0')
