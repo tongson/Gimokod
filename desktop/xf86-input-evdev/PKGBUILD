@@ -1,19 +1,22 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=xf86-input-evdev
 pkgver=2.7.0
-pkgrel=2
+pkgrel=4
 pkgdesc="X.org evdev input driver"
 arch=('x86_64')
 url="http://xorg.freedesktop.org/"
 license=('custom')
+depends=('mtdev')
 makedepends=('xorg-server-devel')
 options=('!libtool' '!makeflags')
-groups=('xorg-drivers' 'xorg')
-source=(${url}/releases/individual/driver/${pkgname}-${pkgver}.tar.bz2)
-sha1sums=('f0cb2d8400c33e8e83b538b53512e77ba73367fa')
+source=(${url}/releases/individual/driver/${pkgname}-${pkgver}.tar.bz2
+        Fix_inverted_horizontal_scroll.diff)
+sha1sums=('f0cb2d8400c33e8e83b538b53512e77ba73367fa'
+          'e959e710d9a0c60a3af967148b9d5e014544993c')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
+  Patch Fix_inverted_horizontal_scroll.diff
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST}
