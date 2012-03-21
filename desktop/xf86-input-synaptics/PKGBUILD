@@ -1,24 +1,22 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=xf86-input-synaptics
-pkgver=1.5.99
+pkgver=1.5.99.901
 pkgrel=1
-_gitver=dfc3a8ed713c2878407c6443c4d3092da3125e0c
 pkgdesc="Synaptics driver for notebook touchpads"
-arch=('i686' 'x86_64')
+arch=('x86_64')
 license=('custom')
 url="http://xorg.freedesktop.org/"
-depends=('libxtst')
+depends=('libxtst' 'mtdev')
 makedepends=('xorg-server-devel' 'libxi' 'libx11')
-groups=('xorg-drivers' 'xorg')
 options=('!libtool')
-source=(#http://xorg.freedesktop.org/releases/individual/driver/${pkgname}-${pkgver}.tar.bz2
-        http://cgit.freedesktop.org/xorg/driver/xf86-input-synaptics/snapshot/xf86-input-synaptics-${_gitver}.tar.gz)
-md5sums=('5e21cc5c7f61802ac340968caf9db7de')
+source=(http://xorg.freedesktop.org/releases/individual/driver/${pkgname}-${pkgver}.tar.bz2
+        synaptics-Fix-inverted-circular-scrolling-direction.patch)
+sha1sums=('8836b1c2bf443b2c11f38457e203c5309698d9d0'
+          '2e35cde5db6c435f612a5c6802f33aca8ba1b6bb')
 
 build() {
-#  cd "${srcdir}/${pkgname}-${pkgver}"
-  cd ${srcdir}/${pkgname}*
-  autoreconf -fi
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  patch -Np1 -i ${srcdir}/synaptics-Fix-inverted-circular-scrolling-direction.patch
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST}
@@ -26,8 +24,7 @@ build() {
 }
 
 package() {
-#  cd "${srcdir}/${pkgname}-${pkgver}"
-  cd ${srcdir}/${pkgname}*
+  cd "${srcdir}/${pkgname}-${pkgver}"
   make DESTDIR="${pkgdir}" install
   install -m755 -d "${pkgdir}/usr/share/licenses/${pkgname}"
   install -m644 COPYING "${pkgdir}/usr/share/licenses/${pkgname}/"
