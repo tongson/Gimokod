@@ -2,7 +2,7 @@
 pkgbase=mesa
 pkgname=('mesa' 'libgl' 'libglapi' 'libgles' 'libegl' 'ati-dri' 'intel-dri' 'nouveau-dri'
          'khrplatform-devel' 'osmesa' 'svga-dri')
-pkgver=8.0.1
+pkgver=8.0.2
 pkgrel=1
 arch=('x86_64')
 makedepends=('glproto' 'libdrm' 'libxxf86vm' 'libxdamage' 'expat' 'libx11' 'libxt'
@@ -12,7 +12,7 @@ license=('custom')
 source=(LICENSE
         "ftp://ftp.freedesktop.org/pub/mesa/${pkgver}/MesaLib-${pkgver}.tar.bz2")
 md5sums=('5c65a0fe315dd347e09b1f2826a1df5a'
-         '24eeebf66971809d8f40775a379b36c9')
+         'a368104e5700707048dc3e8691a9a7a1')
 
 build() {
     cd "${srcdir}"/?esa-*
