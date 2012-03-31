@@ -1,18 +1,19 @@
 pkgname=busybox-static
 _pkgname=busybox
 pkgver=1.19.4
-pkgrel=1
+pkgrel=2
 pkgdesc='Utilities for rescue, embedded and minimal systems'
 arch=('x86_64')
 url='http://busybox.net'
 license=('GPL')
 install=busybox.install
-options=('emptydirs' '!binchecks')
+options=('emptydirs')
+makedepends=('musl')
 groups=('base')
 
 build() {
   cd "${srcdir}/${_pkgname}-${pkgver}"
-
+  export LDFLAGS="${LDFLAGS}  -Wl,-z,noexecstack"
   cp "${srcdir}"/config .config
 
   Patch busybox-1.19.2-bb.patch
