@@ -1,0 +1,24 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=vblade
+pkgver=20
+pkgrel=1
+pkgdesc="Virtual EtherDrive(R) blade AoE target"
+arch=('x86_64')
+url="http://aoetools.sourceforge.net/"
+license=('GPL2')
+source=("http://downloads.sourceforge.net/aoetools/${pkgname}-${pkgver}.tgz")
+md5sums=('3c80e4a6bc7d66ae0c235b88cb44bd59')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  sed -i -e 's,^CFLAGS.*,CFLAGS += -Wall,' \
+         -e 's:-o vblade:${LDFLAGS} \0:' makefile
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  install -D vblade -m0755 "${pkgdir}/usr/bin/vblade"
+  install -D vblade.8  -m0644 "${pkgdir}/usr/share/man/man8/vblade.8"
+}
+
