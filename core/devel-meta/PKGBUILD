@@ -1,6 +1,6 @@
 pkgname=devel-meta
 pkgver=2012.03
-pkgrel=1
+pkgrel=2
 pkgdesc="base-devel meta package"
 arch=('any')
 url="http://gimokod.org"
@@ -13,7 +13,6 @@ depends=(
   bison
   bc
   dejagnu
-  dietlibc
   expect
   fakeroot
   file
