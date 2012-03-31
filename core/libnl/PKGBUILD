@@ -1,12 +1,13 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=libnl
 pkgver=3.2.7
-pkgrel=1
+pkgrel=2
 pkgdesc="Library for applications dealing with netlink sockets"
-arch=('i686' 'x86_64')
+arch=('x86_64')
 url="http://www.infradead.org/~tgr/libnl/"
 license=('GPL')
 option=(!libtool)
+groups=('base-devel')
 install=libnl.install
 source=("$url/files/$pkgname-$pkgver.tar.gz")
 md5sums=('6a233a9dffa0ee3a7f6110c95c5410ab')
