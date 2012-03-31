@@ -157,20 +157,26 @@ do
             printf("%s/%s: %s \n" , distrorepo, getpkgbin(pkg), getpkgbuild(pkg))
             printf("        rm -rf %s/* \n", builddir)
             printf("        cd %s \n", pkg)
-            printf("        /usr/bin/makepkg --nocheck --noconfirm -ci \n")
+            printf("        /usr/bin/makepkg --noconfirm -mci || $(echo Build failed: %s | /usr/bin/bti && exit 1)\n", pkg)
             for _,oldpkg in pairs(getpkgnames(pkg)) do
                 printf("        mv %s/%s{,.sig} %s/../backup \n", distrorepo, getpkgbin(oldpkg), distrorepo)
             end
             for _,newpkg in pairs(getpkgnames(pkg)) do
-                printf("        mv %s/%s-*-*-*.pkg.tar.??{,.sig} %s\n", outputdir, newpkg, distrorepo)
+                printf("        pushd %s\n", outputdir)
+                printf("        echo Build finished: %s $(sha256sum %s-*-*-*.pkg.tar.??) | /usr/bin/bti\n", newpkg, newpkg)
+                printf("        mv %s-*-*-*.pkg.tar.??{,.sig} %s\n", newpkg, distrorepo)
+                printf("        popd\n")
             end
         else
             printf("%s:V: %s \n", pkg, getdep(pkg))
             printf("        rm -rf %s/* \n", builddir)
             printf("        cd %s \n", pkg)
-            printf("        /usr/bin/makepkg --nocheck --noconfirm -ci \n")
+            printf("        /usr/bin/makepkg --noconfirm -mci || $(echo Build failed: %s | /usr/bin/bti && exit 1)\n", pkg)
             for _,newpkg in pairs(getpkgnames(pkg)) do
-                printf("        mv %s/%s-*-*-*.pkg.tar.??{,.sig} %s\n", outputdir, newpkg, distrorepo)
+                printf("        pushd %s\n", outputdir)
+                printf("        echo Build finsihed: %s $(sha256sum %s-*-*-*.pkg.tar.??) | /usr/bin/bti\n", newpkg, newpkg)
+                printf("        mv %s-*-*-*.pkg.tar.??{,.sig} %s\n", newpkg, distrorepo)
+                printf("        popd\n")
             end
         end
     end
