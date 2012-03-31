@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=xf86-input-synaptics
-pkgver=1.5.99.901
+pkgver=1.5.99.902
 pkgrel=1
 pkgdesc="Synaptics driver for notebook touchpads"
 arch=('x86_64')
@@ -9,14 +9,11 @@ url="http://xorg.freedesktop.org/"
 depends=('libxtst' 'mtdev')
 makedepends=('xorg-server-devel' 'libxi' 'libx11')
 options=('!libtool')
-source=(http://xorg.freedesktop.org/releases/individual/driver/${pkgname}-${pkgver}.tar.bz2
-        synaptics-Fix-inverted-circular-scrolling-direction.patch)
-sha1sums=('8836b1c2bf443b2c11f38457e203c5309698d9d0'
-          '2e35cde5db6c435f612a5c6802f33aca8ba1b6bb')
+source=(http://xorg.freedesktop.org/releases/individual/driver/${pkgname}-${pkgver}.tar.bz2)
+sha1sums=('2170854823caf39f15f47329514fdbe620e31e96')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  patch -Np1 -i ${srcdir}/synaptics-Fix-inverted-circular-scrolling-direction.patch
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST}
