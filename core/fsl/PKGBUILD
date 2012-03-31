@@ -1,18 +1,22 @@
 pkgname=fsl
 _pkgname=fossil
 pkgver=20120317175325
-pkgrel=4
+pkgrel=6
 pkgdesc="Simple, high-reliability, distributed SCM (installed as fsl)"
 arch=('x86_64')
 license=('BSD')
 groups=('base')
 url="http://www.fossil-scm.org/"
 makedepends=('musl' 'zlib')
-source=("http://www.fossil-scm.org/download/fossil-src-${pkgver}.tar.gz")
-sha256sums=('8ea3462a29e645fe0bd062d5742de4e1921a38acced5107d08465821d95aa9b0')
+source=("http://www.fossil-scm.org/download/fossil-src-${pkgver}.tar.gz"
+        symlinks-fix.diff)
+sha256sums=('8ea3462a29e645fe0bd062d5742de4e1921a38acced5107d08465821d95aa9b0'
+            'a38c79964401e5b6696357c83733ddece8acd6ea030d81ab93b832120bf3a7c2')
 
 build() {
   cd "${_pkgname}-src-${pkgver}"
+  export CFLAGS="${CFLAGS} -fPIC"
+  export LDFLAGS="${LDFLAGS} -Wl,-z,noexecstack"
   ./configure --prefix=/usr \
               --static \
               --json \
@@ -22,7 +26,7 @@ build() {
               --build=${CBUILD}
 
   cp /usr/include/{zlib,zconf}.h src
-  export CFLAGS="${CFLAGS} -nostdinc -fPIC -fno-strict-aliasing -Wa,--noexecstack"
+  Patch symlinks-fix.diff
   make TCC="/usr/lib/musl/bin/musl-gcc -D_GNU_SOURCE -D__musl__"
 }
 

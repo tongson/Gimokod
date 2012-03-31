@@ -1,0 +1,19 @@
+--- fossil-src-20120317175325/src/db.c
++++ fossil-src-20120317175325/src/db.c
+@@ -934,7 +934,7 @@
+   g.repositoryOpen = 1;
+   g.zRepositoryName = mprintf("%s", zDbName);
+   /* Cache "allow-symlinks" option, because we'll need it on every stat call */
+-  g.allowSymlinks = db_get_boolean("allow-symlinks", 0);
++  g.allowSymlinks = db_get_boolean("allow-symlinks", g.allowSymlinks);
+ }
+ 
+ /*
+@@ -1751,6 +1751,7 @@
+   if( !allowNested && db_open_local() ){
+     fossil_panic("already within an open tree rooted at %s", g.zLocalRoot);
+   }
++  db_open_config(0);
+   file_canonical_name(g.argv[2], &path);
+   db_open_repository(blob_str(&path));
+   db_init_database("./_FOSSIL_", zLocalSchema, (char*)0);
