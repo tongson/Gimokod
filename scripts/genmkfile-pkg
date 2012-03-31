@@ -14,5 +14,5 @@ for pkg in ${packages}; do
 done
 if [[ ${add} != "" ]]; then
     echo "  /usr/bin/repo-add -s ${database} ${add}"
+    echo "Repository updated: ${repo}" | /usr/bin/bti
 fi
-
