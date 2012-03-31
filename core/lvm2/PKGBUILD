@@ -1,25 +1,22 @@
 pkgbase=lvm2
 pkgname=('lvm2' 'device-mapper')
-pkgver=2.02.88
+pkgver=2.02.95
 pkgrel=1
-arch=('i686' 'x86_64')
+arch=('x86_64')
 url="http://sourceware.org/lvm2/"
 license=('GPL2' 'LGPL2')
 groups=('base')
+source=(ftp://sources.redhat.com/pub/lvm2/LVM2.${pkgver}.tgz)
+sha256sums=('0335af36a151dafe5778da55a684546bfb98e7d3193834915b5efe95dbed9125')
 
 build() {
   cd "${srcdir}/LVM2.${pkgver}"
   cd udev
   sed -i -e 's:/usr/sbin:/usr/bin:g' -e 's:/sbin:/usr/bin:g' * >/dev/null 2>&1
   cd ..
-  patch -Np1 -i "${srcdir}"/lvm2-2.02.63-always-make-static-libdm.patch
-  patch -Np1 -i "${srcdir}"/lvm2-2.02.64-dmeventd-libs.patch
-  patch -Np0 -i "${srcdir}"/lvm2-2.02.70-asneeded.patch
-  patch -Np1 -i "${srcdir}"/lvm2-2.02.73-locale-muck.patch
-  patch -Np1 -i "${srcdir}"/lvm2-no-export-dynamic.patch
-  sed -i 's|/usr/bin/tr|/bin/tr|' scripts/lvmdump.sh
-  sed -i -e 's:\(LIBS += $(UDEV_LIBS)\):\1 -lrt:' tools/Makefile.in
-  sed -i -e 's:\($(STATIC_LIBS)\):\1 -lrt:' daemons/dmeventd/Makefile.in
+  Patch lvm2-2.02.63-always-make-static-libdm.patch
+  Patch lvm2-2.02.92-locale-muck.patch
+  Patch lvm2-2.02.92-dynamic-static-ldflags.patch
   autoreconf -v
   ./configure --prefix= \
               --build=${CBUILD} \
@@ -33,6 +30,8 @@ build() {
               --with-usrlibdir=/usr/lib \
               --enable-pkgconfig \
               --enable-static_link \
+              --enable-lvmetad \
+              --with-thin=internal \
               --disable-readline \
               --disable-nls \
               --disable-selinux \
@@ -77,16 +76,12 @@ package_lvm2() {
 
 }
 
-source=(ftp://sources.redhat.com/pub/lvm2/LVM2.${pkgver}.tgz
+source=(${source[@]-}
         lvm2-2.02.63-always-make-static-libdm.patch
-        lvm2-2.02.64-dmeventd-libs.patch
-        lvm2-2.02.70-asneeded.patch
-        lvm2-2.02.73-locale-muck.patch
-        lvm2-no-export-dynamic.patch)
+        lvm2-2.02.92-dynamic-static-ldflags.patch
+        lvm2-2.02.92-locale-muck.patch)
 
-sha256sums=('a129d1d3949524da7d6d2a67218254baea02df06a6744faa5808a4182b2fb432'
+sha256sums=(${sha256sums[@]-}
             '1c498b5efce77ed16bbbfcd9e0ec6da404a9c70c7ad0959ed7b60733adfcfc21'
-            '1b8c281212b3c7edf456b38679c2c7ed838dd55789125c11cde691c2ccf62ace'
-            'b0f84dadc213a9daaa97ae7815f624f0bcdc883d627659c7fcf8b7131538b43e'
-            'ce2d8fc1edcd410723f9f8300f05782caa8361b1fdefaa67feb1fd98897c3196'
-            '35a8a335ed4e65e10ef06e93002eab479253ec7a389d91bf27ef09db1b00fc99')
+            '90b880572186d4d1abf049d39e5f11e4cfedb3707c29eeb9740ceccdb3b62468'
+            '3b24abd3c1254de1727a91b6ade26c36dc8dbee8ecbfab4bf6afbad21fdd59ff')
