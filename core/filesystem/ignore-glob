@@ -38,3 +38,5 @@ ld.so.conf.d
 conky
 qemu
 fuse.conf
+libnl
+trusted-key.key
