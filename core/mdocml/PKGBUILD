@@ -1,13 +1,13 @@
 pkgname=mdocml
-pkgver=1.12.0
+pkgver=1.12.1
 pkgrel=1
 pkgdesc="mdoc macro compiler"
 url="http://mdocml.bsd.lv/"
-arch=('i686' 'x86_64')
+arch=('x86_64')
 license="BSD"
 groups=('base')
 source=(http://mdocml.bsd.lv/snapshots/mdocml-$pkgver.tar.gz)
-sha256sums=('887dbe722e459ce60a6f1e29e278f68932fab9592768b9b324503ba80fe17a5e')
+sha256sums=('12a756cd2901954bccdd25819a16d0ab0501c32c87ad7973570cd65608d32891')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
