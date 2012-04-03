@@ -1,5 +1,5 @@
 pkgname=grub
-pkgver='1.99'
+pkgver=1.99
 pkgrel=1
 url="http://www.gnu.org/software/grub/"
 arch=('i686' 'x86_64')
