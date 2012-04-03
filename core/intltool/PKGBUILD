@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=intltool
-pkgver=0.50.1
+pkgver=0.50.2
 pkgrel=1
 pkgdesc="The internationalization tool collection"
 arch=('any')
@@ -9,7 +9,7 @@ license=('GPL')
 groups=('base-devel')
 depends=('perl-xml-parser')
 source=(http://edge.launchpad.net/intltool/trunk/${pkgver}/+download/${pkgname}-${pkgver}.tar.gz)
-sha1sums=('3964df4057a16c82f711e778df058e6c11fe093a')
+sha1sums=('7fddbd8e1bf94adbf1bc947cbf3b8ddc2453f8ad')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
