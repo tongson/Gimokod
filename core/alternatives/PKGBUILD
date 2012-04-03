@@ -1,7 +1,7 @@
 pkgname=alternatives
 _pkgname=chkconfig
 pkgver=1.3.56
-pkgrel=2
+pkgrel=3
 pkgdesc="reimplementation of the Debian alternatives system by Red Hat"
 arch=('x86_64')
 url="https://fedorahosted.org/releases/c/h/chkconfig/"
@@ -22,7 +22,7 @@ build() {
 
 package() {
   cd "${srcdir}/${_pkgname}-${pkgver}"
-  install -D -m0700 alternatives "${pkgdir}/usr/bin/alternatives"
+  install -D -m0755 alternatives "${pkgdir}/usr/bin/alternatives"
   install -d -m0755 "${pkgdir}/etc/alternatives"
   install -d -m0755 "${pkgdir}/var/lib/alternatives"
   install -D -m0644 alternatives.8 "${pkgdir}/usr/share/man/man8/alternatives.8"
