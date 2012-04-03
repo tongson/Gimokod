@@ -1,19 +1,19 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=libnotify
-pkgver=0.7.4
+pkgver=0.7.5
 pkgrel=1
 pkgdesc="Desktop notification library"
-arch=('i686' 'x86_64')
+arch=('x86_64')
 url="http://library.gnome.org/devel/notification-spec/"
 license=('LGPL')
 depends=('gdk-pixbuf' 'glib')
 makedepends=('pkg-config' 'gtk3')
 options=('!libtool')
 source=(http://ftp.gnome.org/pub/GNOME/sources/${pkgname}/0.7/${pkgname}-${pkgver}.tar.xz)
-sha256sums=('e3c58345112672c2cbb05a67512ff6c7028892df7a34746e2162fe76d9877019')
+sha256sums=('4378cb47874ba4d5f759b7890d8d28d086e81d3f0bd4f6e84e5ab66d82ffb652')
 
 build() {
-  cd "${srcdir}/${pkgname}-${pkgver}"
+  cd "${pkgname}-${pkgver}"
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
@@ -23,6 +23,6 @@ build() {
 }
 
 package() {
-  cd "${srcdir}/${pkgname}-${pkgver}"
+  cd "${pkgname}-${pkgver}"
   make DESTDIR="${pkgdir}" install
 }
