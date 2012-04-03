@@ -1,13 +1,13 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=abiword
 pkgver=2.8.6
-pkgrel=2
-arch=('i686' 'x86_64')
+pkgrel=4
+arch=('x86_64')
 license=('GPL')
 url="http://www.abisource.com"
-makedepends=('pkg-config')
-depends=('boost' 'fribidi' 'wv' 'libxslt' 'glib' 'freetype' 'zlib'
-         'libpng' 'libjpeg' 'cairo' 'gtk2' 'libxml2' 'gcc-libs')
+depends=('fribidi' 'wv' 'libxslt' 'glib' 'freetype' 'zlib'
+         'libpng' 'libjpeg' 'cairo' 'gtk2' 'libxml2' 'enchant')
+makedepends=('boost' 'pkg-config')
 options=('!makeflags' '!libtool')
 source=("http://www.abisource.com/downloads/${pkgname}/${pkgver}/source/${pkgname}-${pkgver}.tar.gz"
         'abiword-2.8.6-no-undefined.patch'
@@ -27,8 +27,8 @@ build() {
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
-              --enable-clipart \
-              --enable-templates \
+              --disable-clipart \
+              --disable-templates \
               --enable-statusbar \
               --enable-shave \
               --disable-maintainer-mode \
@@ -37,7 +37,7 @@ build() {
               --disable-collab-backend-telepathy \
               --disable-collab-backend-sugar \
               --enable-plugins="openxml latex" \
-              --disable-spell \
+              --enable-spell \
               --without-gnomevfs \
               --with-gio \
               --without-goffice \
