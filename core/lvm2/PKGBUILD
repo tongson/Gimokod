@@ -1,7 +1,7 @@
 pkgbase=lvm2
 pkgname=('lvm2' 'device-mapper')
 pkgver=2.02.95
-pkgrel=1
+pkgrel=2
 arch=('x86_64')
 url="http://sourceware.org/lvm2/"
 license=('GPL2' 'LGPL2')
@@ -11,12 +11,13 @@ sha256sums=('0335af36a151dafe5778da55a684546bfb98e7d3193834915b5efe95dbed9125')
 
 build() {
   cd "${srcdir}/LVM2.${pkgver}"
-  cd udev
-  sed -i -e 's:/usr/sbin:/usr/bin:g' -e 's:/sbin:/usr/bin:g' * >/dev/null 2>&1
-  cd ..
   Patch lvm2-2.02.63-always-make-static-libdm.patch
   Patch lvm2-2.02.92-locale-muck.patch
   Patch lvm2-2.02.92-dynamic-static-ldflags.patch
+  Patch lvm2-2.02.95-lvmpath.patch
+  cd udev
+  sed -i -e 's:/usr/sbin:/usr/bin:g' -e 's:/sbin:/usr/bin:g' * >/dev/null 2>&1
+  cd ..
   autoreconf -v
   ./configure --prefix= \
               --build=${CBUILD} \
@@ -79,9 +80,11 @@ package_lvm2() {
 source=(${source[@]-}
         lvm2-2.02.63-always-make-static-libdm.patch
         lvm2-2.02.92-dynamic-static-ldflags.patch
-        lvm2-2.02.92-locale-muck.patch)
+        lvm2-2.02.92-locale-muck.patch
+        lvm2-2.02.95-lvmpath.patch)
 
 sha256sums=(${sha256sums[@]-}
             '1c498b5efce77ed16bbbfcd9e0ec6da404a9c70c7ad0959ed7b60733adfcfc21'
             '90b880572186d4d1abf049d39e5f11e4cfedb3707c29eeb9740ceccdb3b62468'
-            '3b24abd3c1254de1727a91b6ade26c36dc8dbee8ecbfab4bf6afbad21fdd59ff')
+            '3b24abd3c1254de1727a91b6ade26c36dc8dbee8ecbfab4bf6afbad21fdd59ff'
+            '48d65570cbf86dcf749a0e77a1c57e26170ee90ddb8d8800988eab451f402456')
