@@ -1,25 +1,19 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=nspr
-pkgver=4.8.9
+pkgver=4.9
 pkgrel=1
 pkgdesc="Netscape Portable Runtime"
-arch=(i686 x86_64)
+arch=('x86_64')
 url="http://www.mozilla.org/projects/nspr/"
 license=('MPL' 'GPL')
 options=('!emptydirs')
 source=(ftp://ftp.mozilla.org/pub/mozilla.org/nspr/releases/v${pkgver}/src/${pkgname}-${pkgver}.tar.gz
         nspr.pc.in)
-md5sums=('60770d45dc08c0f181b22cdfce5be3e8'
+md5sums=('aa0c960b23a9d66a3c30c3e6ba80a99a'
          'bce1611f3117b53fc904cab549c09967')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  if [ "$CARCH" = "x86_64" ]; then
-    confflags="--enable-64bit"
-  else
-    confflags=""
-  fi
-
   sed -e 's/\$(MKSHLIB) \$(OBJS)/\$(MKSHLIB) \$(LDFLAGS) \$(OBJS)/g' \
       -i mozilla/nsprpub/config/rules.mk
 
@@ -30,7 +24,8 @@ build() {
       --libdir=/usr/lib \
       --includedir=/usr/include/nspr \
       --enable-optimize \
-      --disable-debug ${confflags}
+      --disable-debug \
+      --enable-64bit
   make
 }
 
