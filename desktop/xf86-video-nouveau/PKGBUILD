@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=xf86-video-nouveau
 _gitdate=20110829
-pkgver=0.0.16_git${_gitdate}
+pkgver=0.0.16_git20110829
 pkgrel=1
 pkgdesc="Open Source 3D acceleration driver for nVidia cards (experimental)"
 arch=('i686' 'x86_64')
