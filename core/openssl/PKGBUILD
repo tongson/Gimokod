@@ -1,7 +1,7 @@
 # Significant parts from Gentoo's "openssl-1.0.0e.ebuild"
 pkgname=openssl
 _ver=1.0.0h
-pkgver=${_ver/[a-z]/.${_ver//[0-9.]/}}
+pkgver=1.0.0.h
 pkgrel=2
 pkgdesc='The Open Source toolkit for Secure Sockets Layer and Transport Layer Security'
 arch=('x86_64')
