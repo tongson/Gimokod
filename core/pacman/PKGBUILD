@@ -1,9 +1,9 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=pacman
 pkgver=4.0.2
-pkgrel=1
+pkgrel=2
 pkgdesc="A library-based package manager with dependency support"
-arch=('i686' 'x86_64')
+arch=('x86_64')
 url="http://www.archlinux.org/pacman/"
 license=('GPL')
 groups=('base')
@@ -13,13 +13,12 @@ options=(!libtool)
 source=(ftp://ftp.archlinux.org/other/pacman/"${pkgname}"-"${pkgver}".tar.gz)
 sha256sums=('b53d03b29d5ea41efecd39e1fc3a6c9549d3f23a14d2d7fd540996bc4f8931e5')
 
-PKGEXT='.pkg.tar.gz'
-
 build() {
   cd "${srcdir}"/"${pkgname}"-"${pkgver}"
   Patch pacman-4.0.0-makepkg.diff
   Patch pacman-4.0.0-PKGNAME.diff
   Patch pacman-4.0.2-usrmove.diff
+  rm test/pacman/tests/sync200.py # requires Curl
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
