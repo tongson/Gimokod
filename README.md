@@ -1,6 +1,6 @@
 Gimokod -- a lightweight Linux distribution for servers
 =======================================================
-
+twitter.com/GimokodBot
 
 ## DESCRIPTION
 
