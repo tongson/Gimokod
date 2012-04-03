@@ -4,9 +4,9 @@ _topver=7.3
 _patchlevel=475
 __hgrev=74686ae0b181
 _versiondir="vim${_topver//./}"
-pkgver=${_topver}.${_patchlevel}
-pkgrel=1
-arch=('i686' 'x86_64')
+pkgver=7.3.475
+pkgrel=2
+arch=('x86_64')
 license=('custom:vim')
 url="http://www.vim.org"
 source=(ftp://ftp.archlinux.org/other/vim/${pkgname}-${pkgver}.tar.xz)
@@ -33,7 +33,7 @@ build() {
               --build=${CBUILD} \
               --host=${CHOST} \
               --localstatedir=/var/lib/vim \
-              --with-compiledby=GimokodLinux \
+              --with-compiledby=Gimokod \
               --disable-gpm \
               --disable-acl \
               --with-x=no \
