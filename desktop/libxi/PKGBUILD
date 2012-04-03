@@ -1,9 +1,9 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=libxi
 pkgver=1.6.0
-pkgrel=1
+pkgrel=3
 pkgdesc="X11 Input extension library"
-arch=('i686' 'x86_64')
+arch=('x86_64')
 url="http://xorg.freedesktop.org"
 depends=('libxext' 'inputproto')
 makedepends=('pkg-config' 'xorg-util-macros')
