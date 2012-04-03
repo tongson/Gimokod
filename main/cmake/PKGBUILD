@@ -1,0 +1,29 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=cmake
+pkgver=2.8.7
+pkgrel=1
+pkgdesc="A cross-platform open-source make system"
+arch=('x86_64')
+license=('custom')
+url="http://www.cmake.org"
+depends=('curl' 'libarchive' 'zlib' 'expat' 'gcc-libs')
+makedepends=('pkg-config' 'ncurses')
+source=("http://www.cmake.org/files/v2.8/${pkgname}-${pkgver}.tar.gz")
+md5sums=('e1b237aeaed880f65dec9c20602452f6')
+
+build() {
+  cd "${srcdir}"/${pkgname}-${pkgver}
+  ./bootstrap --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --mandir=/share/man \
+              --docdir=/share/doc/cmake \
+              --system-libs
+  make
+}
+
+package() {
+  cd "${srcdir}"/${pkgname}-${pkgver}
+  make DESTDIR="${pkgdir}" install
+  install -Dm644 Copyright.txt "${pkgdir}"/usr/share/licenses/${pkgname}/LICENSE
+}
