@@ -1,37 +1,41 @@
 # Based upon the PKGBUILD from Arch Linux and ebuild from Gentoo
 pkgname=firefox
-pkgver=10.0.2
+pkgver=11.0
 pkgrel=1
 pkgdesc="Standalone web browser from mozilla.org (unofficial build)"
-arch=('i686' 'x86_64')
+arch=('x86_64')
 license=('MPL' 'GPL' 'LGPL')
 depends=('gtk2' 'mozilla-common' 'nss' 'libxt' 'hunspell' 'startup-notification' 'mime-types'
          'dbus-glib' 'alsa-lib' 'sqlite' 'libnotify' 'desktop-file-utils' 'libvpx' 'libevent'
          'hicolor-icon-theme' 'libffi' 'bzip2' 'zlib' 'nspr' 'libpng' 'libjpeg' 'libidl' 'pixman')
-makedepends=('unzip' 'zip' 'pkg-config' 'yasm' 'mesa' 'autoconf21')
+makedepends=('unzip' 'zip' 'yasm' 'mesa' 'autoconf21' 'imake')
 url="http://www.mozilla.org/projects/firefox"
 source=(ftp://ftp.mozilla.org/pub/mozilla.org/firefox/releases/${pkgver}/source/firefox-${pkgver}.source.tar.bz2)
-sha256sums=('6ec5feba56f180a6fbf437a68cf0c77146ade28b936e5187573e3d95f13a0449')
+sha256sums=('2fda6bcfe455c2449a8a69bc16bf13f6ea6006badb0657dae63107e52f051701')
 
 build() {
   cd "${srcdir}/mozilla-release"
 
   Patch 1001-fix_jemalloc_vs_aslr.patch
   Patch 1002-fix_jemalloc_vs_aslr_part2.patch
-  Patch 2002_fix-preferences-gentoo.patch
   Patch 2003_fix_system_hunspell_dict_detection.patch
-  Patch 5001_fix-title-backspace.patch
-  Patch 5002_allow_locked_prefs.patch
-  Patch 5003_avoid_spurious_run_items_in_application_handlers.patch
-  Patch 5004_properly_launch_applications_set_in_home.patch
-  Patch 5005_use_resource_urls_appropriately.patch
-  Patch 5007_bug_709259_fix_cursor_support.patch
-  Patch 5008_part1_bug_635918_libcanberra.patch
-  Patch 5009_part2_bug_635918_libcanberra.patch
-  Patch 6008_fix_build_failure_on_platforms_without_yarr_support.patch
-  Patch 6010_avoid_invalid_conversions.patch
+  Patch 5000_fix-title-backspace.patch
+  Patch 5001_allow_locked_prefs.patch
+  Patch 5002_avoid_spurious_run_items_in_application_handlers.patch
+  Patch 5003_properly_launch_applications_set_in_home.patch
+  Patch 5004_use_yarr_instead_of_pcre_on_unsupported_platforms.patch
+  Patch 5005_require_libvpx-1.0.0.patch
+  Patch 5007_fix_jemalloc_within_libxul.patch
+  Patch 5008_block_opengl_1_drivers_explicitly.patch
+  Patch 5009_load_dependent_libraries_with_their_real_path.patch
+  Patch 5011_block_nouveau_3d_driver.patch
+  Patch 5012_allow_nouveau_driver_with_mesa_8.0.1.patch
+  Patch 5013_define_G_VARIANT_TYPE_STRING_ARRAY_for_older_glib.patch
+  Patch 5014_revert_621446.patch
+  Patch 6003_avoid_invalid_conversions.patch
+  Patch 6004_fix_alsa_webm_support.patch
+  Patch 6005_only_build_sps_on_supported_platforms.patch
   Patch firefox-install-dir.patch
-  Patch libvpx.patch
 
   sed -i -e "s:gnomevfs::" browser/confvars.sh \
          -e "s:gnomevfs::" xulrunner/confvars.sh
@@ -88,43 +92,51 @@ package() {
 source=(${source[@]-}
         1001-fix_jemalloc_vs_aslr.patch
         1002-fix_jemalloc_vs_aslr_part2.patch
-        2002_fix-preferences-gentoo.patch
         2003_fix_system_hunspell_dict_detection.patch
-        5001_fix-title-backspace.patch
-        5002_allow_locked_prefs.patch
-        5003_avoid_spurious_run_items_in_application_handlers.patch
-        5004_properly_launch_applications_set_in_home.patch
-        5005_use_resource_urls_appropriately.patch
-        5007_bug_709259_fix_cursor_support.patch
-        5008_part1_bug_635918_libcanberra.patch
-        5009_part2_bug_635918_libcanberra.patch
-        6008_fix_build_failure_on_platforms_without_yarr_support.patch
-        6010_avoid_invalid_conversions.patch
+        5000_fix-title-backspace.patch
+        5001_allow_locked_prefs.patch
+        5002_avoid_spurious_run_items_in_application_handlers.patch
+        5003_properly_launch_applications_set_in_home.patch
+        5004_use_yarr_instead_of_pcre_on_unsupported_platforms.patch
+        5005_require_libvpx-1.0.0.patch
+        5007_fix_jemalloc_within_libxul.patch
+        5008_block_opengl_1_drivers_explicitly.patch
+        5009_load_dependent_libraries_with_their_real_path.patch
+        5011_block_nouveau_3d_driver.patch
+        5012_allow_nouveau_driver_with_mesa_8.0.1.patch
+        5013_define_G_VARIANT_TYPE_STRING_ARRAY_for_older_glib.patch
+        5014_revert_621446.patch
+        6003_avoid_invalid_conversions.patch
+        6004_fix_alsa_webm_support.patch
+        6005_only_build_sps_on_supported_platforms.patch
         as-needed_1_5_26.patch
         as-needed_2_2_6.patch
-        libvpx.patch
         firefox-install-dir.patch
-        vendor.js
-        mozconfig)
+        mozconfig
+        vendor.js)
 
 sha256sums=(${sha256sums[@]-}
             '08e2d2db0964c86026ecf7ea9cf6473dfb6b0b55fe1d1cee7a5f308daf91acef'
             'dfe33ff9cc24a1795bfb0fb0ea35438588accbb43dc7d918c2e9bf13410a2286'
-            '7edae5ea1efb042412d02ef00c51f5e55c4499751c240b48c7b07f69cc420d94'
             'abe9fedabbc842a903f8923517457b05d39eb3a97145adc9437ec25e023b9aae'
             '72fb887a845de23ceb6f300415df0182eebfd4d29d46adc9b06d850e5315dc7a'
-            'a8afd44bff5f86b967528c67a71d3310ea0365709d11a0c8d7fb4cedf9c46c98'
-            'b8777d76ef03563da1403a6f5f1c94ce072f4aaebf0f130890c3345e99e7ff3b'
+            'ce0bb27fcb4d6b765d6b32abfaa798feae7a3f49f965b3daa06958c8c1a93b29'
+            '6ac4555e74b10666a86dea1d83b713199643b805c7c833f7524bbf46d288eaa1'
             '1a80f6844ac985cef488e20c918a3e619ada9d29410a7f2c00c9b2205067a1c6'
-            '530f58f06bdd7129df589fb447c35306ece9297a67365fff76afc8ec4f2c62a9'
-            '668b2b319954a6498f815ca423b78473ee3c8e2b99ed019780336041fea117b6'
-            '58f044cfbf8281e8593dc30c32071efbc074ee0ac8e717a58819d54a83fc1a47'
-            'b48438d55fceafe0d31fc35054188d9ff8a0c8855d5f2cda872651d0a261e47b'
-            '2c6b6c89abdbd54399bc3088c02b90b2d08f9968f76398029a757508626eaa9e'
-            '1b6555142ce168e1c7e71d1a2edf5acecf4537cb34dafe0069c91d147c1ba03a'
+            '84de5791a08a06b307fcb1d4a2bc0b839ec5a910bfede563aa072e6440c64c4c'
+            'bb40372c2b738d2f880a65991c98e6213540dff67edb07f4ae2a7b205afe51d6'
+            'fc3b00804d59d2d7c3b4811099b7c5f250db51721ddea1bd16ad00e112fa1f09'
+            'dee4e068772f7cd33dcfb1a1bc638227edcb4c910c33c59fc256efd8e43286e1'
+            'a6e1ba019a88dd8805c6c41add97ed11cb669c79d7e9335f65ba4c295079b545'
+            '749361fd1877e4901e57d06bef79bed186bd5af741f11b5ca6702f37a478233a'
+            'd5ca9ebdf1f4caefc9d3259fc2933c79fa429ed2e5a3ebe617fa2bfa27ee8755'
+            '404a1c7aa3ea775577a054f567205b53995c58e4ae185463802485daee60695f'
+            'b9e62e7e16ce46b17fbc07201a8c8c44bd8d1c317dd9dd2d9e305ce2fc700d0d'
+            '07d53f1954ee05d4058b86db7e61e1f1a35b4bfd5690d3753bdc4e7238a1a018'
+            '569a6503ba754b6053800ae360a81f5dd2971342f1be1103a1ab4fc6092f150b'
+            'c8561ff2f494cfb47730a1cfc117e830c8afdbd4c294f085f45e789cc889dd9d'
             '3060597dcc5801273a2c36ad534a4da76518769c80637803048d041873aa1d28'
             '76e379383f80a463201fe864c1e35c3cd4858b71f26c55b3a5dcb2648e383258'
-            'ff330d7a8888336c9c3aaccc47fde257fda58a1d98be9b2d5f448f027072c4c1'
             '3db7fa9de38b21da92eb3fe2923cd23584c526c6174d984ff7a777fb04a1270b'
-            '4b50e9aec03432e21b44d18c4c97b2630bace606b033f7d556c9d3e3eb0f4fa4'
-            '59c1c4d8d86ae82c07ea10f119e7554192173af65ec69fe862b8a62d813e0399')
+            '59c1c4d8d86ae82c07ea10f119e7554192173af65ec69fe862b8a62d813e0399'
+            '3c7a38c5a7f22ba672f417ce22caf38f0fd478a81e3d534b51a76a879d227f53')

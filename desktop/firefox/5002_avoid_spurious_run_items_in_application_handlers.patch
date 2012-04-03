@@ -9,10 +9,10 @@ Subject: Avoid spurious "Run" items in application handlers configuration
  2 files changed, 6 insertions(+), 6 deletions(-)
 
 diff --git a/browser/components/preferences/applications.js b/browser/components/preferences/applications.js
-index abfec20..40cd81a 100644
+index 8f79153..fd19ace 100644
 --- a/browser/components/preferences/applications.js
 +++ b/browser/components/preferences/applications.js
-@@ -1345,6 +1345,7 @@ var gApplicationsPane = {
+@@ -1334,6 +1334,7 @@ var gApplicationsPane = {
      return aExecutable &&
             aExecutable.exists() &&
             aExecutable.isExecutable() &&

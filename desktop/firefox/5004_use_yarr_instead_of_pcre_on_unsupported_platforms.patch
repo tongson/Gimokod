@@ -5,17 +5,19 @@ Subject: Bug 691898 - Use YARR interpreter instead of PCRE on platforms where
 
 ---
  js/src/Makefile.in           |   21 +++++++++++++--------
+ js/src/jscntxt.cpp           |    8 ++++++++
+ js/src/jscntxt.h             |    6 ++++++
  js/src/vm/RegExpObject-inl.h |   28 ++++++----------------------
- js/src/vm/RegExpObject.cpp   |   36 ------------------------------------
- js/src/vm/RegExpObject.h     |   27 ++++++---------------------
+ js/src/vm/RegExpObject.cpp   |   37 -------------------------------------
+ js/src/vm/RegExpObject.h     |   33 +++++++--------------------------
  js/src/yarr/wtfbridge.h      |    2 --
- 5 files changed, 25 insertions(+), 89 deletions(-)
+ 7 files changed, 40 insertions(+), 95 deletions(-)
 
 diff --git a/js/src/Makefile.in b/js/src/Makefile.in
-index fc48cbd..49f0bdc 100644
+index 06ba7ca..46c32e6 100644
 --- a/js/src/Makefile.in
 +++ b/js/src/Makefile.in
-@@ -416,15 +416,20 @@ CPPSRCS += 	checks.cc \
+@@ -361,15 +361,20 @@ CPPSRCS += 	checks.cc \
  
  ifeq (,$(filter arm% sparc %86 x86_64,$(TARGET_CPU)))
  
@@ -42,62 +44,146 @@ index fc48cbd..49f0bdc 100644
  		$(NULL)
  else
  
-@@ -1015,10 +1020,10 @@ endif
+@@ -921,10 +926,10 @@ endif
  # Needed to "configure" it correctly.  Unfortunately these
  # flags wind up being applied to all code in js/src, not just
  # the code in js/src/assembler.
 -CXXFLAGS += -DUSE_SYSTEM_MALLOC=1 -DENABLE_ASSEMBLER=1
 +CXXFLAGS += -DUSE_SYSTEM_MALLOC=1
  
- ifneq (,$(ENABLE_YARR_JIT)$(ENABLE_TRACEJIT)$(ENABLE_METHODJIT))
+ ifneq (,$(ENABLE_YARR_JIT)$(ENABLE_METHODJIT))
 -CXXFLAGS +=  -DENABLE_JIT=1
 +CXXFLAGS +=  -DENABLE_JIT=1 -DENABLE_ASSEMBLER=1
  endif
  
  INCLUDES +=	-I$(srcdir)/assembler -I$(srcdir)/yarr
+diff --git a/js/src/jscntxt.cpp b/js/src/jscntxt.cpp
+index cc10655..65483d6 100644
+--- a/js/src/jscntxt.cpp
++++ b/js/src/jscntxt.cpp
+@@ -106,7 +106,9 @@ ThreadData::ThreadData(JSRuntime *rt)
+ #endif
+     waiveGCQuota(false),
+     tempLifoAlloc(TEMP_LIFO_ALLOC_PRIMARY_CHUNK_SIZE),
++#if ENABLE_ASSEMBLER
+     execAlloc(NULL),
++#endif
+     bumpAlloc(NULL),
+     repCache(NULL),
+     dtoaState(NULL),
+@@ -123,7 +125,9 @@ ThreadData::~ThreadData()
+ {
+     JS_ASSERT(!repCache);
+ 
++#if ENABLE_ASSEMBLER
+     rt->delete_<JSC::ExecutableAllocator>(execAlloc);
++#endif
+     rt->delete_<WTF::BumpPointerAllocator>(bumpAlloc);
+ 
+     if (dtoaState)
+@@ -157,9 +161,11 @@ ThreadData::sizeOfExcludingThis(JSMallocSizeOfFun mallocSizeOf, size_t *normal,
+     *temporary = tempLifoAlloc.sizeOfExcludingThis(mallocSizeOf);
+ 
+     size_t method = 0, regexp = 0, unused = 0;
++#if ENABLE_ASSEMBLER
+     if (execAlloc)
+         execAlloc->sizeOfCode(&method, &regexp, &unused);
+     JS_ASSERT(method == 0);     /* this execAlloc is only used for regexp code */
++#endif
+     *regexpCode = regexp + unused;
+ 
+     *stackCommitted = stackSpace.sizeOfCommitted();
+@@ -188,6 +194,7 @@ ThreadData::triggerOperationCallback(JSRuntime *rt)
+ #endif
+ }
+ 
++#if ENABLE_ASSEMBLER
+ JSC::ExecutableAllocator *
+ ThreadData::createExecutableAllocator(JSContext *cx)
+ {
+@@ -199,6 +206,7 @@ ThreadData::createExecutableAllocator(JSContext *cx)
+         js_ReportOutOfMemory(cx);
+     return execAlloc;
+ }
++#endif
+ 
+ WTF::BumpPointerAllocator *
+ ThreadData::createBumpPointerAllocator(JSContext *cx)
+diff --git a/js/src/jscntxt.h b/js/src/jscntxt.h
+index a71d6b2..1702c65 100644
+--- a/js/src/jscntxt.h
++++ b/js/src/jscntxt.h
+@@ -153,21 +153,27 @@ struct ThreadData {
+      * Both of these allocators are used for regular expression code which is shared at the
+      * thread-data level.
+      */
++#if ENABLE_ASSEMBLER
+     JSC::ExecutableAllocator    *execAlloc;
++#endif
+     WTF::BumpPointerAllocator   *bumpAlloc;
+     js::RegExpPrivateCache      *repCache;
+ 
++#if ENABLE_ASSEMBLER
+     JSC::ExecutableAllocator *createExecutableAllocator(JSContext *cx);
++#endif
+     WTF::BumpPointerAllocator *createBumpPointerAllocator(JSContext *cx);
+     js::RegExpPrivateCache *createRegExpPrivateCache(JSContext *cx);
+ 
+   public:
++#if ENABLE_ASSEMBLER
+     JSC::ExecutableAllocator *getOrCreateExecutableAllocator(JSContext *cx) {
+         if (execAlloc)
+             return execAlloc;
+ 
+         return createExecutableAllocator(cx);
+     }
++#endif
+ 
+     WTF::BumpPointerAllocator *getOrCreateBumpPointerAllocator(JSContext *cx) {
+         if (bumpAlloc)
 diff --git a/js/src/vm/RegExpObject-inl.h b/js/src/vm/RegExpObject-inl.h
-index 5f7817d..91108a7 100644
+index 6e7ffef..b7a4320 100644
 --- a/js/src/vm/RegExpObject-inl.h
 +++ b/js/src/vm/RegExpObject-inl.h
-@@ -327,6 +327,7 @@ RegExpPrivate::create(JSContext *cx, JSString *source, RegExpFlag flags, TokenSt
-     return RetType(self);
+@@ -367,6 +367,7 @@ detail::RegExpPrivate::create(JSContext *cx, JSLinearString *source, RegExpFlag
+     return RetType(priv);
  }
  
 +#if ENABLE_YARR_JIT
  /* This function should be deleted once bad Android platforms phase out. See bug 604774. */
  inline bool
- RegExpPrivateCode::isJITRuntimeEnabled(JSContext *cx)
-@@ -337,12 +338,12 @@ RegExpPrivateCode::isJITRuntimeEnabled(JSContext *cx)
+ detail::RegExpPrivateCode::isJITRuntimeEnabled(JSContext *cx)
+@@ -377,12 +378,12 @@ detail::RegExpPrivateCode::isJITRuntimeEnabled(JSContext *cx)
      return true;
  #endif
  }
 +#endif
  
  inline bool
- RegExpPrivateCode::compile(JSContext *cx, JSLinearString &pattern, TokenStream *ts,
-                            uintN *parenCount, RegExpFlag flags)
+ detail::RegExpPrivateCode::compile(JSContext *cx, JSLinearString &pattern, TokenStream *ts,
+                                    uintN *parenCount, RegExpFlag flags)
  {
 -#if ENABLE_YARR_JIT
      /* Parse the pattern. */
      ErrorCode yarrError;
      YarrPattern yarrPattern(pattern, bool(flags & IgnoreCaseFlag), bool(flags & MultilineFlag),
-@@ -359,7 +360,7 @@ RegExpPrivateCode::compile(JSContext *cx, JSLinearString &pattern, TokenStream *
+@@ -399,7 +400,7 @@ detail::RegExpPrivateCode::compile(JSContext *cx, JSLinearString &pattern, Token
       * case we have to bytecode compile it.
       */
  
 -#ifdef JS_METHODJIT
 +#if ENABLE_YARR_JIT && defined(JS_METHODJIT)
      if (isJITRuntimeEnabled(cx) && !yarrPattern.m_containsBackreferences) {
-         if (!cx->compartment->ensureJaegerCompartmentExists(cx))
-             return false;
-@@ -371,21 +372,11 @@ RegExpPrivateCode::compile(JSContext *cx, JSLinearString &pattern, TokenStream *
+         JSC::ExecutableAllocator *execAlloc = cx->threadData()->getOrCreateExecutableAllocator(cx);
+         if (!execAlloc) {
+@@ -420,21 +421,11 @@ detail::RegExpPrivateCode::compile(JSContext *cx, JSLinearString &pattern, Token
+         return false;
      }
- #endif
  
 +#if ENABLE_YARR_JIT
      codeBlock.setFallBack(true);
 +#endif
-     byteCode = byteCompile(yarrPattern, cx->compartment->regExpAllocator).get();
+     byteCode = byteCompile(yarrPattern, bumpAlloc).get();
      return true;
 -#else /* !defined(ENABLE_YARR_JIT) */
 -    int error = 0;
@@ -114,7 +200,7 @@ index 5f7817d..91108a7 100644
  }
  
  inline bool
-@@ -431,19 +422,12 @@ RegExpPrivateCode::execute(JSContext *cx, const jschar *chars, size_t start, siz
+@@ -476,19 +467,12 @@ detail::RegExpPrivateCode::execute(JSContext *cx, const jschar *chars, size_t le
      else
          result = JSC::Yarr::execute(codeBlock, chars, start, length, output);
  #else
@@ -123,31 +209,31 @@ index 5f7817d..91108a7 100644
  #endif
  
      if (result == -1)
-         return Success_NotFound;
+         return RegExpRunStatus_Success_NotFound;
  
 -#if !ENABLE_YARR_JIT
 -    if (result < 0) {
 -        reportPCREError(cx, result);
--        return Error;
+-        return RegExpRunStatus_Error;
 -    }
 -#endif
 -
      JS_ASSERT(result >= 0);
-     return Success;
+     return RegExpRunStatus_Success;
  }
 diff --git a/js/src/vm/RegExpObject.cpp b/js/src/vm/RegExpObject.cpp
-index f75c6a5..7631dd5 100644
+index 2796acb..9e6ce15 100644
 --- a/js/src/vm/RegExpObject.cpp
 +++ b/js/src/vm/RegExpObject.cpp
-@@ -251,7 +251,6 @@ Class js::RegExpClass = {
-     NULL                     /* trace */
+@@ -392,7 +392,6 @@ Class js::RegExpClass = {
+     regexp_trace
  };
  
 -#if ENABLE_YARR_JIT
  void
  RegExpPrivateCode::reportYarrError(JSContext *cx, TokenStream *ts, ErrorCode error)
  {
-@@ -283,41 +282,6 @@ RegExpPrivateCode::reportYarrError(JSContext *cx, TokenStream *ts, ErrorCode err
+@@ -424,42 +423,6 @@ RegExpPrivateCode::reportYarrError(JSContext *cx, TokenStream *ts, ErrorCode err
      }
  }
  
@@ -161,9 +247,9 @@ index f75c6a5..7631dd5 100644
 -    return
 -    switch (error) {
 -      case -2: REPORT(JSMSG_REGEXP_TOO_COMPLEX);
--      case 0: JS_NOT_REACHED("Precondition violation: an error must have occurred."); 
+-      case 0: JS_NOT_REACHED("Precondition violation: an error must have occurred.");
 -      case 1: REPORT(JSMSG_TRAILING_SLASH);
--      case 2: REPORT(JSMSG_TRAILING_SLASH); 
+-      case 2: REPORT(JSMSG_TRAILING_SLASH);
 -      case 3: REPORT(JSMSG_REGEXP_TOO_COMPLEX);
 -      case 4: REPORT(JSMSG_BAD_QUANTIFIER);
 -      case 5: REPORT(JSMSG_BAD_QUANTIFIER);
@@ -184,25 +270,29 @@ index f75c6a5..7631dd5 100644
 -    }
 -#undef REPORT
 -}
+-
 -#endif /* ENABLE_YARR_JIT */
 -
  bool
  js::ParseRegExpFlags(JSContext *cx, JSString *flagStr, RegExpFlag *flagsOut)
  {
 diff --git a/js/src/vm/RegExpObject.h b/js/src/vm/RegExpObject.h
-index 1449d56..279f3c0 100644
+index b4b44b0..5675dd4 100644
 --- a/js/src/vm/RegExpObject.h
 +++ b/js/src/vm/RegExpObject.h
-@@ -49,8 +49,6 @@
+@@ -49,10 +49,8 @@
  #include "yarr/Yarr.h"
  #if ENABLE_YARR_JIT
  #include "yarr/YarrJIT.h"
+-#include "yarr/YarrSyntaxChecker.h"
 -#else
 -#include "yarr/pcre/pcre.h"
  #endif
++#include "yarr/YarrSyntaxChecker.h"
  
  namespace js {
-@@ -153,48 +151,39 @@ ResetRegExpObject(JSContext *cx, AlreadyIncRefed<RegExpPrivate> rep);
+ 
+@@ -240,68 +238,51 @@ static const jschar GreedyStarChars[] = {'.', '*'};
  /* Abstracts away the gross |RegExpPrivate| backend details. */
  class RegExpPrivateCode
  {
@@ -247,18 +337,26 @@ index 1449d56..279f3c0 100644
 -#endif
      }
  
+     static bool checkSyntax(JSContext *cx, TokenStream *tokenStream, JSLinearString *source) {
+-#if ENABLE_YARR_JIT
+         ErrorCode error = JSC::Yarr::checkSyntax(*source);
+         if (error == JSC::Yarr::NoError)
+             return true;
+ 
+         reportYarrError(cx, tokenStream, error);
+         return false;
+-#else
+-# error "Syntax checking not implemented for !ENABLE_YARR_JIT"
+-#endif
+     }
+ 
  #if ENABLE_YARR_JIT
      static inline bool isJITRuntimeEnabled(JSContext *cx);
--    void reportYarrError(JSContext *cx, TokenStream *ts, JSC::Yarr::ErrorCode error);
+-    static void reportYarrError(JSContext *cx, TokenStream *ts, JSC::Yarr::ErrorCode error);
 -#else
--    void reportPCREError(JSContext *cx, int error);
+-    static void reportPCREError(JSContext *cx, int error);
  #endif
-+    void reportYarrError(JSContext *cx, TokenStream *ts, JSC::Yarr::ErrorCode error);
- 
-     inline bool compile(JSContext *cx, JSLinearString &pattern, TokenStream *ts, uintN *parenCount,
-                         RegExpFlag flags);
-@@ -205,11 +194,7 @@ class RegExpPrivateCode
-                                  int *output, size_t outputCount);
++    static void reportYarrError(JSContext *cx, TokenStream *ts, JSC::Yarr::ErrorCode error);
  
      static size_t getOutputSize(size_t pairCount) {
 -#if ENABLE_YARR_JIT
@@ -267,8 +365,8 @@ index 1449d56..279f3c0 100644
 -        return pairCount * 3; /* Should be x2, but PCRE has... needs. */
 -#endif
      }
- };
  
+     inline bool compile(JSContext *cx, JSLinearString &pattern, TokenStream *ts, uintN *parenCount,
 diff --git a/js/src/yarr/wtfbridge.h b/js/src/yarr/wtfbridge.h
 index ac41d08..fb8eb86 100644
 --- a/js/src/yarr/wtfbridge.h
@@ -283,5 +381,3 @@ index ac41d08..fb8eb86 100644
  
  namespace JSC { namespace Yarr {
  
-
-

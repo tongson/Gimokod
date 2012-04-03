@@ -1,0 +1,105 @@
+From: Mike Hommey <mh@glandium.org>
+Date: Fri, 27 Jan 2012 17:41:27 +0100
+Subject: Revert investigation patch for bug 621446
+
+---
+ netwerk/protocol/http/HttpChannelParent.cpp |   36 +--------------------------
+ netwerk/protocol/http/HttpChannelParent.h   |    4 ---
+ 2 files changed, 1 insertions(+), 39 deletions(-)
+
+diff --git a/netwerk/protocol/http/HttpChannelParent.cpp b/netwerk/protocol/http/HttpChannelParent.cpp
+index 39e2ccb..3bf147d 100644
+--- a/netwerk/protocol/http/HttpChannelParent.cpp
++++ b/netwerk/protocol/http/HttpChannelParent.cpp
+@@ -57,7 +57,6 @@
+ #include "nsIApplicationCacheService.h"
+ #include "nsIOfflineCacheUpdate.h"
+ #include "nsIRedirectChannelRegistrar.h"
+-#include "prinit.h"
+ 
+ namespace mozilla {
+ namespace net {
+@@ -68,9 +67,6 @@ HttpChannelParent::HttpChannelParent(PBrowserParent* iframeEmbedding)
+   , mStoredProgress(0)
+   , mStoredProgressMax(0)
+   , mHeadersToSyncToChild(nsnull)
+-  , mSentRedirect1Begin(false)
+-  , mSentRedirect1BeginFailed(false)
+-  , mReceivedRedirect2Verify(false)
+ {
+   // Ensure gHttpHandler is initialized: we need the atom table up and running.
+   nsIHttpProtocolHandler* handler;
+@@ -333,11 +329,6 @@ HttpChannelParent::RecvUpdateAssociatedContentSecurity(const PRInt32& high,
+   return true;
+ }
+ 
+-// Bug 621446 investigation, we don't want conditional PR_Aborts bellow to be
+-// merged to a single address.
+-#pragma warning(disable : 4068)
+-#pragma GCC optimize ("O0")
+-
+ bool
+ HttpChannelParent::RecvRedirect2Verify(const nsresult& result, 
+                                        const RequestHeaderTuples& changedHeaders)
+@@ -355,30 +346,11 @@ HttpChannelParent::RecvRedirect2Verify(const nsresult& result,
+     }
+   }
+ 
+-  if (!mRedirectCallback) {
+-    // Bug 621446 investigation (optimization turned off above)
+-    if (mReceivedRedirect2Verify)
+-      ::PR_Abort();
+-    if (mSentRedirect1BeginFailed)
+-      ::PR_Abort();
+-    if (mSentRedirect1Begin && NS_FAILED(result))
+-      ::PR_Abort();
+-    if (mSentRedirect1Begin && NS_SUCCEEDED(result))
+-      ::PR_Abort();
+-    if (!mRedirectChannel)
+-      ::PR_Abort();
+-  }
+-
+-  mReceivedRedirect2Verify = true;
+-
+   mRedirectCallback->OnRedirectVerifyCallback(result);
+   mRedirectCallback = nsnull;
+   return true;
+ }
+ 
+-// Bug 621446 investigation
+-#pragma GCC reset_options
+-
+ bool
+ HttpChannelParent::RecvDocumentChannelCleanup()
+ {
+@@ -596,14 +568,8 @@ HttpChannelParent::StartRedirect(PRUint32 newChannelId,
+                                    redirectFlags,
+                                    responseHead ? *responseHead
+                                                 : nsHttpResponseHead());
+-  if (!result) {
+-    // Bug 621446 investigation
+-    mSentRedirect1BeginFailed = true;
++  if (!result)
+     return NS_BINDING_ABORTED;
+-  }
+-
+-  // Bug 621446 investigation
+-  mSentRedirect1Begin = true;
+ 
+   // Result is handled in RecvRedirect2Verify above
+ 
+diff --git a/netwerk/protocol/http/HttpChannelParent.h b/netwerk/protocol/http/HttpChannelParent.h
+index 0807e36..ab82edc 100644
+--- a/netwerk/protocol/http/HttpChannelParent.h
++++ b/netwerk/protocol/http/HttpChannelParent.h
+@@ -138,10 +138,6 @@ private:
+ 
+   // used while visiting headers, to send them to child: else null
+   RequestHeaderTuples *mHeadersToSyncToChild;
+-
+-  bool mSentRedirect1Begin : 1;
+-  bool mSentRedirect1BeginFailed : 1;
+-  bool mReceivedRedirect2Verify : 1;
+ };
+ 
+ } // namespace net
