@@ -1,16 +1,16 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=gtk-xfce-engine
-pkgver=2.99.1
+pkgver=2.99.2
 pkgrel=1
 pkgdesc="Xfce Gtk+-2.0 and Gtk+-3.0 engines"
-arch=('i686' 'x86_64')
+arch=('x86_64')
 license=('GPL2')
 url="http://www.xfce.org/"
 depends=('gtk2' 'gtk3')
 makedepends=('pkg-config')
 options=('!libtool')
 source=(http://archive.xfce.org/src/xfce/${pkgname}/2.99/${pkgname}-${pkgver}.tar.bz2)
-sha256sums=('077a3d68bb560371af902d4aa35ad949c70974e923ecdf2ec946801a480dece2')
+sha256sums=('81301df31b2bd8b345b40331fa9f1d5deeb6e3e18fa1a60cd23c0fa9b44de2ee')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
@@ -27,5 +27,5 @@ build() {
 
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-make DESTDIR="${pkgdir}" install
+  make DESTDIR="${pkgdir}" install
 }
