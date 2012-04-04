@@ -1,18 +1,21 @@
 #!/usr/bin/env lua
 -- debug.traceback = nil
-pkgbuildrepo = "/home/abs/build"
-distrorepo = "/home/abs/gimokod"
-outputdir = "/home/abs/packages"
-builddir = "/home/abs/builddir"
-pwd = os.getenv("PWD")
-concat = function (_) return table.concat(_, " ") end
-getpkgbuild = function (_) return pkgbuildrepo.."/"..stripl(pwd).."/".._.."/PKGBUILD" end
+
+function concat(table)                        -- STRING
+    return table.concat(table, " ")
+end
 
 function stripl(param)                        -- STRING
     for f in string.gmatch(param, "[^%/%c]+") do
-        output = f
+        local output = f
     end
     return output
+end
+
+function getpkgbuild(pkg)                     -- STRING
+    local pkgbuildrepo = "/home/abs/build"
+    local pwd = os.getenv("PWD")
+    return pkgbuildrepo.."/"..stripl(pwd).."/"..pkg.."/PKGBUILD"
 end
 
 function getpopen(cmd)                        -- TABLE
@@ -44,7 +47,7 @@ function isfile(param)                        -- BOOLEAN
 end
 
 function table.contains(table, element)       -- BOOLEAN
-    for _, value in pairs(table) do
+    for _,value in ipairs(table) do
         if value == element then
             return true
         end
@@ -82,7 +85,7 @@ function getdepends(param)                    -- TABLE
     for _,y in ipairs(targets) do
         if string.find(pkgbuild, y) then
             for x in string.gmatch(string.match(pkgbuild, y.."=%b()"), "'([%w%-%_]*[%=%'%<%>]-)'" ) do
-                pattern = string.gsub(x, "-", "%%-")
+                local pattern = string.gsub(x, "-", "%%-")
                 if table.contains(rdep, rdep[x]) then
                     x = string.gsub(x, pattern, rdep[x])
                 end
@@ -105,31 +108,30 @@ function getpkgdata(pkg, key)                     -- TABLE
     local pkgrel = string.match(pkgbuild, "pkgrel=([%d]*)")
     f:close()
     if string.find(pkgbuild, "pkgbase") then
-        pkgnames = string.match(pkgbuild, "pkgname=%b()")
+        local pkgnames = string.match(pkgbuild, "pkgname=%b()")
         for pkgname in string.gmatch(pkgnames, "'([%w%-%_]*)'" ) do
             _pkgname[#_pkgname+1] = pkgname
             _fullname[#_fullname+1] = pkgname.."-"..pkgver.."-"..pkgrel
         end
     else
-        pkgname = string.match(pkgbuild, "pkgname=([%w%-%_]*)")
+        local pkgname = string.match(pkgbuild, "pkgname=([%w%-%_]*)")
         _pkgname[#_pkgname+1] = pkgname
         _fullname[#_fullname+1] = pkgname.."-"..pkgver.."-"..pkgrel
     end
     return pkgdata[key]
 end
 
-function getpkgbin(pkg, bin)                     -- STRING
-    local dir = distrorepo.."/"..stripl(pwd).."/"
+function getpkgbin(dir, pkg, bin)                     -- STRING
     local bins = {}
     local carch = { "any", "x86_64" }
     if bin == "oldpkg" then
-        cmd = "echo "..dir..pkg.."-*-*-*.pkg.tar.??"
-        pkgname = string.gsub(pkg, "-", "%%-")
-        pattern = pkgname.."%-[%a%d%_%.]+%-[%d]+%-[%a%d%_]+%.pkg%.tar%.%w+"
+        local cmd = "echo "..dir..pkg.."-*-*-*.pkg.tar.??"
+        local pkgname = string.gsub(pkg, "-", "%%-")
+        local pattern = pkgname.."%-[%a%d%_%.]+%-[%d]+%-[%a%d%_]+%.pkg%.tar%.%w+"
         for _,line in pairs(getpopen(cmd)) do
             for p in string.gmatch(line, "[^%c%z%s]+") do
                 if string.find(stripl(p), pattern) then
-                    pkgbin = stripl(p)
+                    local pkgbin = stripl(p)
                     if isfile(dir..pkgbin) then
                         bins[#bins+1] = dir..pkgbin
                     end
@@ -153,25 +155,28 @@ function getpkgbin(pkg, bin)                     -- STRING
     end
 end
 
-function getdep(param)                        -- STRING
-    local deps = {}
-    for _,dep in pairs(getdepends(param)) do
-        if isdir(dep) then
-            if getpkgbin(dep, "newpkg") then
-                deps[#deps+1] = dep
-            elseif isdir(dep) then
-                deps[#deps+1] = dep
-            end
-        end
-    end
-    return concat(deps)
-end
-
 do
+    local builddir = "/home/abs/builddir"
+    local outputdir = "/home/abs/packages"
+    local repo = "/home/abs/gimokod"
     local printf = function (...) io.write(string.format(...)) end
     local dirs = {}
-    local pwd = stripl(pwd)
-    local distrorepo = distrorepo.."/"..pwd
+    local pwd = stripl(os.getenv("PWD"))
+    local repo = repo.."/"..stripl(pwd).."/"
+    local function getdep(param)                        -- STRING
+        local deps = {}
+        for _,dep in pairs(getdepends(param)) do
+            if isdir(dep) then
+                if getpkgbin(repo, dep, "newpkg") then
+                    deps[#deps+1] = dep
+                elseif isdir(dep) then
+                    deps[#deps+1] = dep
+                end
+            end
+        end
+        return concat(deps)
+    end
+
     for _,d in pairs(getpopen("for d in *;do echo $d;done")) do
         if isdir(d) then
             dirs[#dirs+1] = d
@@ -180,21 +185,21 @@ do
     printf("all:V: %s \n", concat(dirs))
 
     for _,pkg in pairs(dirs) do
-        if getpkgbin(pkg, "newpkg") then
-            printf("%s:V: %s %s \n", pkg, getpkgbin(pkg, "newpkg"), getdep(pkg))
-            printf("%s: %s \n", getpkgbin(pkg, "newpkg"), getpkgbuild(pkg))
+        if getpkgbin(repo, pkg, "newpkg") then
+            printf("%s:V: %s %s \n", pkg, getpkgbin(repo, pkg, "newpkg"), getdep(pkg))
+            printf("%s: %s \n", getpkgbin(repo, pkg, "newpkg"), getpkgbuild(pkg))
             printf("    rm -rf %s/* \n", builddir)
             printf("    cd %s \n", pkg)
             printf("    echo Started: $(date -uR)\n")
             printf("    /usr/bin/makepkg --noconfirm -mci || $(echo Build failed: %s | /usr/bin/bti && exit 1)\n", pkg)
             printf("    echo Stopped: $(date -uR)\n")
             for _,oldpkg in pairs(getpkgdata(pkg, "pkgname")) do
-                printf("    mv %s{,.sig} %s/../backup \n", getpkgbin(oldpkg, "oldpkg"), distrorepo)
+                printf("    mv %s{,.sig} %s../backup \n", getpkgbin(repo, oldpkg, "oldpkg"), repo)
             end
             for _,newpkg in pairs(getpkgdata(pkg, "fullname")) do
                 printf("    pushd %s\n", outputdir)
                 printf("    echo Build finished: %s $(sha256sum %s-*.pkg.tar.??) | /usr/bin/bti\n", newpkg, newpkg)
-                printf("    mv %s-*.pkg.tar.??{,.sig} %s\n", newpkg, distrorepo)
+                printf("    mv %s-*.pkg.tar.??{,.sig} %s\n", newpkg, repo)
                 printf("    popd\n")
             end
         else
@@ -207,7 +212,7 @@ do
             for _,newpkg in pairs(getpkgdata(pkg, "fullname")) do
                 printf("    pushd %s\n", outputdir)
                 printf("    echo Build finished: %s $(sha256sum %s-*.pkg.tar.??) | /usr/bin/bti\n", newpkg, newpkg)
-                printf("    mv %s-*.pkg.tar.??{,.sig} %s\n", newpkg, distrorepo)
+                printf("    mv %s-*.pkg.tar.??{,.sig} %s\n", newpkg, repo)
                 printf("    popd\n")
             end
         end
