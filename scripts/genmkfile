@@ -1,31 +1,10 @@
 #!/usr/bin/env lua
 -- debug.traceback = nil
 
-function concat(table)                        -- STRING
-    return table.concat(table, " ")
-end
-
-function stripl(param)                        -- STRING
-    for f in string.gmatch(param, "[^%/%c]+") do
-        local output = f
-    end
-    return output
-end
-
 function getpkgbuild(pkg)                     -- STRING
-    local pkgbuildrepo = "/home/abs/build"
-    local pwd = os.getenv("PWD")
-    return pkgbuildrepo.."/"..stripl(pwd).."/"..pkg.."/PKGBUILD"
-end
-
-function getpopen(cmd)                        -- TABLE
-    local _, f = pcall(io.popen, cmd, 'r')
-    local out = {}
-    for lines in string.gmatch(f:read('*all'), "[%C]+") do
-        out[#out+1] = lines
-    end
-    f:close()
-    return out
+    local pkgbuildrepo = os.getenv('WORK')
+    local repo = os.getenv('REPO')
+    return pkgbuildrepo.."/"..repo.."/"..pkg.."/PKGBUILD"
 end
 
 function isdir(param)                         -- BOOLEAN
@@ -121,85 +100,66 @@ function getpkgdata(pkg, key)                     -- TABLE
     return pkgdata[key]
 end
 
-function getpkgbin(dir, pkg, bin)                     -- STRING
+function getpkgbin(dir, pkg)                     -- STRING
     local bins = {}
+    local binrepo = os.getenv('BINREPO')
+    local repo = os.getenv('REPO')
+    local dir = binrepo.."/"..repo.."/"
     local carch = { "any", "x86_64" }
-    if bin == "oldpkg" then
-        local cmd = "echo "..dir..pkg.."-*-*-*.pkg.tar.??"
-        local pkgname = string.gsub(pkg, "-", "%%-")
-        local pattern = pkgname.."%-[%a%d%_%.]+%-[%d]+%-[%a%d%_]+%.pkg%.tar%.%w+"
-        for _,line in pairs(getpopen(cmd)) do
-            for p in string.gmatch(line, "[^%c%z%s]+") do
-                if string.find(stripl(p), pattern) then
-                    local pkgbin = stripl(p)
-                    if isfile(dir..pkgbin) then
-                        bins[#bins+1] = dir..pkgbin
-                    end
-                end
-            end
-        end
-    end
-    if bin == "newpkg" then
-        for _,pkgname in pairs(getpkgdata(pkg, "fullname")) do
-            for _,arch in ipairs(carch) do
-                if isfile(dir..pkgname.."-"..arch..".pkg.tar.xz") then
-                    bins[#bins+1] = dir..pkgname.."-"..arch..".pkg.tar.xz"
-                end
+    for _,pkgname in pairs(getpkgdata(pkg, "fullname")) do
+        for _,arch in ipairs(carch) do
+            if isfile(dir..pkgname.."-"..arch..".pkg.tar.xz") then
+                bins[#bins+1] = dir..pkgname.."-"..arch..".pkg.tar.xz"
             end
         end
     end
     if next(bins) == nil then
        return false
     else
-       return concat(bins)
+       return table.concat(bins, " ")
     end
 end
 
 do
-    local builddir = "/home/abs/builddir"
-    local outputdir = "/home/abs/packages"
-    local repo = "/home/abs/gimokod"
+    local builddir = os.getenv('BUILD')
+    local outputdir = os.getenv('OUTPUT')
+    local binrepo = os.getenv('BINREPO')
+    local repo = os.getenv('REPO')
     local printf = function (...) io.write(string.format(...)) end
     local dirs = {}
-    local pwd = stripl(os.getenv("PWD"))
-    local repo = repo.."/"..stripl(pwd).."/"
+    local binrepo = binrepo.."/"..repo.."/"
     local function getdep(param)                        -- STRING
         local deps = {}
         for _,dep in pairs(getdepends(param)) do
             if isdir(dep) then
-                if getpkgbin(repo, dep, "newpkg") then
+                if getpkgbin(dep) then
                     deps[#deps+1] = dep
                 elseif isdir(dep) then
                     deps[#deps+1] = dep
                 end
             end
         end
-        return concat(deps)
+        return table.concat(deps, " ")
     end
 
-    for _,d in pairs(getpopen("for d in *;do echo $d;done")) do
-        if isdir(d) then
-            dirs[#dirs+1] = d
-        end
-    end
-    printf("all:V: %s \n", concat(dirs))
+    printf("all:V: %s \n", table.concat(arg, " "))
 
-    for _,pkg in pairs(dirs) do
-        if getpkgbin(repo, pkg, "newpkg") then
-            printf("%s:V: %s %s \n", pkg, getpkgbin(repo, pkg, "newpkg"), getdep(pkg))
-            printf("%s: %s \n", getpkgbin(repo, pkg, "newpkg"), getpkgbuild(pkg))
+    for _,pkg in ipairs(arg) do
+        if getpkgbin(pkg) then
+            printf("%s:V: %s %s \n", pkg, getpkgbin(pkg), getdep(pkg))
+            printf("%s: %s \n", getpkgbin(pkg), getpkgbuild(pkg))
             printf("    rm -rf %s/* \n", builddir)
             printf("    cd %s \n", pkg)
             printf("    echo Started: $(date -uR)\n")
-            printf("    /usr/bin/makepkg --noconfirm -mci || $(echo Build failed: %s | /usr/bin/bti && exit 1)\n", pkg)
+            printf("    makepkg --noconfirm -mci || $(echo Build failed: %s | /usr/bin/bti && exit 1)\n", pkg)
             printf("    echo Stopped: $(date -uR)\n")
             for _,oldpkg in pairs(getpkgdata(pkg, "pkgname")) do
-                printf("    mv %s{,.sig} %s../backup \n", getpkgbin(repo, oldpkg, "oldpkg"), repo)
+                printf("    find %s -type f -regex '.*\\/%s-[0-9a-z\\.]*-[0-9]*-[0-9a-z\\_]*.pkg.tar.xz[\\.sig]*' -exec mv {} %s../backup \\;\n", binrepo, oldpkg, binrepo)
             end
             for _,newpkg in pairs(getpkgdata(pkg, "fullname")) do
                 printf("    pushd %s\n", outputdir)
                 printf("    echo Build finished: %s $(sha256sum %s-*.pkg.tar.??) | /usr/bin/bti\n", newpkg, newpkg)
-                printf("    mv %s-*.pkg.tar.??{,.sig} %s\n", newpkg, repo)
+                printf("    mv %s-*.pkg.tar.??{,.sig} %s\n", newpkg, binrepo)
                 printf("    popd\n")
             end
         else
@@ -207,12 +167,12 @@ do
             printf("    rm -rf %s/* \n", builddir)
             printf("    cd %s \n", pkg)
             printf("    echo Started: $(date -uR)\n")
-            printf("    /usr/bin/makepkg --noconfirm -mci || $(echo Build failed: %s | /usr/bin/bti && exit 1)\n", pkg)
+            printf("    makepkg --noconfirm -mci || $(echo Build failed: %s | /usr/bin/bti && exit 1)\n", pkg)
             printf("    echo Stopped: $(date -uR)\n")
             for _,newpkg in pairs(getpkgdata(pkg, "fullname")) do
                 printf("    pushd %s\n", outputdir)
                 printf("    echo Build finished: %s $(sha256sum %s-*.pkg.tar.??) | /usr/bin/bti\n", newpkg, newpkg)
-                printf("    mv %s-*.pkg.tar.??{,.sig} %s\n", newpkg, repo)
+                printf("    mv %s-*.pkg.tar.??{,.sig} %s\n", newpkg, binrepo)
                 printf("    popd\n")
             end
         end
