@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=util-linux
-pkgver=2.21
+pkgver=2.21.1
 pkgrel=1
 pkgdesc="Miscellaneous system utilities for Linux"
 url="http://www.kernel.org/pub/linux/utils/util-linux/"
@@ -9,14 +9,11 @@ groups=('base')
 license=('GPL2')
 depends=('ncurses' 'zlib')
 options=('!libtool')
-source=(ftp://ftp.kernel.org/pub/linux/utils/${pkgname}/v${pkgver}/${pkgname}-${pkgver}.tar.xz
-        stable-fixes-2.21.patch)
-md5sums=('208aa058f4117759d2939d1be7d662fc'
-         '415b850a4efa9174cd9c34022949f177')
+source=(ftp://ftp.kernel.org/pub/linux/utils/${pkgname}/v2.21/${pkgname}-${pkgver}.tar.xz)
+md5sums=('ad602dcd528f340b1329cfa6200d8f80')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-
   # hardware clock
   sed -e 's%etc/adjtime%var/lib/hwclock/adjtime%' -i include/pathnames.h
 
@@ -31,9 +28,13 @@ build() {
               --disable-wall \
               --enable-partx \
               --enable-libmount-mount \
+              --enable-fs-paths-extra=/usr/bin \
               --disable-nls
-
   make
+}
+
+check() {
+  make -C "$pkgname-$pkgver" check
 }
 
 package() {
