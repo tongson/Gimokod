@@ -1,18 +1,18 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=vim
 _topver=7.3
-_patchlevel=475
-__hgrev=74686ae0b181
+_patchlevel=495
+__hgrev=a104dae7f903
 _versiondir="vim${_topver//./}"
-pkgver=7.3.475
-pkgrel=2
+pkgver=7.3.495
+pkgrel=1
 arch=('x86_64')
 license=('custom:vim')
 url="http://www.vim.org"
 source=(ftp://ftp.archlinux.org/other/vim/${pkgname}-${pkgver}.tar.xz)
 depends=('ncurses')
 install=vim.install
-sha1sums=('56529692b35df97e8a0f8610122957ba93033545')
+sha1sums=('4181e211d0150cda9b3dbd815ec4aa14a6d28196')
 
 build() {
   cd "${srcdir}"
@@ -70,7 +70,7 @@ package() {
   # license
   install -Dm644 "${srcdir}"/vim-${pkgver}/runtime/doc/uganda.txt \
     "${pkgdir}"/usr/share/licenses/${pkgname}/license.txt
-    
+
   # rgb.txt file
   install -Dm644 "${srcdir}"/vim-${pkgver}/runtime/rgb.txt \
     "${pkgdir}"/usr/share/vim/${_versiondir}/rgb.txt
