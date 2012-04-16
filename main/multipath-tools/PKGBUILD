@@ -6,7 +6,7 @@ pkgdesc="Multipath Tools For Linux"
 arch=('i686' 'x86_64')
 url="http://christophe.varoqui.free.fr/"
 license=('GPL')
-install=multipath.install
+options=('!emptydirs')
 depends=('libaio' 'device-mapper')
 source=("http://christophe.varoqui.free.fr/multipath-tools/"${pkgname}"-"${pkgver}".tar.bz2")
 sha256sums=('8d44c8815144b5589cc3e604cb3fc16c76a028aef08aa1bec334ff70bf9ac712')
@@ -17,31 +17,23 @@ build() {
   patch -Np1 -i multipath-tools-0.4.9-buffer-overflows.patch
   patch -Np1 -i multipath-tools-0.4.9-build.patch
   sed -i '27s:multipathd::' Makefile # multipathd needs readline
+  sed -i 's|etc/udev|usr/lib/udev|g' multipath/Makefile kpartx/Makefile
+  sed -i 's|/sbin/|/usr/bin/|g' kpartx/kpartx.rules
+  export LDFLAGS=${LDFLAGS/-Wl,--as-needed}
   make
 }
 
 package() {
   cd "${srcdir}"
-  make DESTDIR="${pkgdir}" install
-  # install -D -m 644 "${srcdir}"/multipath.conf "${pkgdir}"/etc/multipath.conf
-
-  # UsrMove
-  mkdir "${pkgdir}/usr/bin"
-  mkdir "${pkgdir}/usr/lib"
-  mv "${pkgdir}"/sbin/* "${pkgdir}/usr/bin"
-  mv "${pkgdir}"/lib/* "${pkgdir}/usr/lib"
-  rmdir "${pkgdir}/sbin"
-  rmdir "${pkgdir}/lib"
+  make LIB="usr/lib" DESTDIR="$pkgdir" bindir="/usr/bin" libudevdir="/usr/lib/udev" install
 }
 
 source=(${source[@]-}
         multipath-tools-0.4.8-kparted-ext-partitions.patch
         multipath-tools-0.4.9-buffer-overflows.patch
-        multipath-tools-0.4.9-build.patch
-        multipath.conf)
+        multipath-tools-0.4.9-build.patch)
 
 sha256sums=(${sha256sums[@]-}
             '4cd2e75782dbaba715b85ef1ececdc130e24d7497897ceea9802c779e79c1c73'
             '1f9ca1d26fee69dc7d5c1b65a835d23e1b8dd8de6fd3678faf3e7b499611d15d'
-            'b543d2e012b0baedf959e4ccb097d8299bd721a5f543c82f2be01728fa2851a2'
-            'a1474573a52d3e2a06e987540868cfe9f669a14b787b62835bb7decf9088e23c')
+            'b543d2e012b0baedf959e4ccb097d8299bd721a5f543c82f2be01728fa2851a2')
