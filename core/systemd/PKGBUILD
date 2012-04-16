@@ -1,8 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
-pkgbase=systemd
-pkgname=('systemd' 'libsystemd')
+pkgname=systemd
 pkgver=44
-pkgrel=1
+pkgrel=2
 pkgdesc="Session and Startup manager"
 arch=('x86_64')
 url="http://www.freedesktop.org/wiki/Software/systemd"
@@ -10,7 +9,16 @@ license=('GPL2')
 makedepends=('gperf' 'intltool' 'gettext' 'linux-headers' 'dbus-core' 'kbd' 'libcap'
              'cryptsetup' 'udev' 'kmod' 'xz')
 groups=('base')
+replaces=('libsystemd')
 options=('!libtool' '!strip')
+source=("http://www.freedesktop.org/software/$pkgname/$pkgname-$pkgver.tar.xz"
+         0001-util-never-follow-symlinks-in-rm_rf_children.patch
+         0001-logind-close-FIFO-before-ending-sessions-cleanly.patch
+         0001-check-for-proper-return-from-dirent_ensure_type.patch)
+md5sums=('11f44ff74c87850064e4351518bcff17'
+         'b5863d6d4b47e2b5bda8eb57bde0d327'
+         'd37833358ef6c23fad622ea4a0941d1f'
+         '11f930fd0a3966abc794bf9127a7dde0')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
@@ -21,6 +29,8 @@ build() {
   done
   popd
   Patch 0001-util-never-follow-symlinks-in-rm_rf_children.patch
+  Patch 0001-logind-close-FIFO-before-ending-sessions-cleanly.patch
+  Patch 0001-check-for-proper-return-from-dirent_ensure_type.patch
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
@@ -53,9 +63,9 @@ build() {
 }
 
 
-package_systemd() {
-  pkgdesc="systemd and service manager"
-  depends=('dbus-core' 'kbd' 'libcap' 'cryptsetup' 'udev' 'kmod' 'xz' 'libsystemd')
+package() {
+  pkgdesc="system and service manager"
+  depends=('dbus-core' 'kbd' 'libcap' 'cryptsetup' 'udev' 'kmod' 'xz')
   install=systemd.install
   cd "${srcdir}/${pkgname}-${pkgver}"
   make DESTDIR="${pkgdir}" install
@@ -67,26 +77,7 @@ package_systemd() {
   popd
 
   # --disable-manpages
-  rm -rf "${pkgdir}/usr/share/man"
-
-  ### split off libsystemd (libs, includes, pkgconfig)
-  install -dm755 "$srcdir"/libsystemd/usr/{include,lib/pkgconfig}
-
-  cd "$srcdir"/libsystemd
-  mv "$pkgdir/usr/lib"/libsystemd-*.so* usr/lib
-  mv "$pkgdir/usr/include/systemd" usr/include
-  mv "$pkgdir/usr/lib/pkgconfig"/libsystemd-*.pc usr/lib/pkgconfig
+  # rm -rf "${pkgdir}/usr/share/man"
 }
-
-package_libsystemd() {
-  pkgdesc="systemd client libraries"
-  depends=('libcap' 'xz')
-  mv "$srcdir/libsystemd"/* "$pkgdir"
-}
-
-source=("http://www.freedesktop.org/software/${pkgname}/${pkgname}-${pkgver}.tar.xz"
-        0001-util-never-follow-symlinks-in-rm_rf_children.patch)
-sha256sums=('7a5aac4b4b8b3a82bf59292f10e43d8f2c2d7039f34e95714f81d8edcb42233c'
-            '4bf6f7d0312f07614d2addece6b48f3301bb85de5f27c8b9729e11b1f4d9e36a')
 
 
