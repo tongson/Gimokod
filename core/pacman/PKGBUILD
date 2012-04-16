@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=pacman
-pkgver=4.0.2
+pkgver=4.0.3
 pkgrel=2
 pkgdesc="A library-based package manager with dependency support"
 arch=('x86_64')
@@ -11,7 +11,7 @@ depends=('libarchive' 'gpgme' 'gimokod-keyring')
 install=pacman.install
 options=(!libtool)
 source=(ftp://ftp.archlinux.org/other/pacman/"${pkgname}"-"${pkgver}".tar.gz)
-sha256sums=('b53d03b29d5ea41efecd39e1fc3a6c9549d3f23a14d2d7fd540996bc4f8931e5')
+sha256sums=('a48696ae51aaccf31a69ea7916ba9b06e7836eb933b8a281c666729c9d55ce25')
 
 build() {
   cd "${srcdir}"/"${pkgname}"-"${pkgver}"
@@ -40,48 +40,18 @@ check() {
 package() {
   cd "${srcdir}"/"${pkgname}"-"${pkgver}"
   make DESTDIR="${pkgdir}" install
-
-  # install Arch specific stuff
   mkdir -p "${pkgdir}"/etc
-  case "$CARCH" in
-    i686)
-      install -m644 "${srcdir}"/pacman.conf "${pkgdir}"/etc/pacman.conf
-      mycarch="i686"
-      mychost="i686-pc-linux-gnu"
-      myflags="-march=i686 "
-      ;;
-    x86_64)
-      install -m644 "${srcdir}"/pacman.conf.x86_64 "${pkgdir}"/etc/pacman.conf
-      mycarch="x86_64"
-      mychost="x86_64-unknown-linux-gnu"
-      myflags="-march=x86-64 "
-      ;;
-  esac
-  install -m644 "${srcdir}"/makepkg.conf "${pkgdir}"/etc/
-  # set things correctly in the default conf file
-  sed -i "${pkgdir}"/etc/makepkg.conf \
-    -e "s|@CARCH[@]|$mycarch|g" \
-    -e "s|@CHOST[@]|$mychost|g" \
-    -e "s|@CARCHFLAGS[@]|$myflags|g"
-
-  mkdir -p "${pkgdir}"/etc/bash_completion.d/
-  install -m644 contrib/bash_completion "${pkgdir}"/etc/bash_completion.d/pacman
-  mkdir -p "${pkgdir}"/usr/share/zsh/site-functions/
-  install -m644 contrib/zsh_completion "${pkgdir}"/usr/share/zsh/site-functions/_pacman
+  install -m644 "${srcdir}"/pacman.conf "${pkgdir}"/etc/
 }
 
 source=(${source[@]-}
-        makepkg.conf
         pacman-4.0.0-PKGNAME.diff
         pacman-4.0.0-makepkg.diff
         pacman-4.0.2-usrmove.diff
-        pacman.conf
-        pacman.conf.x86_64)
+        pacman.conf)
 
 sha256sums=(${sha256sums[@]-}
-            '049491c1e3749cffb8033f7c757866490af836697fc5ce7bfbeb66596b9b0bc9'
             '56ee72e2fbc53b5d3201895a167b40295e638aaae93adb8cb3b9c8d0d6f4442a'
-            'b6e0c32fac51225e90cd2da100a1af728cc9e91295ecdaa54fe9e8241bed96d0'
+            '51a9dfb31c13ca40a1f7378d7be4f28d27a4a7f981d1c51cb19ea2c300415e88'
             '7ddd5c009d5f6a033be3c284310190ff457357963b83d77a117929a0ccef68e3'
-            '2f3916158d489f567670bb54de932419244d368fc33b0eefa3587ca8316904f3'
-            '17cda5f057d2137427437afe13544ed88c51a52dd8725fbb0bc707c38d786569')
+            '387eb22abab045c3f8c755ab67ea2749449779b5db18252b58d70bd268391755')

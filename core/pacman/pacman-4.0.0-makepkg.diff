@@ -136,19 +136,6 @@
  	fi
  
  	if [[ $(check_option upx) = "y" ]]; then
-@@ -1203,10 +1300,10 @@
- 	done
- 
- 	# check for references to the build and package directory
--	if find "${pkgdir}" -type f -print0 | xargs -0  grep -q -I "${srcdir}" ; then
-+	if find "${pkgdir}" -type f -print0 | xargs -0 grep -q -s "${srcdir}" ; then
- 		warning "$(gettext "Package contains reference to %s")" "\$srcdir"
- 	fi
--	if find "${pkgdir}" -type f -print0 | xargs -0  grep -q -I "${pkgdir}" ; then
-+	if find "${pkgdir}" -type f -print0 | xargs -0 grep -q -s "${pkgdir}" ; then
- 		warning "$(gettext "Package contains reference to %s")" "\$pkgdir"
- 	fi
- 
 @@ -1271,7 +1368,7 @@
  	# bsdtar's gzip compression always saves the time stamp, making one
  	# archive created using the same command line distinct from another.
