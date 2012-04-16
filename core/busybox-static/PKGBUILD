@@ -1,7 +1,7 @@
 pkgname=busybox-static
 _pkgname=busybox
 pkgver=1.19.4
-pkgrel=2
+pkgrel=6
 pkgdesc='Utilities for rescue, embedded and minimal systems'
 arch=('x86_64')
 url='http://busybox.net'
