@@ -1,7 +1,7 @@
 pkgname=busybox-suid
 _pkgname=busybox
 pkgver=1.19.4
-pkgrel=2
+pkgrel=3
 pkgdesc='Utilities for rescue, embedded and minimal systems'
 arch=('x86_64')
 url='http://busybox.net'
@@ -39,4 +39,4 @@ source=(${url}/downloads/${_pkgname}-${pkgver}.tar.bz2
         config)
 
 sha256sums=('9b853406da61ffb59eb488495fe99cbb7fb3dd29a31307fcfa9cf070543710ee'
-            '1e6ae19f033205139cadf9e89adbb101138bf72b7c5c59e29eca0ea480d48697')
+            'cbf8dbd0b46652f06dadce491b6c8bbb4b53b1f570158c09970291ae7adb7f78')

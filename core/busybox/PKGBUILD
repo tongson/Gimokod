@@ -1,6 +1,6 @@
 pkgname=busybox
 pkgver=1.19.4
-pkgrel=3
+pkgrel=5
 pkgdesc='Utilities for rescue, embedded and minimal systems'
 arch=('x86_64')
 url='http://busybox.net'
@@ -93,8 +93,8 @@ package() {
     ln -sf busybox "${pkgdir}"/${symlinks[$x]}
   done
 
-  install -o 160 -g 16 -m0750 -d "${pkgdir}"/var/spool/cron
-  install -o 160 -g 49 -m1730 -d "${pkgdir}"/var/spool/cron/crontabs
+  install -o 160 -g 16 -m0750 -d "${pkgdir}"/etc/cron
+  install -o 160 -g 49 -m1730 -d "${pkgdir}"/etc/cron/crontabs
 
   install -D -m0644 "${srcdir}"/sysctl.conf "${pkgdir}"/etc/sysctl.conf
   install -D -m0644 "${srcdir}"/man_db.conf "${pkgdir}"/etc/man_db.conf
@@ -119,6 +119,7 @@ source=(${url}/downloads/${pkgname}-${pkgver}.tar.bz2)
 #{,.sign})
 sha256sums=('9b853406da61ffb59eb488495fe99cbb7fb3dd29a31307fcfa9cf070543710ee')
 #            '04526172ae950625388bde790f1b78ab126307a6396f80e9548e54621b513171')
+
 source=(${source[@]-}
         busybox-1.19.2-bb.patch
         busybox-1.19.2-man.patch
@@ -132,9 +133,10 @@ source=(${source[@]-}
 sha256sums=(${sha256sums[@]-}
             '98f92c2edbcf61d1bacef783ea8b08cce07051b0a4489ed3f4579296846f89f1'
             '733e23d851e68ecd27ed8bb8f4c4b8ea27b0d143069ec49aadb04deeb65dd9f5'
-            '2bd96a9388d1eab3bcf6f7377b0c0aaf738b9bd99820a2f00e4e3754f2099086'
+            'aa4b216d8f9d88ba204a5d906159adb5d23cd25d08f0bb1203783ad3466ce959'
             'bf0092798438c18fd3e7f6d9a8a281d6575cf4258d2457b6320d9c6bc8443eae'
             'cb9a7e2773ee7dff82a7902d8b6db6c10b225633ba36db77b609911b150afbc4'
             '0f88f033e562769b86e486027e37b5c27a8d0896f1a09f3c6a33374b2ff1eb33'
             '2470c45daabf74cb4905f9e3766da7db1a638621522c51d62952ba2f02ebb342'
-            'a7068e91085533825ff8e53aa6369f5deae26104d4169a0992b279fb45ef27db')
+            '0a09f17990345c331e8aed037c3303ddc18c8e28e91eb11b6884455127913a01')
+
