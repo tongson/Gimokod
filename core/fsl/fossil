@@ -1,0 +1,1 @@
+fossil="server --port 8080 --localauth /tmp"
