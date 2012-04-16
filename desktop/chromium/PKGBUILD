@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=chromium
-pkgver=18.0.1025.142
+pkgver=18.0.1025.162
 pkgrel=1
 pkgdesc="The open-source project behind Google Chrome browser"
 arch=('x86_64')
@@ -11,7 +11,7 @@ depends=('zlib' 'gtk2' 'dbus-glib' 'nss' 'nss-freebl' 'alsa-lib' 'xdg-utils' 'bz
          'hicolor-icon-theme' 'libpng' 'speex' 'libxslt')
 makedepends=('python' 'perl' 'gperf' 'yasm' 'mesa')
 source=(http://commondatastorage.googleapis.com/chromium-browser-official/$pkgname-$pkgver.tar.bz2)
-sha256sums=('911a4ee2e30ed617c4148c84dcddfd1affa4b2fc02dc5e95ac4a4afeeda24b1d')
+sha256sums=('c85875188c40c41225977eef58f3b04def16cae9877d32ced8e13a75207c73cd')
 
 build() {
   cd "${srcdir}/chromium-${pkgver}"
@@ -19,7 +19,6 @@ build() {
   # NaCL disabled
   cp "${srcdir}/nacl.gypi" chrome/
 
-  Patch gcc-4.6.patch
   Patch chromium-media-no-sse-r0.patch
   Patch chromium-revert-jpeg-swizzle-r2.patch
 
@@ -160,12 +159,10 @@ source=(${source[@]-}
         chromium-media-no-sse-r0.patch
         chromium-revert-jpeg-swizzle-r2.patch
         chromium.sh
-        gcc-4.6.patch
         nacl.gypi)
 
 sha256sums=(${sha256sums[@]-}
             '71751bf5913da1eec3c88c433044224c869b0abd5a29172cf239bddbb4eff761'
             'd99162aa6bae562f116a42347254bbec3752464f0a3e4d8675e2b287b2a838a2'
             '10edbd6d0d961f12fde37aec9b2e1508c44309080409f0a0708d493ef941e25e'
-            '50268dafd436813f846ea174d19c447c64d198c3937bd56910d87c5206306977'
             '25bddd2eee7821e18ddda06f6e69552c359e1c04a10971ac3985556c3d8ef059')
