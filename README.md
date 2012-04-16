@@ -76,7 +76,7 @@ failures:
     libjpeg-turbo (libjpeg)
     pacman
     sudo
-
+    util-linux
 
 ## MISCELLANEOUS FEATURES (to be documented)
 
