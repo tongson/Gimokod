@@ -7,15 +7,6 @@ function getpkgbuild(pkg)                     -- STRING
     return pkgbuildrepo.."/"..repo.."/"..pkg.."/PKGBUILD"
 end
 
-function isdir(param)                         -- BOOLEAN
-    local p, f = pcall(io.open, param, 'r')
-    if f == nil then return false end
-    local ok, error, code = f:read(1)
-    f:close()
-    if code == 21 then return true end
-    return false
-end
-
 function isfile(param)                        -- BOOLEAN
     local p, f = pcall(io.open, param, 'r')
     if f == nil then return false end
@@ -100,7 +91,7 @@ function getpkgdata(pkg, key)                     -- TABLE
     return pkgdata[key]
 end
 
-function getpkgbin(dir, pkg)                     -- STRING
+function getpkgbin(pkg)                     -- STRING
     local bins = {}
     local binrepo = os.getenv('BINREPO')
     local repo = os.getenv('REPO')
@@ -131,10 +122,10 @@ do
     local function getdep(param)                        -- STRING
         local deps = {}
         for _,dep in pairs(getdepends(param)) do
-            if isdir(dep) then
+            if isfile(dep.."/PKGBUILD") then
                 if getpkgbin(dep) then
                     deps[#deps+1] = dep
-                elseif isdir(dep) then
+                elseif isfile(dep.."/PKGBUILD") then
                     deps[#deps+1] = dep
                 end
             end
@@ -154,7 +145,7 @@ do
             printf("    makepkg --noconfirm -mci || $(echo Build failed: %s | /usr/bin/bti && exit 1)\n", pkg)
             printf("    echo Stopped: $(date -uR)\n")
             for _,oldpkg in pairs(getpkgdata(pkg, "pkgname")) do
-                printf("    find %s -type f -regex '.*\\/%s-[0-9a-z\\.]*-[0-9]*-[0-9a-z\\_]*.pkg.tar.xz[\\.sig]*' -exec mv {} %s../backup \\;\n", binrepo, oldpkg, binrepo)
+                printf("    find %s -type f -regex '.*\\/%s-[0-9a-z\\_\\.]*-[0-9]*-[0-9a-z\\_]*.pkg.tar.xz[\\.sig]*' -exec mv {} %s../backup \\;\n", binrepo, oldpkg, binrepo)
             end
             for _,newpkg in pairs(getpkgdata(pkg, "fullname")) do
                 printf("    pushd %s\n", outputdir)
