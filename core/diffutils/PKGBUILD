@@ -1,0 +1,36 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=diffutils
+pkgver=3.2
+pkgrel=1
+pkgdesc="Utility programs used for creating patch files"
+arch=('x86_64')
+url="http://www.gnu.org/software/diffutils"
+license=('GPL3')
+groups=('base-devel')
+install=diffutils.install
+source=(ftp://ftp.gnu.org/gnu/${pkgname}/${pkgname}-${pkgver}.tar.xz)
+md5sums=('26ff64c332429c830c154be46b393382')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  ./configure --prefix=/usr \
+              --program-prefix=g \
+              --build=${CBUILD} \
+              --host=${CHOST} \
+              --disable-nls
+  make
+}
+
+check() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make check
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+  pushd "${pkgdir}/usr/bin"
+    ln -sf gsdiff sdiff
+    ln -sf gdiff3 diff3
+  popd
+}
