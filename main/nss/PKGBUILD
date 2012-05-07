@@ -2,7 +2,7 @@
 # Current diff.: check(), libfreebl3.so split
 pkgbase=nss
 pkgname=('nss' 'nss-freebl')
-pkgver=3.13.3
+pkgver=3.13.4
 pkgrel=1
 pkgdesc="Mozilla Network Security Services"
 arch=('x86_64')
@@ -12,30 +12,30 @@ _nsprver=4.9
 depends=("nspr>=${_nsprver}" 'sqlite' 'zlib')
 makedepends=('perl')
 options=('!strip')
-source=(http://pkgs.fedoraproject.org/repo/pkgs/nss/nss-3.13.3-stripped.tar.bz2/3d211ab803585d449f94e67cbeca8502/nss-3.13.3-stripped.tar.bz2
-        http://pkgs.fedoraproject.org/repo/pkgs/nss/nss-pem-20101125.tar.bz2/e63cddf74c07f0d818d1052ecc6fbb1f/nss-pem-20101125.tar.bz2)
-sha256sums=('e90690e00e4b083769199c65e56c5537f82519693e4f2ead3ff1c3b76a12a167'
-            '5593b45e838b899bc599f7d78a0b770032eafc55785e218080bbcaf52f73b298')
-noextract=('nss-pem-20101125.tar.bz2')
+source=(http://pkgs.fedoraproject.org/repo/pkgs/nss/nss-3.13.4-stripped.tar.bz2/74bbd7b520179c2e226a021fba8ff365/nss-3.13.4-stripped.tar.bz2
+        http://pkgs.fedoraproject.org/repo/pkgs/nss/nss-pem-20120402.tar.bz2/d19159b7f91b94afaf7fa78bba006c13/nss-pem-20120402.tar.bz2)
+sha256sums=('0c314f32d8938bd3f5c2a1173b9db0d031156f2bf0cc81c2fba55359f5eb51c3'
+            'aff9c67abe98db7e7aa7f7419da8a4d02000945d6016c78efd804a318f8675bf')
+noextract=('nss-pem-20120402.tar.bz2')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  tar -xf "${srcdir}/nss-pem-20101125.tar.bz2"
+  tar -xf "${srcdir}/nss-pem-20120402.tar.bz2"
   cd "${srcdir}/${pkgname}-${pkgver}/mozilla"
 
   Patch ssl-renegotiate-transitional.patch
   Patch nss-enable-pem.patch
-  Patch nsspem-642433.patch
-  Patch 0001-Bug-695011-PEM-logging.patch
   Patch nss-539183.patch
   Patch nss-646045.patch
-  Patch nsspem-createobject-initialize-pointer.patch
-  Patch 0001-libnsspem-rhbz-734760.patch
-  Patch nsspem-init-inform-not-thread-safe.patch
- # Patch nsspem-use-system-freebl.patch
   Patch nofipstest.patch
-  Patch nsspem-bz754771.patch
+  #Patch nss-ssl-cbc-random-iv-off-by-default.patch
   Patch bz784672-protect-against-calls-before-nss_init.patch
+  Patch Bug-772628-nss_Init-leaks-memory.patch
+  Patch drbg.patch
+  #Patch softoken-minimal-test-dependencies.patch
+  #Patch iquote.patch
+  Patch Bug-801975-Restore-use-of-NSS_NoDB_Init-or-alternate.patch
+  #nsspem-use-system-freebl.patch
 
   # Respect LDFLAGS
   sed -e 's/\$(MKSHLIB) -o/\$(MKSHLIB) \$(LDFLAGS) -o/g' \
@@ -124,35 +124,35 @@ package_nss-freebl() {
 }
 
 source=(${source[@]-}
-        0001-Bug-695011-PEM-logging.patch
-        0001-libnsspem-rhbz-734760.patch
+        Bug-772628-nss_Init-leaks-memory.patch
+        Bug-801975-Restore-use-of-NSS_NoDB_Init-or-alternate.patch
         bz784672-protect-against-calls-before-nss_init.patch
+        drbg.patch
+        iquote.patch
         nofipstest.patch
         nss-539183.patch
         nss-646045.patch
         nss-config.in
         nss-enable-pem.patch
+        nss-ssl-cbc-random-iv-off-by-default.patch
         nss.pc.in
-        nsspem-642433.patch
-        nsspem-bz754771.patch
-        nsspem-createobject-initialize-pointer.patch
-        nsspem-init-inform-not-thread-safe.patch
         nsspem-use-system-freebl.patch
+        softoken-minimal-test-dependencies.patch
         ssl-renegotiate-transitional.patch)
 
 sha256sums=(${sha256sums[@]-}
-            'a75b90c1acacc176e934be7c89c5af010a01ba8c49f8b5a77bacaba22c84b860'
-            'bb961da0435ce2c98d5e729bcc1899f3530c02eeb038c64b7ea892283b976878'
+            'd7c07de4f1dfda2ad3af981d576868eff3ae3f9595dd6bed1d911d120c798abc'
+            '9ac76d879e2b2155cd8d04d194e70e23d19b953bc2fd8abafb081f309476166d'
             '0da5d37c6496a159e5af3a1011ce0714d39fbfff970f8040a93e85110939ce18'
+            '36764f64820d55d744d2dc695222f5dec048ccaaadf522d07e9b171c49572d8a'
+            '47ae4025496178493819b66f3c9d9fdd8025c7854bf9bfe8fc06818a580da1eb'
             'c4a89cda8b777db1201ae7f7b57f8dc46d07563ad0f8dc274752ee355e4384d5'
             '6a758e35f2f23a41f1e943a5e3597afcf13cf3e86aed5d966cc26bf1ffaf052c'
             '15163d5504989a90756298bdce4a98f974ac0119b9424ab0e07df4d3e00b28e8'
             'e44ac5095b4d88f24ec7b2e6a9f1581560bd3ad41a3d198596d67ef22f67adb9'
             '5f2342915c22f06f23aa70e3d0cec95408e57329823e2599f29e56ac8692db4d'
+            '7436f9da740b36c22a0aa6b095edf62d1a44185039befc9beb08c26a49778777'
             'b9f1428ca2305bf30b109507ff335fa00bce5a7ce0434b50acd26ad7c47dd5bd'
-            'ba26a05c7e184f750697fb7221609b0c67a9de5a1aff127b36ead28d2febda69'
-            '65c31c6f3a59fb00eb1a27ff152c1cf870fcfe240b1be85d54bac97a5c2d7676'
-            '7b7bd9ed6b9823eee50b4400db91633cf976f8f3abeb8f8802bd40c9d6f2455e'
-            '91a8028a5161f7b9c22f014b29138dbecf43683e03640b116be3ba26c9b8388c'
             '01da8dbb2dbc4f6eba749f9ffef8cd64b5aa62307bc557fa2ed1cdc207ebc5ee'
+            '390d3cad76285bc7b555537b2480d11b1020f0daeef1512f798144e0453d086b'
             '12df04bccbf674db1eef7a519a28987927b5e9c107b1dc386686f05e64f49a97')
