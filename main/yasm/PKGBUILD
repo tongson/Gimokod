@@ -1,9 +1,9 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=yasm
 pkgver=1.2.0
-pkgrel=1
+pkgrel=2
 pkgdesc="A rewrite of NASM to allow for multiple syntax supported (NASM, TASM, GAS, etc.)"
-arch=('i686' 'x86_64')
+arch=('x86_64')
 license=('custom')
 url="http://www.tortall.net/projects/yasm/"
 source=(http://www.tortall.net/projects/yasm/releases/${pkgname}-${pkgver}.tar.gz)
@@ -21,6 +21,11 @@ build() {
               --disable-dependency-tracking
 
   make
+}
+
+check() {
+  cd ${srcdir}/${pkgname}-${pkgver}
+  make check
 }
 
 package() {
