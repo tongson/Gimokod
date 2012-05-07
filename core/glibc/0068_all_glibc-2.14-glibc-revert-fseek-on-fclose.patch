@@ -1,3 +1,8 @@
+https://bugs.gentoo.org/370413
+http://sourceware.org/bugzilla/show_bug.cgi?id=12724
+https://bugzilla.novell.com/show_bug.cgi?id=711829
+http://redmine.ruby-lang.org/issues/5108
+
 This reverts the following patch from upstream PR 12724,
 which can cause surprising changes in fclose behaviour when multiple
 file handles refer to the same file (fclose on one changes file position
