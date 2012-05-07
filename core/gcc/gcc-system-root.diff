@@ -1,0 +1,42 @@
+# DP: Remove trailing slash from system root directory
+
+--- a/src/gcc/incpath.c
++++ b/src/gcc/incpath.c
+@@ -172,7 +172,15 @@
+ 
+ 	  /* Should this directory start with the sysroot?  */
+ 	  if (sysroot && p->add_sysroot)
+-	    str = concat (sysroot, p->fname, NULL);
++	    {
++	      char *sysroot_no_trailing_dir_separator = xstrdup (sysroot);
++	      size_t sysroot_len = strlen (sysroot);
++
++	      if (sysroot_len > 0 && sysroot[sysroot_len - 1] == DIR_SEPARATOR)
++		sysroot_no_trailing_dir_separator[sysroot_len - 1] = '\0';
++	      str = concat (sysroot_no_trailing_dir_separator, p->fname, NULL);
++	      free (sysroot_no_trailing_dir_separator);
++	    }
+ 	  else if (!p->add_sysroot && relocated
+ 		   && strncmp (p->fname, cpp_PREFIX, cpp_PREFIX_len) == 0)
+ 	    {
+--- a/src/gcc/gcc.c
++++ b/src/gcc/gcc.c
+@@ -2440,9 +2440,17 @@
+ 
+   if (target_system_root)
+     {
++      char *sysroot_no_trailing_dir_separator = xstrdup (target_system_root);
++      size_t sysroot_len = strlen (target_system_root);
++
++      if (sysroot_len > 0
++	  && target_system_root[sysroot_len - 1] == DIR_SEPARATOR)
++	sysroot_no_trailing_dir_separator[sysroot_len - 1] = '\0';
++
+       if (target_sysroot_suffix)
+ 	  prefix = concat (target_sysroot_suffix, prefix, NULL);
+-      prefix = concat (target_system_root, prefix, NULL);
++      prefix = concat (sysroot_no_trailing_dir_separator, prefix, NULL);
++      free (sysroot_no_trailing_dir_separator);
+ 
+       /* We have to override this because GCC's notion of sysroot
+ 	 moves along with GCC.  */

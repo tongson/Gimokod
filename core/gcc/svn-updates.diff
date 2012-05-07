@@ -1,0 +1,2505 @@
+# DP: updates from the 4.6 branch upto 20120412 (r186373).
+
+last_updated()
+{
+	cat > ${dir}LAST_UPDATED <<EOF
+Thu Apr 12 12:53:15 CEST 2012
+Thu Apr 12 10:53:15 UTC 2012 (revision 186373)
+EOF
+}
+
+svn diff svn://gcc.gnu.org/svn/gcc/tags/gcc_4_6_3_release svn://gcc.gnu.org/svn/gcc/branches/gcc-4_6-branch \
+	| sed -r 's,^--- (\S+)\t(\S+)(.*)$,--- a/src/\1\t\2,;s,^\+\+\+ (\S+)\t(\S+)(.*)$,+++ b/src/\1\t\2,' \
+	| awk '/^Index:.*\.(class|texi)/ {skip=1; next} /^Index:/ { skip=0 } skip==0'
+
+Index: gcc/targhooks.c
+===================================================================
+--- a/src/gcc/targhooks.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/targhooks.c	(.../branches/gcc-4_6-branch)
+@@ -529,6 +529,7 @@
+       case scalar_to_vec:
+       case cond_branch_not_taken:
+       case vec_perm:
++      case vec_promote_demote:
+         return 1;
+ 
+       case unaligned_load:
+Index: gcc/cgraph.c
+===================================================================
+--- a/src/gcc/cgraph.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/cgraph.c	(.../branches/gcc-4_6-branch)
+@@ -1700,19 +1700,27 @@
+   free_nodes = node;
+ }
+ 
+-/* Remove the node from cgraph.  */
++/* Remove the node from cgraph and all inline clones inlined into it.
++   Skip however removal of FORBIDDEN_NODE and return true if it needs to be
++   removed.  This allows to call the function from outer loop walking clone
++   tree.  */
+ 
+-void
+-cgraph_remove_node_and_inline_clones (struct cgraph_node *node)
++bool
++cgraph_remove_node_and_inline_clones (struct cgraph_node *node, struct cgraph_node *forbidden_node)
+ {
+   struct cgraph_edge *e, *next;
++  bool found = false;
++
++  if (node == forbidden_node)
++    return true;
+   for (e = node->callees; e; e = next)
+     {
+       next = e->next_callee;
+       if (!e->inline_failed)
+-        cgraph_remove_node_and_inline_clones (e->callee);
++        found |= cgraph_remove_node_and_inline_clones (e->callee, forbidden_node);
+     }
+   cgraph_remove_node (node);
++  return found;
+ }
+ 
+ /* Notify finalize_compilation_unit that given node is reachable.  */
+Index: gcc/cgraph.h
+===================================================================
+--- a/src/gcc/cgraph.h	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/cgraph.h	(.../branches/gcc-4_6-branch)
+@@ -547,7 +547,7 @@
+ void cgraph_insert_node_to_hashtable (struct cgraph_node *node);
+ void cgraph_remove_edge (struct cgraph_edge *);
+ void cgraph_remove_node (struct cgraph_node *);
+-void cgraph_remove_node_and_inline_clones (struct cgraph_node *);
++bool cgraph_remove_node_and_inline_clones (struct cgraph_node *, struct cgraph_node *);
+ void cgraph_release_function_body (struct cgraph_node *);
+ void cgraph_node_remove_callees (struct cgraph_node *node);
+ struct cgraph_edge *cgraph_create_edge (struct cgraph_node *,
+Index: gcc/DATESTAMP
+===================================================================
+--- a/src/gcc/DATESTAMP	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/DATESTAMP	(.../branches/gcc-4_6-branch)
+@@ -1 +1 @@
+-20120301
++20120412
+Index: gcc/target.h
+===================================================================
+--- a/src/gcc/target.h	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/target.h	(.../branches/gcc-4_6-branch)
+@@ -128,7 +128,8 @@
+   scalar_to_vec,
+   cond_branch_not_taken,
+   cond_branch_taken,
+-  vec_perm
++  vec_perm,
++  vec_promote_demote
+ };
+ 
+ /* Sets of optimization levels at which an option may be enabled by
+Index: gcc/toplev.c
+===================================================================
+--- a/src/gcc/toplev.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/toplev.c	(.../branches/gcc-4_6-branch)
+@@ -1326,6 +1326,13 @@
+ 	   "and -ftree-loop-linear)");
+ #endif
+ 
++  if (flag_strict_volatile_bitfields > 0 && !abi_version_at_least (2))
++    {
++      warning (0, "-fstrict-volatile-bitfields disabled; "
++	       "it is incompatible with ABI versions < 2");
++      flag_strict_volatile_bitfields = 0;
++    }
++
+   /* Unrolling all loops implies that standard loop unrolling must also
+      be done.  */
+   if (flag_unroll_all_loops)
+Index: gcc/cgraphunit.c
+===================================================================
+--- a/src/gcc/cgraphunit.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/cgraphunit.c	(.../branches/gcc-4_6-branch)
+@@ -2157,8 +2157,19 @@
+             first_clone->ipa_transforms_to_apply);
+   first_clone->ipa_transforms_to_apply = NULL;
+ 
++  /* When doing recursive inlining, the clone may become unnecessary.
++     This is possible i.e. in the case when the recursive function is proved to be
++     non-throwing and the recursion happens only in the EH landing pad.
++     We can not remove the clone until we are done with saving the body.
++     Remove it now.  */
++  if (!first_clone->callers)
++    {
++      cgraph_remove_node_and_inline_clones (first_clone, NULL);
++      first_clone = NULL;
++    }
+ #ifdef ENABLE_CHECKING
+-  verify_cgraph_node (first_clone);
++  else
++    verify_cgraph_node (first_clone);
+ #endif
+   return first_clone;
+ }
+Index: gcc/ChangeLog
+===================================================================
+--- a/src/gcc/ChangeLog	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/ChangeLog	(.../branches/gcc-4_6-branch)
+@@ -1,3 +1,221 @@
++2012-04-10  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
++
++	PR middle-end/52894
++	* varasm.c (process_pending_assemble_externals): Set
++	pending_assemble_externals_processed true.
++	(assemble_external): Call assemble_external_real if the pending
++	assemble externals have been processed.
++
++2012-04-09  Eric Botcazou  <ebotcazou@adacore.com>
++
++	PR target/52717
++	* config/sparc/sparc.c (sparc_file_end): Set TREE_PUBLIC explicitly on
++	the DECL generated for the special GOT helper.
++
++2012-04-06  Matt Turner  <mattst88@gmail.com>
++
++	* doc/install.texi: Correct typo "-mno-lsc" -> "-mno-llsc".
++
++2012-03-29  Uros Bizjak  <ubizjak@gmail.com>
++
++	* config/i386/sse.md (avx_h<plusminus_insn>v4df3): Fix results
++	crossing 128bit lane boundary.
++
++2012-03-29  Uros Bizjak  <ubizjak@gmail.com>
++
++	Backported from mainline
++	2012-03-27  Uros Bizjak  <ubizjak@gmail.com>
++
++	PR target/52698
++	* config/i386/i386-protos.h (ix86_legitimize_reload_address):
++	New prototype.
++	* config/i386/i386.h (LEGITIMIZE_RELOAD_ADDRESS): New define.
++	* config/i386/i386.c: Include reload.h.
++	(ix86_legitimize_reload_address): New function.
++
++2012-03-28  Joey Ye  <joey.ye@arm.com>
++
++	Backported from mainline
++	2011-12-20  Bernd Schmidt  <bernds@codesourcery.com>
++
++	PR middle-end/51200
++	* expr.c (store_field): Avoid a direct store if the mode is larger
++	than the size of the bit field.
++	* stor-layout.c (layout_decl): If flag_strict_volatile_bitfields,
++	treat non-volatile bit fields like volatile ones.
++	* toplev.c (process_options): Disallow combination of
++	-fstrict-volatile-bitfields and ABI versions less than 2.
++	* config/arm/arm.c (arm_option_override): Don't enable
++	flag_strict_volatile_bitfields if the ABI version is less than 2.
++	* config/h8300/h8300.c (h8300_option_override): Likewise.
++	* config/rx/rx.c (rx_option_override): Likewise.
++	* config/m32c/m32c.c (m32c_option_override): Likewise.
++	* config/sh/sh.c (sh_option_override): Likewise.
++
++	2011-12-22  Joey Ye  <joey.ye@arm.com>
++
++	* toplev.c (process_options): Fix typo.
++
++2012-03-28  Martin Jambor  <mjambor@suse.cz>
++
++	Backported from mainline
++	2012-03-27  Martin Jambor  <mjambor@suse.cz>
++
++	PR middle-end/52693
++	* tree-sra.c (sra_modify_assign): Do not call
++	load_assign_lhs_subreplacements when working with an unscalarizable
++	region.
++
++2012-03-28  Georg-Johann Lay  <avr@gjlay.de>
++
++	PR target/52741
++
++	Revert r181936 from 2011-12-02 for:
++	* config/avr/libgcc.S (__prologue_saves__, __epilogue_restores__)
++	* config/avr/avr.md (movhi_sp_r_irq_off, movhi_sp_r_irq_on)
++	* config/avr/avr.c (output_movhi, avr_file_start)
++
++2012-03-28  Jakub Jelinek  <jakub@redhat.com>
++
++	PR target/52736
++	* config/i386/sse.md (sse2_loadlpd splitter): Use offset 0
++	instead of 8 in adjust_address.
++
++2012-03-24  Jan Hubicka  <jh@suse.cz>
++
++	Backport from mainline
++	PR regression/52696
++	* predict.c (predict_paths_for_bb): Fix typo.
++
++2012-03-24  Jan Hubicka  <jh@suse.cz>
++
++	Backport from mainline
++	PR middle-end/51737
++	* cgraph.c (cgraph_remove_node_and_inline_clones): Add FORBIDDEN_NODE
++	parameter.
++	* cgraph.h (cgraph_remove_node_and_inline_clones): Update prototype.
++	* ipa-inline-transform.c (save_inline_function_body): Remove copied
++	clone if needed.
++	* tree-inline.c (delete_unreachable_blocks_update_callgraph): Update.
++
++2012-03-24  Steven Bosscher  <steven@gcc.gnu.org>
++
++	PR middle-end/52640
++	* varasm.c: Include pointer-set.h.
++	(pending_assemble_externals_set): New pointer set.
++	(process_pending_assemble_externals): Destroy the pointer set.
++	(assemble_external): See if decl is in pending_assemble_externals_set,
++	and add it to pending_assemble_externals if necessary.
++	(init_varasm_once): Allocate pending_assemble_externals_set.
++
++2012-03-16  Jan Hubicka  <jh@suse.cz>
++
++	Backport from mainline
++	PR middle-end/48600
++	* predict.c (predict_paths_for_bb): Prevent looping.
++	(predict_paths_leading_to_edge, predict_paths_leading_to): Update.
++
++2012-03-16  Michael Hope  <michael.hope@linaro.org>
++
++	Backport from mainline
++	2011-05-05  Michael Hope  <michael.hope@linaro.org>
++
++	PR pch/45979
++	* config/host-linux.c (TRY_EMPTY_VM_SPACE): Define for
++	__ARM_EABI__ hosts.
++
++2012-03-15  Chung-Lin Tang  <cltang@codesourcery.com>
++
++	Backport from mainline
++	2012-03-10  Chung-Lin Tang  <cltang@codesourcery.com>
++
++	PR rtl-optimization/52528
++	* combine.c (can_combine_p): Add setting of subst_low_luid
++	before call to expand_field_assignment().
++
++2012-03-12  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
++
++	Backport from mainline
++	2011-09-03  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
++
++	PR Bug middle-end/50232
++	* config/pa/pa.md (return): Define "return" insn pattern.
++	(epilogue): Use it when no epilogue is needed.
++	* config/pa/pa.c (pa_can_use_return_insn): New function.
++	* config/pa/pa-protos.h (pa_can_use_return_insn): Declare.
++
++	Backport for mainline
++	2012-01-28  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
++
++	PR target/51871
++	* config/pa/pa.c (pa_return_addr_rtx): Add support for PA2.0 export
++	stubs.
++
++2012-03-06  Michael Meissner  <meissner@linux.vnet.ibm.com>
++
++	Backport from mainline
++	PR target/50310
++	* config/rs6000/vector.md (vector_uneq<mode>): Add support for
++	UNEQ, LTGT, ORDERED, and UNORDERED IEEE vector comparisons.
++	(vector_ltgt<mode>): Likewise.
++	(vector_ordered<mode>): Likewise.
++	(vector_unordered<mode>): Likewise.
++	* config/rs6000/rs6000.c (rs6000_emit_vector_compare_inner): Likewise.
++
++2012-03-04  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
++
++	Backport from mainline
++	2012-03-01  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
++
++	PR target/52408
++	* config/pa/pa.md (zvdep_imm32): Change type of variable x from int to
++	unsigned HOST_WIDE_INT.
++	(zvdep_imm64): Likewise.
++	(vdepi_ior): Change type of variable x from int to HOST_WIDE_INT.
++	(vdepi_and): Likewise.
++	Likewise for unamed 64-bit patterns.
++	* config/pa/predicates.md (lhs_lshift_cint_operand): Update comment.
++
++2012-03-03  Eric Botcazou  <ebotcazou@adacore.com>
++
++	PR target/52425
++	Backport from mainline
++	2011-05-22  Eric Botcazou  <ebotcazou@adacore.com>
++
++	* config/sparc/sparc.c (sparc_delegitimize_address): Handle
++	UNSPEC_MOVE_PIC pattern.
++
++2012-03-02  Peter Bergner  <bergner@vnet.ibm.com>
++
++	Backport from mainline
++	2012-03-02  Peter Bergner  <bergner@vnet.ibm.com>
++
++	* config/rs6000/vsx.md (vsx_set_<mode>): Reorder operands.
++
++2012-03-02  Bill Schmidt <wschmidt@linux.vnet.ibm.com>
++	    Ira Rosen <irar@il.ibm.com>
++
++	PR tree-optimization/50031
++	PR tree-optimization/50969
++	* targhooks.c (default_builtin_vectorization_cost): Handle
++	vec_promote_demote.
++	* target.h (enum vect_cost_for_stmt): Add vec_promote_demote.
++	* tree-vect-loop.c (vect_get_single_scalar_iteraion_cost): Handle
++	all types of reduction and pattern statements.
++	(vect_estimate_min_profitable_iters): Likewise.
++	* tree-vect-stmts.c (vect_model_promotion_demotion_cost): New function.
++	(vect_model_store_cost): Use vec_perm rather than vector_stmt for
++	statement cost.
++	(vect_model_load_cost): Likewise.
++	(vect_get_load_cost): Likewise; add dump logic for explicit realigns.
++	(vectorizable_type_demotion): Call vect_model_promotion_demotion_cost.
++	(vectorizable_type_promotion): Likewise.
++	* config/spu/spu.c (spu_builtin_vectorization_cost): Handle
++	vec_promote_demote.
++	* config/i386/i386.c (ix86_builtin_vectorization_cost): Likewise.
++	* config/rs6000/rs6000.c (rs6000_builtin_vectorization_cost): Update
++	vec_perm for VSX and handle vec_promote_demote.
++
+ 2012-03-01  Release Manager
+ 
+ 	* GCC 4.6.3 released.
+Index: gcc/testsuite/gcc.target/arm/volatile-bitfields-4.c
+===================================================================
+--- a/src/gcc/testsuite/gcc.target/arm/volatile-bitfields-4.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/testsuite/gcc.target/arm/volatile-bitfields-4.c	(.../branches/gcc-4_6-branch)
+@@ -0,0 +1,30 @@
++/* { dg-require-effective-target arm_eabi } */
++/* { dg-do compile } */
++/* { dg-options "-O2" } */
++/* { dg-final { scan-assembler-times "ldr\[\\t \]+\[^\n\]*,\[\\t \]*\\\[\[^\n\]*\\\]" 2 } } */
++/* { dg-final { scan-assembler-times "str\[\\t \]+\[^\n\]*,\[\\t \]*\\\[\[^\n\]*\\\]" 2 } } */
++/* { dg-final { scan-assembler-not "strb" } } */
++
++struct thing {
++  unsigned a: 8;
++  unsigned b: 8;
++  unsigned c: 8;
++  unsigned d: 8;
++};
++
++struct thing2 {
++  volatile unsigned a: 8;
++  volatile unsigned b: 8;
++  volatile unsigned c: 8;
++  volatile unsigned d: 8;
++};
++
++void test1(volatile struct thing *t)
++{
++  t->a = 5;
++}
++
++void test2(struct thing2 *t)
++{
++  t->a = 5;
++}
+Index: gcc/testsuite/gcc.target/powerpc/pr52457.c
+===================================================================
+--- a/src/gcc/testsuite/gcc.target/powerpc/pr52457.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/testsuite/gcc.target/powerpc/pr52457.c	(.../branches/gcc-4_6-branch)
+@@ -0,0 +1,34 @@
++/* { dg-do run { target { powerpc*-*-linux* } } } */
++/* { dg-skip-if "" { powerpc*-*-darwin* } { "*" } { "" } } */
++/* { dg-skip-if "" { powerpc*-*-*spe* } { "*" } { "" } } */
++/* { dg-require-effective-target vsx_hw } */
++/* { dg-options "-O1 -mcpu=power7" } */
++
++extern void abort (void);
++
++typedef long long T;
++typedef T vl_t __attribute__((vector_size(2 * sizeof (T))));
++
++vl_t
++buggy_func (T x)
++{
++  vl_t w;
++  T *p = (T *)&w;
++  p[0] = p[1] = x;
++  return w;
++}
++
++int
++main(void)
++{
++  vl_t rval;
++  T *pl;
++
++  pl = (T *) &rval;
++  rval = buggy_func (2);
++
++  if (pl[0] != 2 || pl[1] != 2)
++    abort ();
++
++  return 0;
++}
+Index: gcc/testsuite/gcc.target/i386/pr52736.c
+===================================================================
+--- a/src/gcc/testsuite/gcc.target/i386/pr52736.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/testsuite/gcc.target/i386/pr52736.c	(.../branches/gcc-4_6-branch)
+@@ -0,0 +1,29 @@
++/* PR target/52736 */
++/* { dg-do run } */
++/* { dg-options "-O1 -msse2" } */
++/* { dg-require-effective-target sse2_runtime } */
++
++#include <x86intrin.h>
++
++typedef double D __attribute__((may_alias));
++__attribute__((aligned(16))) static const double r[4] = { 1., 5., 1., 3. };
++
++__attribute__((noinline, noclone))
++void
++foo (int x)
++{
++  asm volatile ("" : "+g" (x) : : "memory");
++  if (x != 3)
++    __builtin_abort ();
++}
++
++int
++main ()
++{
++  __m128d t = _mm_set1_pd (5.);
++  ((D *)(&t))[0] = 1.;
++  foo (_mm_movemask_pd (_mm_cmpeq_pd (t, _mm_load_pd (&r[0]))));
++  ((D *)(&t))[1] = 3.;
++  foo (_mm_movemask_pd (_mm_cmpeq_pd (t, _mm_load_pd (&r[2]))));
++  return 0;
++}
+Index: gcc/testsuite/gfortran.dg/intrinsic_8.f90
+===================================================================
+--- a/src/gcc/testsuite/gfortran.dg/intrinsic_8.f90	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/testsuite/gfortran.dg/intrinsic_8.f90	(.../branches/gcc-4_6-branch)
+@@ -0,0 +1,23 @@
++! { dg-do compile }
++!
++! PR fortran/52452
++!
++! Contributed by Roger Ferrer Ibanez
++!
++PROGRAM test_etime
++    IMPLICIT NONE
++    INTRINSIC :: etime
++    REAL(4) :: tarray(1:2)
++    REAL(4) :: result
++
++    CALL etime(tarray, result)
++END PROGRAM test_etime
++
++subroutine test_etime2
++    IMPLICIT NONE
++    INTRINSIC :: etime
++    REAL(4) :: tarray(1:2)
++    REAL(4) :: result
++
++    result = etime(tarray)
++END subroutine test_etime2
+Index: gcc/testsuite/gfortran.dg/proc_ptr_34.f90
+===================================================================
+--- a/src/gcc/testsuite/gfortran.dg/proc_ptr_34.f90	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/testsuite/gfortran.dg/proc_ptr_34.f90	(.../branches/gcc-4_6-branch)
+@@ -0,0 +1,79 @@
++! { dg-do compile }
++!
++! PR fortran/52469
++!
++! This was failing as the DECL of the proc pointer "func"
++! was used for the interface of the proc-pointer component "my_f_ptr"
++! rather than the decl of the proc-pointer target
++!
++! Contributed by palott@gmail.com
++!
++
++module ExampleFuncs
++  implicit none
++
++  ! NOTE: "func" is a procedure pointer!
++  pointer :: func
++  interface
++     function func (z)
++        real :: func
++        real, intent (in) :: z
++     end function func
++  end interface
++
++  type Contains_f_ptr
++     procedure (func), pointer, nopass :: my_f_ptr
++  end type Contains_f_ptr
++contains
++
++function f1 (x)
++  real :: f1
++  real, intent (in) :: x
++
++  f1 = 2.0 * x
++
++  return
++end function f1
++
++function f2 (x)
++   real :: f2
++   real, intent (in) :: x
++
++   f2 = 3.0 * x**2
++
++   return
++end function f2
++
++function fancy (func, x)
++   real :: fancy
++   real, intent (in) :: x
++
++   interface AFunc
++      function func (y)
++         real :: func
++         real, intent (in) ::y
++      end function func
++   end interface AFunc
++
++   fancy = func (x) + 3.3 * x
++end function fancy
++
++end module  ExampleFuncs
++
++
++program test_proc_ptr
++  use ExampleFuncs
++  implicit none
++
++  type (Contains_f_ptr), dimension (2) :: NewType
++ 
++  !NewType(1) % my_f_ptr => f1
++  NewType(2) % my_f_ptr => f2
++
++  !write (*, *) NewType(1) % my_f_ptr (3.0), NewType(2) % my_f_ptr (3.0)
++  write (6, *)  NewType(2) % my_f_ptr (3.0) ! < Shall print '27.0'
++
++  stop
++end program test_proc_ptr
++
++! { dg-final { cleanup-modules "examplefuncs" } }
+Index: gcc/testsuite/gcc.c-torture/compile/limits-externdecl.c
+===================================================================
+--- a/src/gcc/testsuite/gcc.c-torture/compile/limits-externdecl.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/testsuite/gcc.c-torture/compile/limits-externdecl.c	(.../branches/gcc-4_6-branch)
+@@ -0,0 +1,56 @@
++/* Inspired by the test case for PR middle-end/52640.  */
++
++typedef struct
++{
++    char *value;
++} REFERENCE;
++
++/* Add a few "extern int Xxxxxx ();" declarations.  */
++#undef DEF
++#undef LIM1
++#undef LIM2
++#undef LIM3
++#undef LIM4
++#undef LIM5
++#undef LIM6
++#define DEF(x) 	extern int x ()
++#define LIM1(x) DEF(x##0); DEF(x##1); DEF(x##2); DEF(x##3); DEF(x##4); \
++		DEF(x##5); DEF(x##6); DEF(x##7); DEF(x##8); DEF(x##9);
++#define LIM2(x) LIM1(x##0) LIM1(x##1) LIM1(x##2) LIM1(x##3) LIM1(x##4) \
++		LIM1(x##5) LIM1(x##6) LIM1(x##7) LIM1(x##8) LIM1(x##9)
++#define LIM3(x) LIM2(x##0) LIM2(x##1) LIM2(x##2) LIM2(x##3) LIM2(x##4) \
++		LIM2(x##5) LIM2(x##6) LIM2(x##7) LIM2(x##8) LIM2(x##9)
++#define LIM4(x) LIM3(x##0) LIM3(x##1) LIM3(x##2) LIM3(x##3) LIM3(x##4) \
++		LIM3(x##5) LIM3(x##6) LIM3(x##7) LIM3(x##8) LIM3(x##9)
++#define LIM5(x) LIM4(x##0) LIM4(x##1) LIM4(x##2) LIM4(x##3) LIM4(x##4) \
++		LIM4(x##5) LIM4(x##6) LIM4(x##7) LIM4(x##8) LIM4(x##9)
++#define LIM6(x) LIM5(x##0) LIM5(x##1) LIM5(x##2) LIM5(x##3) LIM5(x##4) \
++		LIM5(x##5) LIM5(x##6) LIM5(x##7) LIM5(x##8) LIM5(x##9)
++LIM5 (X);
++
++/* Add references to them, or GCC will simply ignore the extern decls.  */
++#undef DEF
++#undef LIM1
++#undef LIM2
++#undef LIM3
++#undef LIM4
++#undef LIM5
++#undef LIM6
++#define DEF(x)	(char *) x
++#define LIM1(x) DEF(x##0), DEF(x##1), DEF(x##2), DEF(x##3), DEF(x##4), \
++		DEF(x##5), DEF(x##6), DEF(x##7), DEF(x##8), DEF(x##9),
++#define LIM2(x) LIM1(x##0) LIM1(x##1) LIM1(x##2) LIM1(x##3) LIM1(x##4) \
++		LIM1(x##5) LIM1(x##6) LIM1(x##7) LIM1(x##8) LIM1(x##9)
++#define LIM3(x) LIM2(x##0) LIM2(x##1) LIM2(x##2) LIM2(x##3) LIM2(x##4) \
++		LIM2(x##5) LIM2(x##6) LIM2(x##7) LIM2(x##8) LIM2(x##9)
++#define LIM4(x) LIM3(x##0) LIM3(x##1) LIM3(x##2) LIM3(x##3) LIM3(x##4) \
++		LIM3(x##5) LIM3(x##6) LIM3(x##7) LIM3(x##8) LIM3(x##9)
++#define LIM5(x) LIM4(x##0) LIM4(x##1) LIM4(x##2) LIM4(x##3) LIM4(x##4) \
++		LIM4(x##5) LIM4(x##6) LIM4(x##7) LIM4(x##8) LIM4(x##9)
++#define LIM6(x) LIM5(x##0) LIM5(x##1) LIM5(x##2) LIM5(x##3) LIM5(x##4) \
++		LIM5(x##5) LIM5(x##6) LIM5(x##7) LIM5(x##8) LIM5(x##9)
++REFERENCE references[] = {
++  LIM5 (X)
++  0
++};
++
+Index: gcc/testsuite/gcc.dg/torture/pr52693.c
+===================================================================
+--- a/src/gcc/testsuite/gcc.dg/torture/pr52693.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/testsuite/gcc.dg/torture/pr52693.c	(.../branches/gcc-4_6-branch)
+@@ -0,0 +1,33 @@
++/* { dg-do run } */
++
++struct pair
++{
++  int x;
++  int y;
++};
++
++struct array
++{
++  struct pair elems[ 2 ];
++  unsigned index;
++};
++
++extern void abort ();
++
++void __attribute__ ((noinline,noclone))
++test_results (int x1, int y1, int x2, int y2)
++{
++  if (x1 != x2 || y1 != y2)
++    abort ();
++}
++
++int
++main (void)
++{
++  struct array arr = {{{1,2}, {3,4}}, 1};
++  struct pair last = arr.elems[arr.index];
++
++  test_results ( last.x, last.y, arr.elems[1].x, arr.elems[1].y);
++
++  return 0;
++}
+Index: gcc/testsuite/gcc.dg/volatile-bitfields-2.c
+===================================================================
+--- a/src/gcc/testsuite/gcc.dg/volatile-bitfields-2.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/testsuite/gcc.dg/volatile-bitfields-2.c	(.../branches/gcc-4_6-branch)
+@@ -0,0 +1,15 @@
++/* { dg-do run } */
++/* { dg-options "-fstrict-volatile-bitfields" } */
++
++extern void abort(void);
++struct thing {
++  volatile unsigned short a: 8;
++  volatile unsigned short b: 8;
++} t = {1,2};
++
++int main()
++{
++  t.a = 3;
++  if (t.a !=3 || t.b !=2) abort();
++  return 0;
++}
+Index: gcc/testsuite/ChangeLog
+===================================================================
+--- a/src/gcc/testsuite/ChangeLog	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/testsuite/ChangeLog	(.../branches/gcc-4_6-branch)
+@@ -1,3 +1,70 @@
++2012-04-03  Jason Merrill  <jason@redhat.com>
++
++	PR c++/52796
++	* g++.dg/cpp0x/variadic-value1.C: New.
++
++2012-03-28  Joey Ye  <joey.ye@arm.com>
++
++	Backported from mainline
++	2011-12-20  Bernd Schmidt  <bernds@codesourcery.com>
++
++	PR middle-end/51200
++	* gcc.target/arm/volatile-bitfields-4.c: New test.
++	* c-c++-common/abi-bf.c: New test.
++
++	2011-12-26  Joey Ye  <joey.ye@arm.com>
++
++	PR middle-end/51200
++	* gcc.dg/volatile-bitfields-2.c: New test.
++
++2012-03-28  Martin Jambor  <mjambor@suse.cz>
++
++	Backported from mainline
++	2012-03-27  Martin Jambor  <mjambor@suse.cz>
++
++	PR middle-end/52693
++	* gcc.dg/torture/pr52693.c: New test.
++
++2012-03-28  Jakub Jelinek  <jakub@redhat.com>
++
++	PR target/52736
++	* gcc.target/i386/pr52736.c: New test.
++
++2012-03-24  Jan Hubicka  <jh@suse.cz>
++
++	PR middle-end/51737
++	* g++.dg/torture/pr51737.C: New testcase
++
++2012-03-24  Steven Bosscher  <steven@gcc.gnu.org>
++
++	PR middle-end/52640
++	* gcc.c-torture/compile/limits-externdecl.c: New test.
++
++2012-03-16  Jan Hubicka  <jh@suse.cz>
++
++	PR middle-end/48600
++	* g++.dg/torture/pr48600.C: New testcase.
++
++2012-03-10  Tobias Burnus  <burnus@net-b.de>
++
++	PR fortran/52469
++	* gfortran.dg/proc_ptr_34.f90: New.
++
++2012-03-06  Tobias Burnus  <burnus@net-b.de>
++
++	Backport from mainline
++	2012-03-02  Tobias Burnus  <burnus@net-b.de>
++
++	PR fortran/52452
++	* gfortran.dg/intrinsic_8.f90: New.
++
++2012-03-02  Peter Bergner  <bergner@vnet.ibm.com>
++
++	Backport from mainline
++	2012-03-02  Peter Bergner  <bergner@vnet.ibm.com>
++
++	* gcc.target/powerpc/pr52457.c: New test.
++
+ 2012-03-01  Release Manager
+ 
+ 	* GCC 4.6.3 released.
+Index: gcc/testsuite/g++.dg/cpp0x/variadic-value1.C
+===================================================================
+--- a/src/gcc/testsuite/g++.dg/cpp0x/variadic-value1.C	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/testsuite/g++.dg/cpp0x/variadic-value1.C	(.../branches/gcc-4_6-branch)
+@@ -0,0 +1,24 @@
++// PR c++/52796
++// { dg-do run { target c++11 } }
++
++inline void *operator new(__SIZE_TYPE__ s, void *p) { return p; }
++
++struct A
++{
++  int i;
++  template<class... Ts>
++  A(Ts&&... ts): i(ts...) { }
++};
++
++static union {
++  unsigned char c[sizeof(A)];
++  int i;
++};
++
++int main()
++{
++  i = 0xdeadbeef;
++  new(c) A;
++  if (i != 0)
++    __builtin_abort();
++}
+Index: gcc/testsuite/c-c++-common/abi-bf.c
+===================================================================
+--- a/src/gcc/testsuite/c-c++-common/abi-bf.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/testsuite/c-c++-common/abi-bf.c	(.../branches/gcc-4_6-branch)
+@@ -0,0 +1,3 @@
++/* { dg-warning "incompatible" } */
++/* { dg-do compile } */
++/* { dg-options "-fstrict-volatile-bitfields -fabi-version=1" } */
+Index: gcc/cp/decl.c
+===================================================================
+--- a/src/gcc/cp/decl.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/cp/decl.c	(.../branches/gcc-4_6-branch)
+@@ -3636,7 +3636,7 @@
+     TYPE_SIZE_UNIT (nullptr_type_node) = size_int (GET_MODE_SIZE (ptr_mode));
+     TYPE_UNSIGNED (nullptr_type_node) = 1;
+     TYPE_PRECISION (nullptr_type_node) = GET_MODE_BITSIZE (ptr_mode);
+-    SET_TYPE_MODE (nullptr_type_node, Pmode);
++    SET_TYPE_MODE (nullptr_type_node, ptr_mode);
+     record_builtin_type (RID_MAX, "decltype(nullptr)", nullptr_type_node);
+     nullptr_node = build_int_cst (nullptr_type_node, 0);
+   }
+Index: gcc/cp/ChangeLog
+===================================================================
+--- a/src/gcc/cp/ChangeLog	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/cp/ChangeLog	(.../branches/gcc-4_6-branch)
+@@ -1,3 +1,14 @@
++2012-04-04  Steve Ellcey <sje@cup.hp.com>
++
++	Backported from mainline.
++	* decl.c (cxx_init_decl_processing): Use ptr_mode instead of Pmode.
++
++2012-04-03  Jason Merrill  <jason@redhat.com>
++
++	PR c++/52796
++	* pt.c (tsubst_initializer_list): A pack expansion with no elements
++	means value-initialization.
++
+ 2012-03-01  Release Manager
+ 
+ 	* GCC 4.6.3 released.
+Index: gcc/cp/pt.c
+===================================================================
+--- a/src/gcc/cp/pt.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/cp/pt.c	(.../branches/gcc-4_6-branch)
+@@ -17785,6 +17785,7 @@
+             }
+           else
+             {
++	      tree tmp;
+               decl = tsubst_copy (TREE_PURPOSE (t), argvec, 
+                                   tf_warning_or_error, NULL_TREE);
+ 
+@@ -17793,10 +17794,17 @@
+                 in_base_initializer = 1;
+ 
+ 	      init = TREE_VALUE (t);
++	      tmp = init;
+ 	      if (init != void_type_node)
+ 		init = tsubst_expr (init, argvec,
+ 				    tf_warning_or_error, NULL_TREE,
+ 				    /*integral_constant_expression_p=*/false);
++	      if (init == NULL_TREE && tmp != NULL_TREE)
++		/* If we had an initializer but it instantiated to nothing,
++		   value-initialize the object.  This will only occur when
++		   the initializer was a pack expansion where the parameter
++		   packs used in that expansion were of length zero.  */
++		init = void_type_node;
+               in_base_initializer = 0;
+             }
+ 
+Index: gcc/cp/semantics.c
+===================================================================
+--- a/src/gcc/cp/semantics.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/cp/semantics.c	(.../branches/gcc-4_6-branch)
+@@ -6763,7 +6763,6 @@
+ 
+   STRIP_NOPS (sub);
+   subtype = TREE_TYPE (sub);
+-  gcc_assert (POINTER_TYPE_P (subtype));
+ 
+   if (TREE_CODE (sub) == ADDR_EXPR)
+     {
+Index: gcc/expr.c
+===================================================================
+--- a/src/gcc/expr.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/expr.c	(.../branches/gcc-4_6-branch)
+@@ -5971,6 +5971,8 @@
+ 		|| bitpos % GET_MODE_ALIGNMENT (mode))
+ 	       && SLOW_UNALIGNED_ACCESS (mode, MEM_ALIGN (target)))
+ 	      || (bitpos % BITS_PER_UNIT != 0)))
++      || (bitsize >= 0 && mode != BLKmode
++	  && GET_MODE_BITSIZE (mode) > bitsize)
+       /* If the RHS and field are a constant size and the size of the
+ 	 RHS isn't the same size as the bitfield, we must use bitfield
+ 	 operations.  */
+Index: gcc/predict.c
+===================================================================
+--- a/src/gcc/predict.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/predict.c	(.../branches/gcc-4_6-branch)
+@@ -1790,7 +1790,8 @@
+ static void
+ predict_paths_for_bb (basic_block cur, basic_block bb,
+ 		      enum br_predictor pred,
+-		      enum prediction taken)
++		      enum prediction taken,
++		      bitmap visited)
+ {
+   edge e;
+   edge_iterator ei;
+@@ -1811,7 +1812,7 @@
+ 	continue;
+       gcc_assert (bb == cur || dominated_by_p (CDI_POST_DOMINATORS, cur, bb));
+ 
+-      /* See if there is how many edge from e->src that is not abnormal
++      /* See if there is an edge from e->src that is not abnormal
+ 	 and does not lead to BB.  */
+       FOR_EACH_EDGE (e2, ei2, e->src->succs)
+ 	if (e2 != e
+@@ -1824,16 +1825,20 @@
+ 
+       /* If there is non-abnormal path leaving e->src, predict edge
+ 	 using predictor.  Otherwise we need to look for paths
+-	 leading to e->src.  */
++	 leading to e->src.
++
++	 The second may lead to infinite loop in the case we are predicitng
++	 regions that are only reachable by abnormal edges.  We simply
++	 prevent visiting given BB twice.  */
+       if (found)
+         predict_edge_def (e, pred, taken);
+-      else
+-	predict_paths_for_bb (e->src, e->src, pred, taken);
++      else if (bitmap_set_bit (visited, e->src->index))
++	predict_paths_for_bb (e->src, e->src, pred, taken, visited);
+     }
+   for (son = first_dom_son (CDI_POST_DOMINATORS, cur);
+        son;
+        son = next_dom_son (CDI_POST_DOMINATORS, son))
+-    predict_paths_for_bb (son, bb, pred, taken);
++    predict_paths_for_bb (son, bb, pred, taken, visited);
+ }
+ 
+ /* Sets branch probabilities according to PREDiction and
+@@ -1843,7 +1848,9 @@
+ predict_paths_leading_to (basic_block bb, enum br_predictor pred,
+ 			  enum prediction taken)
+ {
+-  predict_paths_for_bb (bb, bb, pred, taken);
++  bitmap visited = BITMAP_ALLOC (NULL);
++  predict_paths_for_bb (bb, bb, pred, taken, visited);
++  BITMAP_FREE (visited);
+ }
+ 
+ /* Like predict_paths_leading_to but take edge instead of basic block.  */
+@@ -1866,7 +1873,11 @@
+ 	break;
+       }
+   if (!has_nonloop_edge)
+-    predict_paths_for_bb (bb, bb, pred, taken);
++    {
++      bitmap visited = BITMAP_ALLOC (NULL);
++      predict_paths_for_bb (bb, bb, pred, taken, visited);
++      BITMAP_FREE (visited);
++    }
+   else
+     predict_edge_def (e, pred, taken);
+ }
+Index: gcc/fortran/ChangeLog
+===================================================================
+--- a/src/gcc/fortran/ChangeLog	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/fortran/ChangeLog	(.../branches/gcc-4_6-branch)
+@@ -1,3 +1,18 @@
++2012-03-10  Tobias Burnus  <burnus@net-b.de>
++
++	PR fortran/52469
++	* trans-types.c (gfc_get_function_type): Handle backend_decl
++	of a procedure pointer.
++
++2012-03-06  Tobias Burnus  <burnus@net-b.de>
++
++	Backport from mainline
++	2012-03-02  Tobias Burnus  <burnus@net-b.de>
++
++	PR fortran/52452
++	* resolve.c (resolve_intrinsic): Don't search for a
++	function if we know that it is a subroutine.
++
+ 2012-03-01  Release Manager
+ 
+ 	* GCC 4.6.3 released.
+Index: gcc/fortran/trans-types.c
+===================================================================
+--- a/src/gcc/fortran/trans-types.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/fortran/trans-types.c	(.../branches/gcc-4_6-branch)
+@@ -2519,7 +2519,11 @@
+ 	      || sym->attr.flavor == FL_PROGRAM);
+ 
+   if (sym->backend_decl)
+-    return TREE_TYPE (sym->backend_decl);
++    {
++      if (sym->attr.proc_pointer)
++	return TREE_TYPE (TREE_TYPE (sym->backend_decl));
++      return TREE_TYPE (sym->backend_decl);
++    }
+ 
+   alternate_return = 0;
+   typelist = NULL_TREE;
+Index: gcc/fortran/resolve.c
+===================================================================
+--- a/src/gcc/fortran/resolve.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/fortran/resolve.c	(.../branches/gcc-4_6-branch)
+@@ -1452,7 +1452,7 @@
+ 
+   if (sym->intmod_sym_id)
+     isym = gfc_intrinsic_function_by_id ((gfc_isym_id) sym->intmod_sym_id);
+-  else
++  else if (!sym->attr.subroutine)
+     isym = gfc_find_function (sym->name);
+ 
+   if (isym)
+Index: gcc/stor-layout.c
+===================================================================
+--- a/src/gcc/stor-layout.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/stor-layout.c	(.../branches/gcc-4_6-branch)
+@@ -660,12 +660,13 @@
+ 	  /* See if we can use an ordinary integer mode for a bit-field.
+ 	     Conditions are: a fixed size that is correct for another mode,
+ 	     occupying a complete byte or bytes on proper boundary,
+-	     and not volatile or not -fstrict-volatile-bitfields.  */
++	     and not -fstrict-volatile-bitfields.  If the latter is set,
++	     we unfortunately can't check TREE_THIS_VOLATILE, as a cast
++	     may make a volatile object later.  */
+ 	  if (TYPE_SIZE (type) != 0
+ 	      && TREE_CODE (TYPE_SIZE (type)) == INTEGER_CST
+ 	      && GET_MODE_CLASS (TYPE_MODE (type)) == MODE_INT
+-	      && !(TREE_THIS_VOLATILE (decl)
+-		   && flag_strict_volatile_bitfields > 0))
++	      && flag_strict_volatile_bitfields <= 0)
+ 	    {
+ 	      enum machine_mode xmode
+ 		= mode_for_size_tree (DECL_SIZE (decl), MODE_INT, 1);
+Index: gcc/tree-vect-loop.c
+===================================================================
+--- a/src/gcc/tree-vect-loop.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/tree-vect-loop.c	(.../branches/gcc-4_6-branch)
+@@ -2104,7 +2104,8 @@
+           if (stmt_info
+               && !STMT_VINFO_RELEVANT_P (stmt_info)
+               && (!STMT_VINFO_LIVE_P (stmt_info)
+-                  || STMT_VINFO_DEF_TYPE (stmt_info) != vect_reduction_def))
++                  || !VECTORIZABLE_CYCLE_DEF (STMT_VINFO_DEF_TYPE (stmt_info)))
++	      && !STMT_VINFO_IN_PATTERN_P (stmt_info))
+             continue;
+ 
+           if (STMT_VINFO_DATA_REF (vinfo_for_stmt (stmt)))
+@@ -2251,11 +2252,19 @@
+ 	{
+ 	  gimple stmt = gsi_stmt (si);
+ 	  stmt_vec_info stmt_info = vinfo_for_stmt (stmt);
++
++	  if (STMT_VINFO_IN_PATTERN_P (stmt_info))
++	    {
++	      stmt = STMT_VINFO_RELATED_STMT (stmt_info);
++	      stmt_info = vinfo_for_stmt (stmt);
++	    }
++
+ 	  /* Skip stmts that are not vectorized inside the loop.  */
+ 	  if (!STMT_VINFO_RELEVANT_P (stmt_info)
+ 	      && (!STMT_VINFO_LIVE_P (stmt_info)
+-		  || STMT_VINFO_DEF_TYPE (stmt_info) != vect_reduction_def))
++		  || !VECTORIZABLE_CYCLE_DEF (STMT_VINFO_DEF_TYPE (stmt_info))))
+ 	    continue;
++
+ 	  vec_inside_cost += STMT_VINFO_INSIDE_OF_LOOP_COST (stmt_info) * factor;
+ 	  /* FIXME: for stmts in the inner-loop in outer-loop vectorization,
+ 	     some of the "outside" costs are generated inside the outer-loop.  */
+Index: gcc/tree-sra.c
+===================================================================
+--- a/src/gcc/tree-sra.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/tree-sra.c	(.../branches/gcc-4_6-branch)
+@@ -2937,7 +2937,13 @@
+     }
+   else
+     {
+-      if (access_has_children_p (lacc) && access_has_children_p (racc))
++      if (access_has_children_p (lacc)
++	  && access_has_children_p (racc)
++	  /* When an access represents an unscalarizable region, it usually
++	     represents accesses with variable offset and thus must not be used
++	     to generate new memory accesses.  */
++	  && !lacc->grp_unscalarizable_region
++	  && !racc->grp_unscalarizable_region)
+ 	{
+ 	  gimple_stmt_iterator orig_gsi = *gsi;
+ 	  enum unscalarized_data_handling refreshed;
+Index: gcc/varasm.c
+===================================================================
+--- a/src/gcc/varasm.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/varasm.c	(.../branches/gcc-4_6-branch)
+@@ -30,6 +30,7 @@
+ #include "config.h"
+ #include "system.h"
+ #include "coretypes.h"
++#include "pointer-set.h"
+ #include "tm.h"
+ #include "rtl.h"
+ #include "tree.h"
+@@ -2097,6 +2098,19 @@
+    it all the way to final.  See PR 17982 for further discussion.  */
+ static GTY(()) tree pending_assemble_externals;
+ 
++/* FIXME: Trunk is at GCC 4.8 now and the above problem still hasn't been
++   addressed properly.  This caused PR 52640 due to O(external_decls**2)
++   lookups in the pending_assemble_externals TREE_LIST in assemble_external.
++   Paper over with this pointer set, which we use to see if we have already
++   added a decl to pending_assemble_externals without first traversing
++   the entire pending_assemble_externals list.  See assemble_external().  */
++static struct pointer_set_t *pending_assemble_externals_set;
++
++/* Some targets delay some output to final using TARGET_ASM_FILE_END.
++   As a result, assemble_external can be called after the list of externals
++   is processed and the pointer set destroyed.  */
++static bool pending_assemble_externals_processed;
++
+ #ifdef ASM_OUTPUT_EXTERNAL
+ /* True if DECL is a function decl for which no out-of-line copy exists.
+    It is assumed that DECL's assembler name has been set.  */
+@@ -2146,6 +2160,8 @@
+     assemble_external_real (TREE_VALUE (list));
+ 
+   pending_assemble_externals = 0;
++  pending_assemble_externals_processed = true;
++  pointer_set_destroy (pending_assemble_externals_set);
+ #endif
+ }
+ 
+@@ -2186,7 +2202,13 @@
+     weak_decls = tree_cons (NULL, decl, weak_decls);
+ 
+ #ifdef ASM_OUTPUT_EXTERNAL
+-  if (value_member (decl, pending_assemble_externals) == NULL_TREE)
++  if (pending_assemble_externals_processed)
++    {
++      assemble_external_real (decl);
++      return;
++    }
++
++  if (! pointer_set_insert (pending_assemble_externals_set, decl))
+     pending_assemble_externals = tree_cons (NULL, decl,
+ 					    pending_assemble_externals);
+ #endif
+@@ -6019,6 +6041,10 @@
+ 
+   if (readonly_data_section == NULL)
+     readonly_data_section = text_section;
++
++#ifdef ASM_OUTPUT_EXTERNAL
++  pending_assemble_externals_set = pointer_set_create ();
++#endif
+ }
+ 
+ enum tls_model
+Index: gcc/tree-vect-stmts.c
+===================================================================
+--- a/src/gcc/tree-vect-stmts.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/tree-vect-stmts.c	(.../branches/gcc-4_6-branch)
+@@ -623,6 +623,46 @@
+ }
+ 
+ 
++/* Model cost for type demotion and promotion operations.  PWR is normally
++   zero for single-step promotions and demotions.  It will be one if 
++   two-step promotion/demotion is required, and so on.  Each additional
++   step doubles the number of instructions required.  */
++
++static void
++vect_model_promotion_demotion_cost (stmt_vec_info stmt_info,
++				    enum vect_def_type *dt, int pwr)
++{
++  int i, tmp;
++  int inside_cost = 0, outside_cost = 0, single_stmt_cost;
++
++  /* The SLP costs were already calculated during SLP tree build.  */
++  if (PURE_SLP_STMT (stmt_info))
++    return;
++
++  single_stmt_cost = vect_get_stmt_cost (vec_promote_demote);
++  for (i = 0; i < pwr + 1; i++)
++    {
++      tmp = (STMT_VINFO_TYPE (stmt_info) == type_promotion_vec_info_type) ?
++	(i + 1) : i;
++      inside_cost += vect_pow2 (tmp) * single_stmt_cost;
++    }
++
++  /* FORNOW: Assuming maximum 2 args per stmts.  */
++  for (i = 0; i < 2; i++)
++    {
++      if (dt[i] == vect_constant_def || dt[i] == vect_external_def)
++        outside_cost += vect_get_stmt_cost (vector_stmt);
++    }
++
++  if (vect_print_dump_info (REPORT_COST))
++    fprintf (vect_dump, "vect_model_promotion_demotion_cost: inside_cost = %d, "
++             "outside_cost = %d .", inside_cost, outside_cost);
++
++  /* Set the costs in STMT_INFO.  */
++  stmt_vinfo_set_inside_of_loop_cost (stmt_info, NULL, inside_cost);
++  stmt_vinfo_set_outside_of_loop_cost (stmt_info, NULL, outside_cost);
++}
++
+ /* Function vect_cost_strided_group_size
+ 
+    For strided load or store, return the group_size only if it is the first
+@@ -691,7 +731,7 @@
+     {
+       /* Uses a high and low interleave operation for each needed permute.  */
+       inside_cost = ncopies * exact_log2(group_size) * group_size
+-        * vect_get_stmt_cost (vector_stmt);
++        * vect_get_stmt_cost (vec_perm);
+ 
+       if (vect_print_dump_info (REPORT_COST))
+         fprintf (vect_dump, "vect_model_store_cost: strided group_size = %d .",
+@@ -795,7 +835,7 @@
+     {
+       /* Uses an even and odd extract operations for each needed permute.  */
+       inside_cost = ncopies * exact_log2(group_size) * group_size
+-	* vect_get_stmt_cost (vector_stmt);
++	* vect_get_stmt_cost (vec_perm);
+ 
+       if (vect_print_dump_info (REPORT_COST))
+         fprintf (vect_dump, "vect_model_load_cost: strided group_size = %d .",
+@@ -855,7 +895,7 @@
+     case dr_explicit_realign:
+       {
+         *inside_cost += ncopies * (2 * vect_get_stmt_cost (vector_load)
+-           + vect_get_stmt_cost (vector_stmt));
++				   + vect_get_stmt_cost (vec_perm));
+ 
+         /* FIXME: If the misalignment remains fixed across the iterations of
+            the containing loop, the following cost should be added to the
+@@ -863,6 +903,9 @@
+         if (targetm.vectorize.builtin_mask_for_load)
+           *inside_cost += vect_get_stmt_cost (vector_stmt);
+ 
++        if (vect_print_dump_info (REPORT_COST))
++          fprintf (vect_dump, "vect_model_load_cost: explicit realign");
++
+         break;
+       }
+     case dr_explicit_realign_optimized:
+@@ -886,7 +929,12 @@
+           }
+ 
+         *inside_cost += ncopies * (vect_get_stmt_cost (vector_load)
+-          + vect_get_stmt_cost (vector_stmt));
++				   + vect_get_stmt_cost (vec_perm));
++
++        if (vect_print_dump_info (REPORT_COST))
++          fprintf (vect_dump,
++		   "vect_model_load_cost: explicit realign optimized");
++
+         break;
+       }
+ 
+@@ -2919,7 +2967,7 @@
+       STMT_VINFO_TYPE (stmt_info) = type_demotion_vec_info_type;
+       if (vect_print_dump_info (REPORT_DETAILS))
+         fprintf (vect_dump, "=== vectorizable_demotion ===");
+-      vect_model_simple_cost (stmt_info, ncopies, dt, NULL);
++      vect_model_promotion_demotion_cost (stmt_info, dt, multi_step_cvt);
+       return true;
+     }
+ 
+@@ -3217,7 +3265,7 @@
+       STMT_VINFO_TYPE (stmt_info) = type_promotion_vec_info_type;
+       if (vect_print_dump_info (REPORT_DETAILS))
+         fprintf (vect_dump, "=== vectorizable_promotion ===");
+-      vect_model_simple_cost (stmt_info, 2*ncopies, dt, NULL);
++      vect_model_promotion_demotion_cost (stmt_info, dt, multi_step_cvt);
+       return true;
+     }
+ 
+Index: gcc/tree-inline.c
+===================================================================
+--- a/src/gcc/tree-inline.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/tree-inline.c	(.../branches/gcc-4_6-branch)
+@@ -4947,7 +4947,7 @@
+ 	        if ((e = cgraph_edge (id->dst_node, gsi_stmt (bsi))) != NULL)
+ 		  {
+ 		    if (!e->inline_failed)
+-		      cgraph_remove_node_and_inline_clones (e->callee);
++		      cgraph_remove_node_and_inline_clones (e->callee, id->dst_node);
+ 		    else
+ 	              cgraph_remove_edge (e);
+ 		  }
+@@ -4957,8 +4957,8 @@
+ 		    {
+ 	              if ((e = cgraph_edge (node, gsi_stmt (bsi))) != NULL)
+ 			{
+-		          if (!e->inline_failed)
+-		            cgraph_remove_node_and_inline_clones (e->callee);
++		          if (!e->inline_failed && e->callee != id->src_node)
++		            cgraph_remove_node_and_inline_clones (e->callee, id->dst_node);
+ 			  else
+ 	                    cgraph_remove_edge (e);
+ 			}
+Index: gcc/combine.c
+===================================================================
+--- a/src/gcc/combine.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/combine.c	(.../branches/gcc-4_6-branch)
+@@ -1788,6 +1788,10 @@
+   if (set == 0)
+     return 0;
+ 
++  /* The simplification in expand_field_assignment may call back to
++     get_last_value, so set safe guard here.  */
++  subst_low_luid = DF_INSN_LUID (insn);
++
+   set = expand_field_assignment (set);
+   src = SET_SRC (set), dest = SET_DEST (set);
+ 
+Index: gcc/config/m32c/m32c.c
+===================================================================
+--- a/src/gcc/config/m32c/m32c.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/config/m32c/m32c.c	(.../branches/gcc-4_6-branch)
+@@ -447,7 +447,7 @@
+     flag_ivopts = 0;
+ 
+   /* This target defaults to strict volatile bitfields.  */
+-  if (flag_strict_volatile_bitfields < 0)
++  if (flag_strict_volatile_bitfields < 0 && abi_version_at_least(2))
+     flag_strict_volatile_bitfields = 1;
+ 
+   /* r8c/m16c have no 16-bit indirect call, so thunks are involved.
+Index: gcc/config/spu/spu.c
+===================================================================
+--- a/src/gcc/config/spu/spu.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/config/spu/spu.c	(.../branches/gcc-4_6-branch)
+@@ -6794,6 +6794,7 @@
+       case scalar_to_vec:
+       case cond_branch_not_taken:
+       case vec_perm:
++      case vec_promote_demote:
+         return 1;
+ 
+       case scalar_store:
+Index: gcc/config/sparc/sparc.c
+===================================================================
+--- a/src/gcc/config/sparc/sparc.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/config/sparc/sparc.c	(.../branches/gcc-4_6-branch)
+@@ -3658,13 +3658,17 @@
+ {
+   x = delegitimize_mem_from_attrs (x);
+ 
+-  if (GET_CODE (x) == LO_SUM
+-      && GET_CODE (XEXP (x, 1)) == UNSPEC
+-      && XINT (XEXP (x, 1), 1) == UNSPEC_TLSLE)
+-    {
+-      x = XVECEXP (XEXP (x, 1), 0, 0);
+-      gcc_assert (GET_CODE (x) == SYMBOL_REF);
+-    }
++  if (GET_CODE (x) == LO_SUM && GET_CODE (XEXP (x, 1)) == UNSPEC)
++    switch (XINT (XEXP (x, 1), 1))
++      {
++      case UNSPEC_MOVE_PIC:
++      case UNSPEC_TLSLE:
++	x = XVECEXP (XEXP (x, 1), 0, 0);
++	gcc_assert (GET_CODE (x) == SYMBOL_REF);
++	break;
++      default:
++	break;
++      }
+ 
+   return x;
+ }
+@@ -9634,6 +9638,7 @@
+ 						       void_list_node));
+ 	  DECL_RESULT (decl) = build_decl (BUILTINS_LOCATION, RESULT_DECL,
+ 					   NULL_TREE, void_type_node);
++	  TREE_PUBLIC (decl) = 1;
+ 	  TREE_STATIC (decl) = 1;
+ 	  make_decl_one_only (decl, DECL_ASSEMBLER_NAME (decl));
+ 	  DECL_VISIBILITY (decl) = VISIBILITY_HIDDEN;
+Index: gcc/config/rx/rx.c
+===================================================================
+--- a/src/gcc/config/rx/rx.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/config/rx/rx.c	(.../branches/gcc-4_6-branch)
+@@ -2348,7 +2348,7 @@
+ rx_option_override (void)
+ {
+   /* This target defaults to strict volatile bitfields.  */
+-  if (flag_strict_volatile_bitfields < 0)
++  if (flag_strict_volatile_bitfields < 0 && abi_version_at_least(2))
+     flag_strict_volatile_bitfields = 1;
+ 
+   rx_override_options_after_change ();
+Index: gcc/config/i386/i386.h
+===================================================================
+--- a/src/gcc/config/i386/i386.h	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/config/i386/i386.h	(.../branches/gcc-4_6-branch)
+@@ -1668,6 +1668,17 @@
+ 
+ #define LEGITIMATE_CONSTANT_P(X)  legitimate_constant_p (X)
+ 
++/* Try a machine-dependent way of reloading an illegitimate address
++   operand.  If we find one, push the reload and jump to WIN.  This
++   macro is used in only one place: `find_reloads_address' in reload.c.  */
++
++#define LEGITIMIZE_RELOAD_ADDRESS(X, MODE, OPNUM, TYPE, INDL, WIN)	\
++do {									\
++  if (ix86_legitimize_reload_address ((X), (MODE), (OPNUM),		\
++				      (int)(TYPE), (INDL)))		\
++    goto WIN;								\
++} while (0)
++
+ /* If defined, a C expression to determine the base term of address X.
+    This macro is used in only one place: `find_base_term' in alias.c.
+ 
+Index: gcc/config/i386/sse.md
+===================================================================
+--- a/src/gcc/config/i386/sse.md	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/config/i386/sse.md	(.../branches/gcc-4_6-branch)
+@@ -1324,15 +1324,15 @@
+ 		(parallel [(const_int 0)]))
+ 	      (vec_select:DF (match_dup 1) (parallel [(const_int 1)])))
+ 	    (plusminus:DF
+-	      (vec_select:DF (match_dup 1) (parallel [(const_int 2)]))
+-	      (vec_select:DF (match_dup 1) (parallel [(const_int 3)]))))
+-	  (vec_concat:V2DF
+-	    (plusminus:DF
+ 	      (vec_select:DF
+ 		(match_operand:V4DF 2 "nonimmediate_operand" "xm")
+ 		(parallel [(const_int 0)]))
+-	      (vec_select:DF (match_dup 2) (parallel [(const_int 1)])))
++	      (vec_select:DF (match_dup 2) (parallel [(const_int 1)]))))
++	  (vec_concat:V2DF
+ 	    (plusminus:DF
++	      (vec_select:DF (match_dup 1) (parallel [(const_int 2)]))
++	      (vec_select:DF (match_dup 1) (parallel [(const_int 3)])))
++	    (plusminus:DF
+ 	      (vec_select:DF (match_dup 2) (parallel [(const_int 2)]))
+ 	      (vec_select:DF (match_dup 2) (parallel [(const_int 3)]))))))]
+   "TARGET_AVX"
+@@ -5058,7 +5058,7 @@
+ 	  (vec_select:DF (match_dup 0) (parallel [(const_int 1)]))))]
+   "TARGET_SSE2 && reload_completed"
+   [(set (match_dup 0) (match_dup 1))]
+-  "operands[0] = adjust_address (operands[0], DFmode, 8);")
++  "operands[0] = adjust_address (operands[0], DFmode, 0);")
+ 
+ ;; Not sure these two are ever used, but it doesn't hurt to have
+ ;; them. -aoliva
+Index: gcc/config/i386/i386-protos.h
+===================================================================
+--- a/src/gcc/config/i386/i386-protos.h	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/config/i386/i386-protos.h	(.../branches/gcc-4_6-branch)
+@@ -59,7 +59,8 @@
+ extern bool constant_address_p (rtx);
+ extern bool legitimate_pic_operand_p (rtx);
+ extern bool legitimate_pic_address_disp_p (rtx);
+-
++extern bool ix86_legitimize_reload_address (rtx, enum machine_mode,
++					    int, int, int);
+ extern void print_reg (rtx, int, FILE*);
+ extern void ix86_print_operand (FILE *, rtx, int);
+ 
+Index: gcc/config/i386/i386.c
+===================================================================
+--- a/src/gcc/config/i386/i386.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/config/i386/i386.c	(.../branches/gcc-4_6-branch)
+@@ -46,6 +46,7 @@
+ #include "target.h"
+ #include "target-def.h"
+ #include "langhooks.h"
++#include "reload.h"
+ #include "cgraph.h"
+ #include "gimple.h"
+ #include "dwarf2.h"
+@@ -12168,6 +12169,64 @@
+   return false;
+ }
+ 
++/* Our implementation of LEGITIMIZE_RELOAD_ADDRESS.  Returns a value to
++   replace the input X, or the original X if no replacement is called for.
++   The output parameter *WIN is 1 if the calling macro should goto WIN,
++   0 if it should not.  */
++
++bool
++ix86_legitimize_reload_address (rtx x,
++				enum machine_mode mode ATTRIBUTE_UNUSED,
++				int opnum, int type,
++				int ind_levels ATTRIBUTE_UNUSED)
++{
++  /* Reload can generate:
++
++     (plus:DI (plus:DI (unspec:DI [(const_int 0 [0])] UNSPEC_TP)
++		       (reg:DI 97))
++	      (reg:DI 2 cx))
++
++     This RTX is rejected from ix86_legitimate_address_p due to
++     non-strictness of base register 97.  Following this rejection, 
++     reload pushes all three components into separate registers,
++     creating invalid memory address RTX.
++
++     Following code reloads only the invalid part of the
++     memory address RTX.  */
++
++  if (GET_CODE (x) == PLUS
++      && REG_P (XEXP (x, 1))
++      && GET_CODE (XEXP (x, 0)) == PLUS
++      && REG_P (XEXP (XEXP (x, 0), 1)))
++    {
++      rtx base, index;
++      bool something_reloaded = false;
++
++      base = XEXP (XEXP (x, 0), 1);      
++      if (!REG_OK_FOR_BASE_STRICT_P (base))
++	{
++	  push_reload (base, NULL_RTX, &XEXP (XEXP (x, 0), 1), NULL,
++		       BASE_REG_CLASS, GET_MODE (x), VOIDmode, 0, 0,
++		       opnum, (enum reload_type)type);
++	  something_reloaded = true;
++	}
++
++      index = XEXP (x, 1);
++      if (!REG_OK_FOR_INDEX_STRICT_P (index))
++	{
++	  push_reload (index, NULL_RTX, &XEXP (x, 1), NULL,
++		       INDEX_REG_CLASS, GET_MODE (x), VOIDmode, 0, 0,
++		       opnum, (enum reload_type)type);
++	  something_reloaded = true;
++	}
++
++      gcc_assert (something_reloaded);
++      return true;
++    }
++
++  return false;
++}
++
+ /* Recognizes RTL expressions that are valid memory addresses for an
+    instruction.  The MODE argument is the machine mode for the MEM
+    expression that wants to use this address.
+@@ -32823,7 +32882,8 @@
+         return ix86_cost->cond_not_taken_branch_cost;
+ 
+       case vec_perm:
+-        return 1;
++      case vec_promote_demote:
++        return ix86_cost->vec_stmt_cost;
+ 
+       default:
+         gcc_unreachable ();
+Index: gcc/config/sh/sh.c
+===================================================================
+--- a/src/gcc/config/sh/sh.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/config/sh/sh.c	(.../branches/gcc-4_6-branch)
+@@ -1018,7 +1018,7 @@
+     sh_fix_range (sh_fixed_range_str);
+ 
+   /* This target defaults to strict volatile bitfields.  */
+-  if (flag_strict_volatile_bitfields < 0)
++  if (flag_strict_volatile_bitfields < 0 && abi_version_at_least(2))
+     flag_strict_volatile_bitfields = 1;
+ }
+ 
+Index: gcc/config/avr/libgcc.S
+===================================================================
+--- a/src/gcc/config/avr/libgcc.S	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/config/avr/libgcc.S	(.../branches/gcc-4_6-branch)
+@@ -582,16 +582,7 @@
+ 	push r17
+ 	push r28
+ 	push r29
+-#if defined (__AVR_HAVE_8BIT_SP__)
+-;; FIXME: __AVR_HAVE_8BIT_SP__ is set on device level, not on core level
+-;;        so this lines are dead code.  To make it work, devices without
+-;;        SP_H must get their own multilib(s), see PR51345.
+ 	in	r28,__SP_L__
+-	sub	r28,r26
+-	clr	r29
+-	out	__SP_L__,r28
+-#else
+-	in	r28,__SP_L__
+ 	in	r29,__SP_H__
+ 	sub	r28,r26
+ 	sbc	r29,r27
+@@ -600,7 +591,6 @@
+ 	out	__SP_H__,r29
+ 	out	__SREG__,__tmp_reg__
+ 	out	__SP_L__,r28
+-#endif
+ #if defined (__AVR_HAVE_EIJMP_EICALL__)
+ 	eijmp
+ #else
+@@ -635,15 +625,6 @@
+ 	ldd	r16,Y+4
+ 	ldd	r17,Y+3
+ 	ldd	r26,Y+2
+-#if defined (__AVR_HAVE_8BIT_SP__)
+-;; FIXME: __AVR_HAVE_8BIT_SP__ is set on device level, not on core level
+-;;        so this lines are dead code.  To make it work, devices without
+-;;        SP_H must get their own multilib(s).
+-	ldd	r29,Y+1
+-	add	r28,r30
+-	out	__SP_L__,r28
+-	mov	r28, r26
+-#else
+ 	ldd	r27,Y+1
+ 	add	r28,r30
+ 	adc	r29,__zero_reg__
+@@ -654,7 +635,6 @@
+ 	out	__SP_L__,r28
+ 	mov_l	r28, r26
+ 	mov_h	r29, r27
+-#endif
+ 	ret
+ .endfunc
+ #endif /* defined (L_epilogue) */
+Index: gcc/config/avr/avr.md
+===================================================================
+--- a/src/gcc/config/avr/avr.md	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/config/avr/avr.md	(.../branches/gcc-4_6-branch)
+@@ -299,7 +299,7 @@
+   [(set (match_operand:HI 0 "stack_register_operand" "=q")
+         (unspec_volatile:HI [(match_operand:HI 1 "register_operand"  "r")] 
+ 			    UNSPECV_WRITE_SP_IRQ_OFF))]
+-  "!AVR_HAVE_8BIT_SP"
++  ""
+   "out __SP_H__, %B1
+ 	out __SP_L__, %A1"
+   [(set_attr "length" "2")
+@@ -309,7 +309,7 @@
+   [(set (match_operand:HI 0 "stack_register_operand" "=q")
+         (unspec_volatile:HI [(match_operand:HI 1 "register_operand"  "r")] 
+ 			    UNSPECV_WRITE_SP_IRQ_ON))]
+-  "!AVR_HAVE_8BIT_SP"
++  ""
+   "cli
+         out __SP_H__, %B1
+ 	sei
+Index: gcc/config/avr/avr.c
+===================================================================
+--- a/src/gcc/config/avr/avr.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/config/avr/avr.c	(.../branches/gcc-4_6-branch)
+@@ -1879,12 +1879,9 @@
+ 	    }
+ 	  else if (test_hard_reg_class (STACK_REG, src))
+ 	    {
+-              *l = 2;
+-              return AVR_HAVE_8BIT_SP
+-                ? (AS2 (in,%A0,__SP_L__) CR_TAB
+-                   AS1 (clr,%B0))
+-                : (AS2 (in,%A0,__SP_L__) CR_TAB
+-                   AS2 (in,%B0,__SP_H__));
++	      *l = 2;	
++	      return (AS2 (in,%A0,__SP_L__) CR_TAB
++		      AS2 (in,%B0,__SP_H__));
+ 	    }
+ 
+ 	  if (AVR_HAVE_MOVW)
+@@ -5177,10 +5174,9 @@
+ 
+   default_file_start ();
+ 
+-  fputs ("__SREG__ = 0x3f\n", asm_out_file);
+-  if (!AVR_HAVE_8BIT_SP)
+-    fputs ("__SP_H__ = 0x3e\n", asm_out_file);
+-  fputs ("__SP_L__ = 0x3d\n", asm_out_file);
++  fputs ("__SREG__ = 0x3f\n"
++	 "__SP_H__ = 0x3e\n"
++	 "__SP_L__ = 0x3d\n", asm_out_file);
+   
+   fputs ("__tmp_reg__ = 0\n" 
+          "__zero_reg__ = 1\n", asm_out_file);
+Index: gcc/config/host-linux.c
+===================================================================
+--- a/src/gcc/config/host-linux.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/config/host-linux.c	(.../branches/gcc-4_6-branch)
+@@ -84,6 +84,8 @@
+ # define TRY_EMPTY_VM_SPACE	0x60000000
+ #elif defined(__mc68000__)
+ # define TRY_EMPTY_VM_SPACE	0x40000000
++#elif defined(__ARM_EABI__)
++# define TRY_EMPTY_VM_SPACE     0x60000000
+ #else
+ # define TRY_EMPTY_VM_SPACE	0
+ #endif
+Index: gcc/config/rs6000/vector.md
+===================================================================
+--- a/src/gcc/config/rs6000/vector.md	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/config/rs6000/vector.md	(.../branches/gcc-4_6-branch)
+@@ -448,6 +448,94 @@
+   "VECTOR_UNIT_ALTIVEC_P (<MODE>mode)"
+   "")
+ 
++(define_insn_and_split "*vector_uneq<mode>"
++  [(set (match_operand:VEC_F 0 "vfloat_operand" "")
++	(uneq:VEC_F (match_operand:VEC_F 1 "vfloat_operand" "")
++		    (match_operand:VEC_F 2 "vfloat_operand" "")))]
++  "VECTOR_UNIT_ALTIVEC_OR_VSX_P (<MODE>mode)"
++  "#"
++  ""
++  [(set (match_dup 3)
++	(gt:VEC_F (match_dup 1)
++		  (match_dup 2)))
++   (set (match_dup 4)
++	(gt:VEC_F (match_dup 2)
++		  (match_dup 1)))
++   (set (match_dup 0)
++	(not:VEC_F (ior:VEC_F (match_dup 3)
++			      (match_dup 4))))]
++  "
++{
++  operands[3] = gen_reg_rtx (<MODE>mode);
++  operands[4] = gen_reg_rtx (<MODE>mode);
++}")
++
++(define_insn_and_split "*vector_ltgt<mode>"
++  [(set (match_operand:VEC_F 0 "vfloat_operand" "")
++	(ltgt:VEC_F (match_operand:VEC_F 1 "vfloat_operand" "")
++		    (match_operand:VEC_F 2 "vfloat_operand" "")))]
++  "VECTOR_UNIT_ALTIVEC_OR_VSX_P (<MODE>mode)"
++  "#"
++  ""
++  [(set (match_dup 3)
++	(gt:VEC_F (match_dup 1)
++		  (match_dup 2)))
++   (set (match_dup 4)
++	(gt:VEC_F (match_dup 2)
++		  (match_dup 1)))
++   (set (match_dup 0)
++	(ior:VEC_F (match_dup 3)
++		   (match_dup 4)))]
++  "
++{
++  operands[3] = gen_reg_rtx (<MODE>mode);
++  operands[4] = gen_reg_rtx (<MODE>mode);
++}")
++
++(define_insn_and_split "*vector_ordered<mode>"
++  [(set (match_operand:VEC_F 0 "vfloat_operand" "")
++	(ordered:VEC_F (match_operand:VEC_F 1 "vfloat_operand" "")
++		       (match_operand:VEC_F 2 "vfloat_operand" "")))]
++  "VECTOR_UNIT_ALTIVEC_OR_VSX_P (<MODE>mode)"
++  "#"
++  ""
++  [(set (match_dup 3)
++	(ge:VEC_F (match_dup 1)
++		  (match_dup 2)))
++   (set (match_dup 4)
++	(ge:VEC_F (match_dup 2)
++		  (match_dup 1)))
++   (set (match_dup 0)
++	(ior:VEC_F (match_dup 3)
++		   (match_dup 4)))]
++  "
++{
++  operands[3] = gen_reg_rtx (<MODE>mode);
++  operands[4] = gen_reg_rtx (<MODE>mode);
++}")
++
++(define_insn_and_split "*vector_unordered<mode>"
++  [(set (match_operand:VEC_F 0 "vfloat_operand" "")
++	(unordered:VEC_F (match_operand:VEC_F 1 "vfloat_operand" "")
++			 (match_operand:VEC_F 2 "vfloat_operand" "")))]
++  "VECTOR_UNIT_ALTIVEC_OR_VSX_P (<MODE>mode)"
++  "#"
++  ""
++  [(set (match_dup 3)
++	(ge:VEC_F (match_dup 1)
++		  (match_dup 2)))
++   (set (match_dup 4)
++	(ge:VEC_F (match_dup 2)
++		  (match_dup 1)))
++   (set (match_dup 0)
++	(not:VEC_F (ior:VEC_F (match_dup 3)
++			      (match_dup 4))))]
++  "
++{
++  operands[3] = gen_reg_rtx (<MODE>mode);
++  operands[4] = gen_reg_rtx (<MODE>mode);
++}")
++
+ ;; Note the arguments for __builtin_altivec_vsel are op2, op1, mask
+ ;; which is in the reverse order that we want
+ (define_expand "vector_select_<mode>"
+Index: gcc/config/rs6000/rs6000.c
+===================================================================
+--- a/src/gcc/config/rs6000/rs6000.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/config/rs6000/rs6000.c	(.../branches/gcc-4_6-branch)
+@@ -3695,12 +3695,23 @@
+       case vec_to_scalar:
+       case scalar_to_vec:
+       case cond_branch_not_taken:
+-      case vec_perm:
+         return 1;
+ 
+       case cond_branch_taken:
+         return 3;
+ 
++      case vec_perm:
++	if (TARGET_VSX)
++	  return 4;
++	else
++	  return 1;
++
++      case vec_promote_demote:
++	if (TARGET_VSX)
++	  return 5;
++	else
++	  return 1;
++
+       case unaligned_load:
+         if (TARGET_VSX && TARGET_ALLOW_MOVMISALIGN)
+           {
+@@ -17229,6 +17240,10 @@
+     case EQ:
+     case GT:
+     case GTU:
++    case ORDERED:
++    case UNORDERED:
++    case UNEQ:
++    case LTGT:
+       mask = gen_reg_rtx (mode);
+       emit_insn (gen_rtx_SET (VOIDmode,
+ 			      mask,
+Index: gcc/config/rs6000/vsx.md
+===================================================================
+--- a/src/gcc/config/rs6000/vsx.md	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/config/rs6000/vsx.md	(.../branches/gcc-4_6-branch)
+@@ -1006,9 +1006,9 @@
+   "VECTOR_MEM_VSX_P (<MODE>mode)"
+ {
+   if (INTVAL (operands[3]) == 0)
+-    return \"xxpermdi %x0,%x1,%x2,1\";
++    return \"xxpermdi %x0,%x2,%x1,1\";
+   else if (INTVAL (operands[3]) == 1)
+-    return \"xxpermdi %x0,%x2,%x1,0\";
++    return \"xxpermdi %x0,%x1,%x2,0\";
+   else
+     gcc_unreachable ();
+ }
+Index: gcc/config/arm/arm.c
+===================================================================
+--- a/src/gcc/config/arm/arm.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/config/arm/arm.c	(.../branches/gcc-4_6-branch)
+@@ -2005,7 +2005,8 @@
+ 			   global_options_set.x_param_values);
+ 
+   /* ARM EABI defaults to strict volatile bitfields.  */
+-  if (TARGET_AAPCS_BASED && flag_strict_volatile_bitfields < 0)
++  if (TARGET_AAPCS_BASED && flag_strict_volatile_bitfields < 0
++      && abi_version_at_least(2))
+     flag_strict_volatile_bitfields = 1;
+ 
+   /* Enable sw prefetching at -O3 for CPUS that have prefetch, and we have deemed
+Index: gcc/config/pa/predicates.md
+===================================================================
+--- a/src/gcc/config/pa/predicates.md	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/config/pa/predicates.md	(.../branches/gcc-4_6-branch)
+@@ -421,9 +421,9 @@
+   (ior (match_operand 0 "register_operand")
+        (match_operand 0 "cint_ior_operand")))
+ 
+-;; True iff OP is a CONST_INT of the forms 0...0xxxx or
+-;; 0...01...1xxxx. Such values can be the left hand side x in (x <<
+-;; r), using the zvdepi instruction.
++;; True iff OP is a CONST_INT of the forms 0...0xxxx, 0...01...1xxxx,
++;; or 1...1xxxx. Such values can be the left hand side x in (x << r),
++;; using the zvdepi instruction.
+ 
+ (define_predicate "lhs_lshift_cint_operand"
+   (match_code "const_int")
+Index: gcc/config/pa/pa.md
+===================================================================
+--- a/src/gcc/config/pa/pa.md	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/config/pa/pa.md	(.../branches/gcc-4_6-branch)
+@@ -6348,7 +6348,7 @@
+   ""
+   "*
+ {
+-  int x = INTVAL (operands[1]);
++  unsigned HOST_WIDE_INT x = UINTVAL (operands[1]);
+   operands[2] = GEN_INT (4 + exact_log2 ((x >> 4) + 1));
+   operands[1] = GEN_INT ((x & 0xf) - 0x10);
+   return \"{zvdepi %1,%2,%0|depwi,z %1,%%sar,%2,%0}\";
+@@ -6366,7 +6366,7 @@
+   "exact_log2 (INTVAL (operands[1]) + 1) > 0"
+   "*
+ {
+-  int x = INTVAL (operands[1]);
++  HOST_WIDE_INT x = INTVAL (operands[1]);
+   operands[2] = GEN_INT (exact_log2 (x + 1));
+   return \"{vdepi -1,%2,%0|depwi -1,%%sar,%2,%0}\";
+ }"
+@@ -6383,7 +6383,7 @@
+   "INTVAL (operands[1]) == -2"
+   "*
+ {
+-  int x = INTVAL (operands[1]);
++  HOST_WIDE_INT x = INTVAL (operands[1]);
+   operands[2] = GEN_INT (exact_log2 ((~x) + 1));
+   return \"{vdepi 0,%2,%0|depwi 0,%%sar,%2,%0}\";
+ }"
+@@ -6447,7 +6447,7 @@
+   "TARGET_64BIT"
+   "*
+ {
+-  int x = INTVAL (operands[1]);
++  unsigned HOST_WIDE_INT x = UINTVAL (operands[1]);
+   operands[2] = GEN_INT (4 + exact_log2 ((x >> 4) + 1));
+   operands[1] = GEN_INT ((x & 0x1f) - 0x20);
+   return \"depdi,z %1,%%sar,%2,%0\";
+@@ -6465,7 +6465,7 @@
+   "TARGET_64BIT && exact_log2 (INTVAL (operands[1]) + 1) > 0"
+   "*
+ {
+-  int x = INTVAL (operands[1]);
++  HOST_WIDE_INT x = INTVAL (operands[1]);
+   operands[2] = GEN_INT (exact_log2 (x + 1));
+   return \"depdi -1,%%sar,%2,%0\";
+ }"
+@@ -6482,7 +6482,7 @@
+   "TARGET_64BIT && INTVAL (operands[1]) == -2"
+   "*
+ {
+-  int x = INTVAL (operands[1]);
++  HOST_WIDE_INT x = INTVAL (operands[1]);
+   operands[2] = GEN_INT (exact_log2 ((~x) + 1));
+   return \"depdi 0,%%sar,%2,%0\";
+ }"
+@@ -6671,6 +6671,20 @@
+ 
+ ;; Unconditional and other jump instructions.
+ 
++;; Trivial return used when no epilogue is needed.
++(define_insn "return"
++  [(return)
++   (use (reg:SI 2))]
++  "pa_can_use_return_insn ()"
++  "*
++{
++  if (TARGET_PA_20)
++    return \"bve%* (%%r2)\";
++  return \"bv%* %%r0(%%r2)\";
++}"
++  [(set_attr "type" "branch")
++   (set_attr "length" "4")])
++
+ ;; This is used for most returns.
+ (define_insn "return_internal"
+   [(return)
+@@ -6719,11 +6733,8 @@
+   rtx x;
+ 
+   /* Try to use the trivial return first.  Else use the full epilogue.  */
+-  if (reload_completed
+-      && !frame_pointer_needed
+-      && !df_regs_ever_live_p (2)
+-      && (compute_frame_size (get_frame_size (), 0) ? 0 : 1))
+-    x = gen_return_internal ();
++  if (pa_can_use_return_insn ())
++    x = gen_return ();
+   else
+     {
+       hppa_expand_epilogue ();
+Index: gcc/config/pa/pa-protos.h
+===================================================================
+--- a/src/gcc/config/pa/pa-protos.h	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/config/pa/pa-protos.h	(.../branches/gcc-4_6-branch)
+@@ -136,6 +136,7 @@
+ extern int cint_ok_for_move (HOST_WIDE_INT);
+ extern void hppa_expand_prologue (void);
+ extern void hppa_expand_epilogue (void);
++extern bool pa_can_use_return_insn (void);
+ extern int ior_mask_p (unsigned HOST_WIDE_INT);
+ extern void compute_zdepdi_operands (unsigned HOST_WIDE_INT,
+ 				     unsigned *);
+Index: gcc/config/pa/pa.c
+===================================================================
+--- a/src/gcc/config/pa/pa.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/config/pa/pa.c	(.../branches/gcc-4_6-branch)
+@@ -4442,6 +4442,24 @@
+     }
+ }
+ 
++bool
++pa_can_use_return_insn (void)
++{
++  if (!reload_completed)
++    return false;
++
++  if (frame_pointer_needed)
++    return false;
++
++  if (df_regs_ever_live_p (2))
++    return false;
++
++  if (crtl->profile)
++    return false;
++
++  return compute_frame_size (get_frame_size (), 0) == 0;
++}
++
+ rtx
+ hppa_pic_save_rtx (void)
+ {
+@@ -4586,7 +4604,7 @@
+   rtx saved_rp;
+   rtx ins;
+ 
+-  /* Instruction stream at the normal return address for the export stub:
++  /* The instruction stream at the return address of a PA1.X export stub is:
+ 
+ 	0x4bc23fd1 | stub+8:   ldw -18(sr0,sp),rp
+ 	0x004010a1 | stub+12:  ldsid (sr0,rp),r1
+@@ -4594,11 +4612,17 @@
+ 	0xe0400002 | stub+20:  be,n 0(sr0,rp)
+ 
+      0xe0400002 must be specified as -532676606 so that it won't be
+-     rejected as an invalid immediate operand on 64-bit hosts.  */
++     rejected as an invalid immediate operand on 64-bit hosts.
+ 
+-  HOST_WIDE_INT insns[4] = {0x4bc23fd1, 0x004010a1, 0x00011820, -532676606};
+-  int i;
++     The instruction stream at the return address of a PA2.0 export stub is:
+ 
++	0x4bc23fd1 | stub+8:   ldw -18(sr0,sp),rp
++	0xe840d002 | stub+12:  bve,n (rp)
++  */
++
++  HOST_WIDE_INT insns[4];
++  int i, len;
++
+   if (count != 0)
+     return NULL_RTX;
+ 
+@@ -4620,11 +4644,26 @@
+   ins = copy_to_reg (gen_rtx_AND (Pmode, rp, MASK_RETURN_ADDR));
+   label = gen_label_rtx ();
+ 
++  if (TARGET_PA_20)
++    {
++      insns[0] = 0x4bc23fd1;
++      insns[1] = -398405630;
++      len = 2;
++    }
++  else
++    {
++      insns[0] = 0x4bc23fd1;
++      insns[1] = 0x004010a1;
++      insns[2] = 0x00011820;
++      insns[3] = -532676606;
++      len = 4;
++    }
++
+   /* Check the instruction stream at the normal return address for the
+      export stub.  If it is an export stub, than our return address is
+      really in -24[frameaddr].  */
+ 
+-  for (i = 0; i < 3; i++)
++  for (i = 0; i < len; i++)
+     {
+       rtx op0 = gen_rtx_MEM (SImode, plus_constant (ins, i * 4)); 
+       rtx op1 = GEN_INT (insns[i]);
+Index: gcc/config/h8300/h8300.c
+===================================================================
+--- a/src/gcc/config/h8300/h8300.c	(.../tags/gcc_4_6_3_release)
++++ b/src/gcc/config/h8300/h8300.c	(.../branches/gcc-4_6-branch)
+@@ -416,7 +416,7 @@
+     }
+ 
+   /* This target defaults to strict volatile bitfields.  */
+-  if (flag_strict_volatile_bitfields < 0)
++  if (flag_strict_volatile_bitfields < 0 && abi_version_at_least(2))
+     flag_strict_volatile_bitfields = 1;
+ }
+ 
+Index: libstdc++-v3/include/debug/safe_iterator.h
+===================================================================
+--- a/src/libstdc++-v3/include/debug/safe_iterator.h	(.../tags/gcc_4_6_3_release)
++++ b/src/libstdc++-v3/include/debug/safe_iterator.h	(.../branches/gcc-4_6-branch)
+@@ -1,6 +1,6 @@
+ // Safe iterator implementation  -*- C++ -*-
+ 
+-// Copyright (C) 2003, 2004, 2005, 2006, 2009, 2010, 2011
++// Copyright (C) 2003, 2004, 2005, 2006, 2009, 2010, 2011, 2012
+ // Free Software Foundation, Inc.
+ //
+ // This file is part of the GNU ISO C++ Library.  This library is free
+@@ -142,7 +142,25 @@
+ 			      ._M_iterator(__x, "other"));
+       }
+ 
++#ifdef __GXX_EXPERIMENTAL_CXX0X__
+       /**
++       * @brief Move construction.
++       * @post __x is singular and unattached
++       */
++      _Safe_iterator(_Safe_iterator&& __x) : _M_current()
++      {
++	_GLIBCXX_DEBUG_VERIFY(!__x._M_singular()
++			      || __x._M_current == _Iterator(),
++			      _M_message(__msg_init_copy_singular)
++			      ._M_iterator(*this, "this")
++			      ._M_iterator(__x, "other"));
++	std::swap(_M_current, __x._M_current);
++	this->_M_attach(__x._M_sequence);
++	__x._M_detach();
++      }
++#endif
++
++      /**
+        *  @brief Converting constructor from a mutable iterator to a
+        *  constant iterator.
+       */
+@@ -181,7 +199,28 @@
+ 	return *this;
+       }
+ 
++#ifdef __GXX_EXPERIMENTAL_CXX0X__
+       /**
++       * @brief Move assignment.
++       * @post __x is singular and unattached
++       */
++      _Safe_iterator&
++      operator=(_Safe_iterator&& __x)
++      {
++	_GLIBCXX_DEBUG_VERIFY(!__x._M_singular()
++			      || __x._M_current == _Iterator(),
++			      _M_message(__msg_copy_singular)
++			      ._M_iterator(*this, "this")
++			      ._M_iterator(__x, "other"));
++	_M_current = __x._M_current;
++	_M_attach(__x._M_sequence);
++	__x._M_detach();
++	__x._M_current = _Iterator();
++	return *this;
++      }
++#endif
++
++      /**
+        *  @brief Iterator dereference.
+        *  @pre iterator is dereferenceable
+        */
+@@ -415,7 +454,9 @@
+       /// Is this iterator equal to the sequence's before_begin() iterator if
+       /// any?
+       bool _M_is_before_begin() const
+-      { return _BeforeBeginHelper<_Sequence>::_M_Is(base(), _M_get_sequence()); }
++      {
++	return _BeforeBeginHelper<_Sequence>::_M_Is(base(), _M_get_sequence());
++      }
+     };
+ 
+   template<typename _IteratorL, typename _IteratorR, typename _Sequence>
+Index: libstdc++-v3/ChangeLog
+===================================================================
+--- a/src/libstdc++-v3/ChangeLog	(.../tags/gcc_4_6_3_release)
++++ b/src/libstdc++-v3/ChangeLog	(.../branches/gcc-4_6-branch)
+@@ -1,3 +1,15 @@
++2012-04-09  Terry Guo  <terry.guo@arm.com>
++
++	* testsuite/Makefile.am (TEST_GCC_EXEC_PREFIX): New.
++	* testsuite/Makefile.in: Regenerated.
++
++2012-03-08  Jonathan Wakely  <jwakely.gcc@gmail.com>
++
++	PR libstdc++/52433
++	* include/debug/safe_iterator.h (_Safe_iterator): Add move
++	constructor and move assignment operator.
++	* testsuite/23_containers/vector/debug/52433.cc: New.
++
+ 2012-03-01  Release Manager
+ 
+ 	* GCC 4.6.3 released.
+Index: libstdc++-v3/testsuite/Makefile.in
+===================================================================
+--- a/src/libstdc++-v3/testsuite/Makefile.in	(.../tags/gcc_4_6_3_release)
++++ b/src/libstdc++-v3/testsuite/Makefile.in	(.../branches/gcc-4_6-branch)
+@@ -502,6 +502,7 @@
+ 	@echo 'set target_triplet $(target_triplet)' >>site.tmp
+ 	@echo 'set libiconv "$(LIBICONV)"' >>site.tmp
+ 	@echo 'set baseline_dir "$(baseline_dir)"' >> site.tmp
++	@echo 'set TEST_GCC_EXEC_PREFIX "$(libdir)/gcc/"' >> site.tmp
+ 	@echo '## All variables above are generated by configure. Do Not Edit ##' >>site.tmp
+ 	@test ! -f site.exp || \
+ 	  sed '1,/^## All variables above are.*##/ d' site.exp >> site.tmp
+Index: libstdc++-v3/testsuite/Makefile.am
+===================================================================
+--- a/src/libstdc++-v3/testsuite/Makefile.am	(.../tags/gcc_4_6_3_release)
++++ b/src/libstdc++-v3/testsuite/Makefile.am	(.../branches/gcc-4_6-branch)
+@@ -59,6 +59,7 @@
+ 	@echo 'set target_triplet $(target_triplet)' >>site.tmp
+ 	@echo 'set libiconv "$(LIBICONV)"' >>site.tmp
+ 	@echo 'set baseline_dir "$(baseline_dir)"' >> site.tmp
++	@echo 'set TEST_GCC_EXEC_PREFIX "$(libdir)/gcc/"' >> site.tmp
+ 	@echo '## All variables above are generated by configure. Do Not Edit ##' >>site.tmp
+ 	@test ! -f site.exp || \
+ 	  sed '1,/^## All variables above are.*##/ d' site.exp >> site.tmp
+Index: libstdc++-v3/testsuite/23_containers/vector/debug/52433.cc
+===================================================================
+--- a/src/libstdc++-v3/testsuite/23_containers/vector/debug/52433.cc	(.../tags/gcc_4_6_3_release)
++++ b/src/libstdc++-v3/testsuite/23_containers/vector/debug/52433.cc	(.../branches/gcc-4_6-branch)
+@@ -0,0 +1,43 @@
++// Copyright (C) 2012 Free Software Foundation, Inc.
++//
++// This file is part of the GNU ISO C++ Library.  This library is free
++// software; you can redistribute it and/or modify it under the
++// terms of the GNU General Public License as published by the
++// Free Software Foundation; either version 3, or (at your option)
++// any later version.
++//
++// This library is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++//
++// You should have received a copy of the GNU General Public License along
++// with this library; see the file COPYING3.  If not see
++// <http://www.gnu.org/licenses/>.
++//
++// { dg-require-debug-mode "" }
++// { dg-options "-std=gnu++0x" }
++// { dg-do compile }
++
++// PR libstdc++/52433
++
++#include <vector>
++
++struct X
++{
++    std::vector<int>::iterator i;
++
++    X() = default;
++    X(const X&) = default;
++    X(X&&) = default;
++    X& operator=(const X&) = default;
++    X& operator=(X&&) = default;
++};
++
++X test01()
++{
++    X x;
++    x = X();
++    return x;
++}
++
+Index: boehm-gc/configure.ac
+===================================================================
+--- a/src/boehm-gc/configure.ac	(.../tags/gcc_4_6_3_release)
++++ b/src/boehm-gc/configure.ac	(.../branches/gcc-4_6-branch)
+@@ -392,6 +392,7 @@
+ oldLIBS="$LIBS"
+ LIBS="$LIBS $THREADLIBS"
+ AC_CHECK_FUNCS([pthread_getattr_np])
++AC_CHECK_FUNCS([pthread_get_stackaddr_np])
+ LIBS="$oldLIBS"
+ 
+ # Configuration of machine-dependent code
+Index: boehm-gc/include/gc_config.h.in
+===================================================================
+--- a/src/boehm-gc/include/gc_config.h.in	(.../tags/gcc_4_6_3_release)
++++ b/src/boehm-gc/include/gc_config.h.in	(.../branches/gcc-4_6-branch)
+@@ -87,6 +87,9 @@
+ /* Define to 1 if you have the `pthread_getattr_np' function. */
+ #undef HAVE_PTHREAD_GETATTR_NP
+ 
++/* Define to 1 if you have the `pthread_get_stackaddr_np_np' function. */
++#undef HAVE_PTHREAD_GET_STACKADDR_NP
++
+ /* Define to 1 if you have the <stdint.h> header file. */
+ #undef HAVE_STDINT_H
+ 
+Index: boehm-gc/include/private/gcconfig.h
+===================================================================
+--- a/src/boehm-gc/include/private/gcconfig.h	(.../tags/gcc_4_6_3_release)
++++ b/src/boehm-gc/include/private/gcconfig.h	(.../branches/gcc-4_6-branch)
+@@ -1331,7 +1331,11 @@
+ 	 These aren't used when dyld support is enabled (it is by default) */
+ #     define DATASTART ((ptr_t) get_etext())
+ #     define DATAEND	((ptr_t) get_end())
+-#     define STACKBOTTOM ((ptr_t) 0xc0000000)
++#     ifdef HAVE_PTHREAD_GET_STACKADDR_NP
++#       define STACKBOTTOM (ptr_t)pthread_get_stackaddr_np(pthread_self())
++#     else
++#       define STACKBOTTOM ((ptr_t) 0xc0000000)
++#     endif
+ #     define USE_MMAP
+ #     define USE_MMAP_ANON
+ #     define USE_ASM_PUSH_REGS
+@@ -2011,7 +2015,11 @@
+ 	 These aren't used when dyld support is enabled (it is by default) */
+ #     define DATASTART ((ptr_t) get_etext())
+ #     define DATAEND	((ptr_t) get_end())
+-#     define STACKBOTTOM ((ptr_t) 0x7fff5fc00000)
++#     ifdef HAVE_PTHREAD_GET_STACKADDR_NP
++#       define STACKBOTTOM (ptr_t)pthread_get_stackaddr_np(pthread_self())
++#     else
++#       define STACKBOTTOM ((ptr_t) 0x7fff5fc00000)
++#     endif
+ #     define USE_MMAP
+ #     define USE_MMAP_ANON
+ #     ifdef GC_DARWIN_THREADS
+Index: boehm-gc/ChangeLog
+===================================================================
+--- a/src/boehm-gc/ChangeLog	(.../tags/gcc_4_6_3_release)
++++ b/src/boehm-gc/ChangeLog	(.../branches/gcc-4_6-branch)
+@@ -1,3 +1,17 @@
++2012-03-02  Jack Howarth  <howarth@bromo.med.uc.edu>
++
++	Backport from mainline
++	2012-02-23  Patrick Marlier  <patrick.marlier@gmail.com>
++		    Jack Howarth  <howarth@bromo.med.uc.edu>
++
++	PR boehm-gc/52179
++	* include/gc_config.h.in: Undefine HAVE_PTHREAD_GET_STACKADDR_NP.
++	* include/private/gcconfig.h (DARWIN): Define STACKBOTTOM with
++	pthread_get_stackaddr_np when available.
++	* configure.ac (THREADS): Check availability of
++	pthread_get_stackaddr_np.
++	* configure: Regenerate.
++
+ 2012-03-01  Release Manager
+ 
+ 	* GCC 4.6.3 released.
+Index: boehm-gc/configure
+===================================================================
+--- a/src/boehm-gc/configure	(.../tags/gcc_4_6_3_release)
++++ b/src/boehm-gc/configure	(.../branches/gcc-4_6-branch)
+@@ -15246,6 +15246,17 @@
+ fi
+ done
+ 
++for ac_func in pthread_get_stackaddr_np
++do :
++  ac_fn_c_check_func "$LINENO" "pthread_get_stackaddr_np" "ac_cv_func_pthread_get_stackaddr_np"
++if test "x$ac_cv_func_pthread_get_stackaddr_np" = x""yes; then :
++  cat >>confdefs.h <<_ACEOF
++#define HAVE_PTHREAD_GET_STACKADDR_NP 1
++_ACEOF
++
++fi
++done
++
+ LIBS="$oldLIBS"
+ 
+ # Configuration of machine-dependent code
+Index: libffi/src/powerpc/aix.S
+===================================================================
+--- a/src/libffi/src/powerpc/aix.S	(.../tags/gcc_4_6_3_release)
++++ b/src/libffi/src/powerpc/aix.S	(.../branches/gcc-4_6-branch)
+@@ -1,5 +1,5 @@
+ /* -----------------------------------------------------------------------
+-   aix.S - Copyright (c) 2002,2009 Free Software Foundation, Inc.
++   aix.S - Copyright (c) 2002, 2009 Free Software Foundation, Inc.
+    based on darwin.S by John Hornkvist
+ 
+    PowerPC Assembly glue.
+@@ -79,6 +79,8 @@
+ 	.set f20,20
+ 	.set f21,21
+ 
++	.extern .ffi_prep_args
++
+ #define LIBFFI_ASM
+ #include <fficonfig.h>
+ #include <ffi.h>
+@@ -125,6 +127,7 @@
+ 	/* Call ffi_prep_args.  */
+ 	mr	r4, r1
+ 	bl	.ffi_prep_args
++	nop
+ 
+ 	/* Now do the call.  */
+ 	ld	r0, 0(r29)
+@@ -226,6 +229,7 @@
+ 	/* Call ffi_prep_args.  */
+ 	mr	r4, r1
+ 	bl	.ffi_prep_args
++	nop
+ 
+ 	/* Now do the call.  */
+ 	lwz	r0, 0(r29)
+Index: libffi/src/powerpc/aix_closure.S
+===================================================================
+--- a/src/libffi/src/powerpc/aix_closure.S	(.../tags/gcc_4_6_3_release)
++++ b/src/libffi/src/powerpc/aix_closure.S	(.../branches/gcc-4_6-branch)
+@@ -79,6 +79,8 @@
+ 	.set f20,20
+ 	.set f21,21
+ 
++	.extern .ffi_closure_helper_DARWIN
++
+ #define LIBFFI_ASM
+ #define JUMPTARGET(name) name
+ #define L(x) x
+@@ -165,6 +167,7 @@
+ 
+ 	/* look up the proper starting point in table  */
+ 	/* by using return type as offset */
++	lhz	r3, 10(r3)	/* load type from return type */
+ 	ld	r4, LC..60(2)	/* get address of jump table */
+ 	sldi	r3, r3, 4	/* now multiply return type by 16 */
+ 	ld	r0, 240+16(r1)	/* load return address */
+@@ -337,8 +340,9 @@
+ 
+ 	/* look up the proper starting point in table  */
+ 	/* by using return type as offset */
++	lhz	r3, 6(r3)	/* load type from return type */
+ 	lwz	r4, LC..60(2)	/* get address of jump table */
+-	slwi	r3, r3, 4	/* now multiply return type by 4 */
++	slwi	r3, r3, 4	/* now multiply return type by 16 */
+ 	lwz	r0, 176+8(r1)	/* load return address */
+ 	add	r3, r3, r4	/* add contents of table to table address */
+ 	mtctr	r3
+Index: libffi/ChangeLog
+===================================================================
+--- a/src/libffi/ChangeLog	(.../tags/gcc_4_6_3_release)
++++ b/src/libffi/ChangeLog	(.../branches/gcc-4_6-branch)
+@@ -1,3 +1,17 @@
++2012-03-22  David Edelsohn  <dje.gcc@gmail.com>
++
++	Backport from mainline:
++	2012-03-09  David Edelsohn  <dje.gcc@gmail.com>
++
++	* src/powerpc/aix_closure.S (ffi_closure_ASM): Adjust for Darwin64
++	change to return value of ffi_closure_helper_DARWIN and load type
++	from return type.
++
++	From Tom Honermann <tom.honermann@oracle.com>:
++	* src/powerpc/aix.S: Declare .ffi_prep_args.  Insert nops after
++	branch instructions.
++	* src/powerpc/aix_closure.S: Declare .ffi_closure_helper_DARWIN.
++
+ 2012-03-01  Release Manager
+ 
+ 	* GCC 4.6.3 released.
+Index: libjava/configure.ac
+===================================================================
+--- a/src/libjava/configure.ac	(.../tags/gcc_4_6_3_release)
++++ b/src/libjava/configure.ac	(.../branches/gcc-4_6-branch)
+@@ -886,14 +886,9 @@
+         SYSTEMSPEC="-lunicows $SYSTEMSPEC"
+       fi
+     ;;
+-    *-*-darwin9*)
++    *-*-darwin[[912]]*)
+       SYSTEMSPEC="%{!Zdynamiclib:%{!Zbundle:-allow_stack_execute}}"
+     ;;
+-    *-*-darwin[[12]]*)
+-      # Something is incompatible with pie, would be nice to fix it and
+-      # remove -no_pie.  PR49461
+-      SYSTEMSPEC="-no_pie %{!Zdynamiclib:%{!Zbundle:-allow_stack_execute}}"
+-    ;;
+     *)
+       SYSTEMSPEC=
+     ;;
+Index: libjava/ChangeLog
+===================================================================
+--- a/src/libjava/ChangeLog	(.../tags/gcc_4_6_3_release)
++++ b/src/libjava/ChangeLog	(.../branches/gcc-4_6-branch)
+@@ -1,3 +1,13 @@
++2012-03-02  Jack Howarth  <howarth@bromo.med.uc.edu>
++
++	Backport from mainline
++	2012-02-23  Patrick Marlier  <patrick.marlier@gmail.com>
++       	    Jack Howarth  <howarth@bromo.med.uc.edu>
++
++	PR target/49461
++	* configure.ac (SYSTEMSPEC): No longer pass -no_pie for darwin11.
++	* configure: Regenerate.
++
+ 2012-03-01  Release Manager
+ 
+ 	* GCC 4.6.3 released.
+Index: libjava/configure
+===================================================================
+--- a/src/libjava/configure	(.../tags/gcc_4_6_3_release)
++++ b/src/libjava/configure	(.../branches/gcc-4_6-branch)
+@@ -19775,14 +19775,9 @@
+         SYSTEMSPEC="-lunicows $SYSTEMSPEC"
+       fi
+     ;;
+-    *-*-darwin9*)
++    *-*-darwin[912]*)
+       SYSTEMSPEC="%{!Zdynamiclib:%{!Zbundle:-allow_stack_execute}}"
+     ;;
+-    *-*-darwin[12]*)
+-      # Something is incompatible with pie, would be nice to fix it and
+-      # remove -no_pie.  PR49461
+-      SYSTEMSPEC="-no_pie %{!Zdynamiclib:%{!Zbundle:-allow_stack_execute}}"
+-    ;;
+     *)
+       SYSTEMSPEC=
+     ;;
