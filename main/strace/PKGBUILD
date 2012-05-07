@@ -1,13 +1,13 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=strace
-pkgver=4.6
+pkgver=4.7
 pkgrel=1
 pkgdesc="A useful diagnositic, instructional, and debugging tool"
-arch=('i686' 'x86_64')
+arch=('x86_64')
 url="http://sourceforge.net/projects/strace/"
 license=('custom')
 source=(http://downloads.sourceforge.net/${pkgname}/${pkgname}-${pkgver}.tar.xz)
-md5sums=('e537b2b1afeec70c0e6e27a0d0fd671e')
+md5sums=('6054c3880a00c6703f83b57f15e04642')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
