@@ -1,23 +1,22 @@
 pkgname=glib
-pkgver=2.30.2
-_mver=2.30
+pkgver=2.32.1
 pkgrel=1
 pkgdesc="Common C routines used by GTK+ and other libs"
 url="http://www.gtk.org/"
-arch=(i686 x86_64)
+arch=('x86_64')
 license=('LGPL')
 groups=('base-devel')
 depends=('zlib' 'libffi')
 makedepends=('zlib' 'libffi' 'gettext')
 options=('!libtool' '!docs')
 build() {
-  cd "${srcdir}/${pkgname}-${pkgver}"
+  cd glib-$pkgver
   sed 's/^\(.*\SUBDIRS .*\=.*\)po docs\(.*\)$/\1\2/' -i $(find . -name Makefile.am -o -name Makefile.in)
   sed 's/^\(.*\SUBDIRS .*\=.*\)tests\(.*\)$/\1\2/' -i $(find . -name Makefile.am -o -name Makefile.in)
   sed -i 's:^tests\/.*$::' configure.ac
   sed -i 's:^docs\/.*$::' configure.ac
-  Patch glib-2.30.1-external-gdbus-codegen.patch
-  Patch glib-2.30.2-machine-id.patch
+  Patch glib-2.31.x-external-gdbus-codegen.patch
+  Patch revert-warn-glib-compile-schemas.patch
   ln -sfn /bin/true py-compile # echo '#!/usr/bin/env sh' > py-compile 1.11.2
   AT_M4DIR="${srcdir}/${pkgname}-${pkgver}" autoreconf -v
   export DBUS1_CFLAGS="-I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include"
@@ -30,7 +29,6 @@ build() {
               --host=${CHOST} \
               --mandir=/usr/share/man \
               --sysconfdir=/etc \
-              --enable-regex \
               --with-pcre=internal \
               --with-threads=posix \
               --disable-dtrace \
@@ -44,7 +42,7 @@ build() {
 }
 
 package() {
-  cd "${srcdir}/${pkgname}-${pkgver}"
+  cd glib-$pkgver
   make DESTDIR="${pkgdir}" install
   rm -rf "${pkgdir}/usr/share/gdb/" "${pkgdir}/usr/share/glib-2.0/gdb/"
   for _i in "${pkgdir}/etc/bash_completion.d/"*; do
@@ -52,9 +50,13 @@ package() {
   done
 }
 
-source=(http://ftp.gnome.org/pub/GNOME/sources/${pkgname}/${_mver}/${pkgname}-${pkgver}.tar.xz
-        glib-2.30.2-machine-id.patch
-        glib-2.30.1-external-gdbus-codegen.patch)
-sha256sums=('f0e91e6333321ddb48fa12b5c66f56c3d5f05325748c66dd2e9016c278ff8e82'
-            'c8341c9025bfaa728cb69ad6ee47040aba2309046050dbb357def72cf90413f4'
-            '45daf662034806d2858f1b2b43185e6891e9d395acd3bbfb7a81a15541b49078')
+source=(http://ftp.gnome.org/pub/GNOME/sources/glib/${pkgver%.*}/glib-$pkgver.tar.xz)
+sha256sums=('484d5b7fc09f3fa398355adaf74b369768f5859866c299f229c99721990f8398')
+
+source=(${source[@]-}
+        glib-2.31.x-external-gdbus-codegen.patch
+        revert-warn-glib-compile-schemas.patch)
+
+sha256sums=(${sha256sums[@]-}
+            '47a0f2f2a99a50042063952994c8538097dee14ea5b2ca39f1c168092c645c6e'
+            '049240975cd2f1c88fbe7deb28af14d4ec7d2640495f7ca8980d873bb710cc97')
