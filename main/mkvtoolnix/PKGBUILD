@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=mkvtoolnix
 pkgver=5.5.0
-pkgrel=1
+pkgrel=2
 arch=('x86_64')
 license=('GPL')
 url="http://www.bunkus.org/videotools/mkvtoolnix/index.html"
@@ -34,6 +34,7 @@ build() {
               --disable-wxwidgets \
               --disable-debug \
               --disable-qt \
+              --without-gettext \
               --with-boost-regex=boost_regex \
               --with-boost-filesystem=boost_filesystem \
               --with-boost-system=boost_system
