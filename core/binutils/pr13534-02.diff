@@ -1,0 +1,136 @@
+commit 433cc73f9df08a1435b4d07a7bd3eed20f0c3dcd
+Author: Francois Gouget <fgouget@codeweavers.com>
+Date:   Tue Dec 20 19:39:41 2011 +0100
+
+    bfd: Refuse to create an invalid archive when an archive element is too big.
+    
+    The archive format stores element sizes as a 10 character string and thus cannot handle anything 10GB or more.
+
+diff --git a/bfd/archive.c b/bfd/archive.c
+index 5c5b3d4..05aba6c 100644
+--- a/bfd/archive.c
++++ b/bfd/archive.c
+@@ -179,13 +179,18 @@ _bfd_ar_spacepad (char *p, size_t n, const char *fmt, long val)
+     memcpy (p, buf, n);
+ }
+ 
+-void
++int
+ _bfd_ar_sizepad (char *p, size_t n, bfd_size_type size)
+ {
+   static char buf[21];
+   size_t len;
+   snprintf (buf, sizeof (buf), "%-10" BFD_VMA_FMT "u", size);
+   len = strlen (buf);
++  if (len > n)
++    {
++      bfd_set_error(bfd_error_file_too_big);
++      return 0;
++    }
+   if (len < n)
+     {
+       memcpy (p, buf, len);
+@@ -193,6 +198,7 @@ _bfd_ar_sizepad (char *p, size_t n, bfd_size_type size)
+     }
+   else
+     memcpy (p, buf, n);
++  return 1;
+ }
+ 
+ bfd_boolean
+@@ -1786,8 +1792,9 @@ _bfd_bsd44_write_ar_hdr (bfd *archive, bfd *abfd)
+ 
+       BFD_ASSERT (padded_len == arch_eltdata (abfd)->extra_size);
+ 
+-      _bfd_ar_sizepad (hdr->ar_size, sizeof (hdr->ar_size),
+-                        arch_eltdata (abfd)->parsed_size + padded_len);
++      if (!_bfd_ar_sizepad (hdr->ar_size, sizeof (hdr->ar_size),
++                            arch_eltdata (abfd)->parsed_size + padded_len))
++        return FALSE;
+ 
+       if (bfd_bwrite (hdr, sizeof (*hdr), archive) != sizeof (*hdr))
+         return FALSE;
+@@ -1907,8 +1914,8 @@ bfd_ar_hdr_from_filesystem (bfd *abfd, const char *filename, bfd *member)
+                       status.st_gid);
+   _bfd_ar_spacepad (hdr->ar_mode, sizeof (hdr->ar_mode), "%-8lo",
+                     status.st_mode);
+-  _bfd_ar_sizepad (hdr->ar_size, sizeof (hdr->ar_size),
+-                    status.st_size);
++  if (!_bfd_ar_sizepad (hdr->ar_size, sizeof (hdr->ar_size), status.st_size))
++    return NULL;
+   memcpy (hdr->ar_fmag, ARFMAG, 2);
+   ared->parsed_size = status.st_size;
+   ared->arch_header = (char *) hdr;
+@@ -2148,8 +2155,9 @@ _bfd_write_archive_contents (bfd *arch)
+       memset (&hdr, ' ', sizeof (struct ar_hdr));
+       memcpy (hdr.ar_name, ename, strlen (ename));
+       /* Round size up to even number in archive header.  */
+-      _bfd_ar_sizepad (hdr.ar_size, sizeof (hdr.ar_size),
+-                        (elength + 1) & ~(bfd_size_type) 1);
++      if (!_bfd_ar_sizepad (hdr.ar_size, sizeof (hdr.ar_size),
++                            (elength + 1) & ~(bfd_size_type) 1))
++        return FALSE;
+       memcpy (hdr.ar_fmag, ARFMAG, 2);
+       if ((bfd_bwrite (&hdr, sizeof (struct ar_hdr), arch)
+ 	   != sizeof (struct ar_hdr))
+@@ -2425,7 +2433,8 @@ bsd_write_armap (bfd *arch,
+                     bfd_ardata (arch)->armap_timestamp);
+   _bfd_ar_spacepad (hdr.ar_uid, sizeof (hdr.ar_uid), "%ld", uid);
+   _bfd_ar_spacepad (hdr.ar_gid, sizeof (hdr.ar_gid), "%ld", gid);
+-  _bfd_ar_sizepad (hdr.ar_size, sizeof (hdr.ar_size), mapsize);
++  if (!_bfd_ar_sizepad (hdr.ar_size, sizeof (hdr.ar_size), mapsize))
++    return FALSE;
+   memcpy (hdr.ar_fmag, ARFMAG, 2);
+   if (bfd_bwrite (&hdr, sizeof (struct ar_hdr), arch)
+       != sizeof (struct ar_hdr))
+@@ -2580,7 +2589,8 @@ coff_write_armap (bfd *arch,
+ 
+   memset (&hdr, ' ', sizeof (struct ar_hdr));
+   hdr.ar_name[0] = '/';
+-  _bfd_ar_sizepad (hdr.ar_size, sizeof (hdr.ar_size), mapsize);
++  if (!_bfd_ar_sizepad (hdr.ar_size, sizeof (hdr.ar_size), mapsize))
++    return FALSE;
+   _bfd_ar_spacepad (hdr.ar_date, sizeof (hdr.ar_date), "%ld",
+                     ((arch->flags & BFD_DETERMINISTIC_OUTPUT) == 0
+                      ? time (NULL) : 0));
+diff --git a/bfd/archive64.c b/bfd/archive64.c
+index a906508..bdbda0a 100644
+--- a/bfd/archive64.c
++++ b/bfd/archive64.c
+@@ -169,8 +169,8 @@ bfd_elf64_archive_write_armap (bfd *arch,
+ 
+   memset (&hdr, ' ', sizeof (struct ar_hdr));
+   memcpy (hdr.ar_name, "/SYM64/", strlen ("/SYM64/"));
+-  _bfd_ar_sizepad (hdr.ar_size, sizeof (hdr.ar_size),
+-                    mapsize);
++  if (!_bfd_ar_sizepad (hdr.ar_size, sizeof (hdr.ar_size), mapsize))
++    return FALSE;
+   _bfd_ar_spacepad (hdr.ar_date, sizeof (hdr.ar_date), "%ld",
+                     time (NULL));
+   /* This, at least, is what Intel coff sets the values to.: */
+diff --git a/bfd/libbfd-in.h b/bfd/libbfd-in.h
+index 57197ac..a4ba4b6 100644
+--- a/bfd/libbfd-in.h
++++ b/bfd/libbfd-in.h
+@@ -203,7 +203,7 @@ extern void *_bfd_generic_read_ar_hdr
+   (bfd *);
+ extern void _bfd_ar_spacepad
+   (char *, size_t, const char *, long);
+-extern void _bfd_ar_sizepad
++extern int _bfd_ar_sizepad
+   (char *, size_t, bfd_size_type);
+ 
+ extern void *_bfd_generic_read_ar_hdr_mag
+diff --git a/bfd/libbfd.h b/bfd/libbfd.h
+index 121e865..7f142d0 100644
+--- a/bfd/libbfd.h
++++ b/bfd/libbfd.h
+@@ -208,7 +208,7 @@ extern void *_bfd_generic_read_ar_hdr
+   (bfd *);
+ extern void _bfd_ar_spacepad
+   (char *, size_t, const char *, long);
+-extern void _bfd_ar_sizepad
++extern int _bfd_ar_sizepad
+   (char *, size_t, bfd_size_type);
+ 
+ extern void *_bfd_generic_read_ar_hdr_mag
