@@ -1,0 +1,53 @@
+# DP: Fix PR c++/50114, backport from trunk.
+
+gcc/testsuite/
+
+2011-08-30  Jason Merrill  <jason@redhat.com>
+
+	PR c++/50114
+	* g++.dg/cpp0x/lambda/lambda-for.C: New.
+
+cp/
+
+2011-08-30  Jason Merrill  <jason@redhat.com>
+
+	PR c++/50114
+	* decl.c (poplevel): Disable for scope compatibility hack
+	in C++11 mode.
+
+--- a/src/gcc/testsuite/g++.dg/ext/forscope2.C
++++ b/src/gcc/testsuite/g++.dg/ext/forscope2.C
+@@ -1,5 +1,5 @@
+ // { dg-do compile }
+-// { dg-options -fpermissive }
++// { dg-options "-fpermissive -std=c++98" }
+ 
+ // Copyright (C) 2001 Free Software Foundation, Inc.
+ // Contributed by Nathan Sidwell 4 Sept 2001 <nathan@codesourcery.com>
+--- /dev/null
++++ b/src/gcc/testsuite/g++.dg/cpp0x/lambda/lambda-for.C
+@@ -0,0 +1,12 @@
++// PR c++/50114
++// { dg-options "-std=c++0x -w" }
++
++int open()
++{
++  int *x2feed_i = 0;
++  auto insert_feed = [&](unsigned char venue, int* newfeed)
++  {
++     for(int x2feed_i = 1; 0; ) ;
++     x2feed_i = newfeed;
++  };
++}
+--- a/src/gcc/cp/decl.c
++++ b/src/gcc/cp/decl.c
+@@ -642,6 +642,9 @@
+   for (link = decls; link; link = TREE_CHAIN (link))
+     {
+       if (leaving_for_scope && TREE_CODE (link) == VAR_DECL
++	  /* It's hard to make this ARM compatibility hack play nicely with
++	     lambdas, and it really isn't necessary in C++11 mode.  */
++	  && cxx_dialect < cxx0x
+ 	  && DECL_NAME (link))
+ 	{
+ 	  tree name = DECL_NAME (link);

@@ -1,0 +1,200 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgbase=gcc
+pkgname=('gcc' 'gcc-libs')
+pkgver=4.6.3
+pkgrel=1
+pkgdesc="The GNU Compiler Collection"
+arch=('x86_64')
+license=('GPL' 'LGPL' 'FDL' 'custom')
+url="http://gcc.gnu.org"
+makedepends=('binutils' 'mpc' 'gmp' 'mpfr' 'zlib' 'gawk' 'autogen' 'dejagnu')
+options=('!libtool' '!emptydirs')
+source=(ftp://gcc.gnu.org/pub/gcc/releases/gcc-${pkgver}/gcc-${pkgver}.tar.bz2)
+sha256sums=('e8f5853d4eec2f5ebaf8a72ae4d53c436aacf98153b2499f8635b48c4718a093')
+_basedir="${srcdir}/gcc-${pkgver}"
+
+build() {
+  cd ${_basedir}
+
+  # Do not install libiberty
+  sed -i 's/install_to_$(INSTALL_DEST) //' libiberty/Makefile.in
+
+  # Do not run fixincludes
+  sed -i 's@\./fixinc\.sh@-c true@' gcc/Makefile.in
+
+  Patch gcc-hash-style-both.diff
+  Patch gcc-system-root.diff
+  Patch gcc_pure64.diff
+  Patch svn-updates.diff
+  Patch ignore-comp-fail.diff
+  Patch libffi-ro-eh_frame_sect.diff
+  Patch libstdc++-pic.diff
+  Patch libstdc++-test-installed.diff
+  Patch pr39491.diff
+  Patch pr47612.diff
+  Patch pr49756.diff
+  Patch pr50114.diff
+#  Patch gcc-linaro.diff
+#  Patch pr52870.diff
+#  Patch link-libs.diff
+
+  echo ${pkgver} > gcc/BASE-VER
+
+  cd ${srcdir}
+  mkdir gcc-build && cd gcc-build
+  CFLAGS=${CFLAGS/-Os/-O2}
+  CXXFLAGS=${CXXFLAGS/-pipe/}
+  CXXFLAGS=${CXXFLAGS/-Os/-O2}
+
+  rm -rf ${_basedir}/intl
+
+  ${_basedir}/configure --prefix=/usr \
+      --build=${CBUILD} --host=${CHOST} \
+      --libdir=/usr/lib --libexecdir=/usr/lib \
+      --mandir=/usr/share/man --infodir=/usr/share/info \
+      --with-bugurl=http://gimokod.org/ \
+      --enable-languages=c,c++ \
+      --enable-shared --enable-threads=posix \
+      --with-system-zlib --enable-__cxa_atexit \
+      --disable-libunwind-exceptions --enable-clocale=gnu \
+      --disable-libstdcxx-pch \
+      --enable-gnu-unique-object --enable-linker-build-id \
+      --without-ppl --without-cloog \
+      --disable-lto --disable-gold \
+      --disable-plugin --enable-libgomp --disable-nls \
+      --disable-multilib --disable-libssp \
+      --enable-checking=release --disable-libmudflap
+      # --disable-build-with-cxx --disable-build-poststage1-with-cxx --enable-libstdcxx-time \
+      # --with-linker-hash-style=gnu \
+  make
+}
+
+check() {
+  cd gcc-build
+  ulimit -s 32768
+  export LC_ALL=C
+  export LANG=C
+  make -j1 -k check || true
+  ${_basedir}/contrib/test_summary
+}
+
+package_gcc-libs()
+{
+  pkgdesc="Runtime libraries shipped by GCC"
+  groups=('base-devel')
+
+  cd gcc-build
+  make -j1 -C $CHOST/libgcc DESTDIR="${pkgdir}" install-shared
+  for lib in libgomp libstdc++-v3/src; do
+    make -j1 -C $CHOST/$lib DESTDIR="${pkgdir}" install-toolexeclibLTLIBRARIES
+  done
+
+  # remove unnecessary files installed by install-target-{libquadmath,libgfortran,libobjc}
+  rm -rf "${pkgdir}"/usr/lib/{gcc/,libgfortran.spec}
+
+  # remove static libraries
+  find ${pkgdir} -name *.a -delete
+
+  # Install Runtime Library Exception
+  install -Dm644 ${_basedir}/COPYING.RUNTIME \
+    "${pkgdir}"/usr/share/licenses/gcc-libs/RUNTIME.LIBRARY.EXCEPTION
+}
+
+package_gcc()
+{
+  pkgdesc="The GNU Compiler Collection - C and C++ frontends"
+  depends=('gcc-libs' 'binutils' 'mpc' 'gmp' 'mpfr' 'zlib')
+  groups=('base-devel')
+
+  cd gcc-build
+
+  # unfortunately it is much, much easier to install the lot and clean-up the mess...
+  make -j1 DESTDIR="${pkgdir}" install
+  rm -f "${pkgdir}"/usr/bin/{{$CHOST-,}gfortran,{$CHOST-,}gccgo,gnat*}
+  rm -f "${pkgdir}"/usr/lib/*.so*
+  rm -f "${pkgdir}"/usr/lib/lib{ffi,gfortran,go{,begin},objc,quadmath}.a
+  rm -f "${pkgdir}"/usr/lib/libgfortran.spec
+  rm -rf "${pkgdir}"/usr/lib/gcc/$CHOST/${pkgver}/{ada{include,lib},finclude,include/objc}
+  rm -f "${pkgdir}"/usr/lib/gcc/$CHOST/${pkgver}/include/{ffi{,target}.h,quadmath{,_weak}.h}
+  rm -f "${pkgdir}"/usr/lib/gcc/$CHOST/${pkgver}/{cc1obj{,plus},f951,gnat1,go1,libgfortranbegin.a}
+  rm -rf "${pkgdir}"/usr/lib/go
+  rm -f "${pkgdir}"/usr/share/info/{gccgo,gfortran,gnat*,libgomp,libquadmath}.info
+  rm -f "${pkgdir}"/usr/share/locale/{de,fr}/LC_MESSAGES/libstdc++.mo
+  rm -f "${pkgdir}"/usr/share/man/man1/{gccgo,gfortran}.1
+  rm -f "${pkgdir}"/usr/share/man/man3/ffi*
+
+  # many packages require these symlinks
+  install -dm755 "${pkgdir}"/lib
+  ln -sf /usr/bin/cpp "${pkgdir}"/usr/lib/cpp
+  ln -sf gcc "${pkgdir}"/usr/bin/cc
+  ln -sf g++ "${pkgdir}"/usr/bin/c++
+
+  # install gengtype for plugin support
+  install -m755 gcc/build/gengtype "${pkgdir}"/usr/lib/gcc/"${CHOST}"/"${pkgver}"/
+  install -m644 gcc/gtype.state "${pkgdir}"/usr/lib/gcc/"${CHOST}"/"${pkgver}"/
+
+  # POSIX conformance launcher scripts for c89 and c99
+  cat > "${pkgdir}"/usr/bin/c89 <<"EOF"
+fl="-std=c89"
+for opt; do
+  case "$opt" in
+    -ansi|-std=c89|-std=iso9899:1990) fl="";;
+    -std=*) echo "`basename $0` called with non ANSI/ISO C option $opt" >&2
+      exit 1;;
+  esac
+done
+exec gcc $fl ${1+"$@"}
+EOF
+
+  cat > "${pkgdir}"/usr/bin/c99 <<"EOF"
+fl="-std=c99"
+for opt; do
+  case "$opt" in
+    -std=c99|-std=iso9899:1999) fl="";;
+    -std=*) echo "`basename $0` called with non ISO C99 option $opt" >&2
+      exit 1;;
+  esac
+done
+exec gcc $fl ${1+"$@"}
+EOF
+
+  chmod 755 "${pkgdir}"/usr/bin/c{8,9}9
+
+  # Install Runtime Library Exception
+  install -Dm644 "${_basedir}"/COPYING.RUNTIME \
+    "${pkgdir}"/usr/share/licenses/gcc/RUNTIME.LIBRARY.EXCEPTION
+}
+
+source=(${source[@]-}
+        gcc-hash-style-both.diff
+        gcc-linaro.diff
+        gcc-system-root.diff
+        gcc_pure64.diff
+        ignore-comp-fail.diff
+        libffi-ro-eh_frame_sect.diff
+        libstdc++-pic.diff
+        libstdc++-test-installed.diff
+        link-libs.diff
+        pr39491.diff
+        pr47612.diff
+        pr49756.diff
+        pr50114.diff
+        pr52870.diff
+        svn-updates.diff)
+
+sha256sums=(${sha256sums[@]-}
+            'a1df7c94af6e59eadf482060e66441d08284095e5f72e0fd2288919097bacffc'
+            '0d3022ffcf5654dea9cd5e291a4e502eaec5252800d2b58648909ba825cceabb'
+            '2300e1884d7280cdc2bd174cb5f6d34dccc531d29dc5411eb44639112e444c21'
+            'ef2a65b1abc45080989b758d97dfe0b6e198d8fa09d763174478072bfe183d85'
+            '44ef4380e2528abe2e490390248a9a62fc481743efa708dcd9886341875d174a'
+            '7d50e7a4642c28ffdd82090be979fcc8d8d824ec2a43302099185e30b12b1f7b'
+            'b0b3d4dd4ca9f44203d17d9ed74a2d23068da2f0394770a04e50bf4c21f93e0b'
+            '347f3a792bb9a748a04fdeca16675d64f8f562b3f883be0c885dde9f563d3213'
+            'bb7f32dfb5806c5c31eafe742b150f7347dc5cead62efe248ba6288eadf85ef8'
+            '063b444c5934839c567ca5c6bed3b4f261fb0b1032493de41a26d60e4da90387'
+            'a1cc5d4e952cbdccf1b6d3ff1cbe8eec8e38770732b2c4e29e67bac89555c331'
+            '40123071ef9545aa674191b624806a407e648802057767882dac0c134ae04659'
+            '28385eb13396623da828f29ae83080007770f1785e68834a7a50fdff0bf3f528'
+            '5c04a913532761a8def3af1859b6f0405f5c4df1c9a639d1e71c2002d54513e7'
+            'ee66d2e190bb1dcea6eee9817b4d2e68658dea40726f749418a88e6e13db0475')

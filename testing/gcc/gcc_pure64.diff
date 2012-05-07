@@ -1,0 +1,24 @@
+--- gcc-4.6.3.o/gcc/config/i386/linux64.h
++++ gcc-4.6.3/gcc/config/i386/linux64.h
+@@ -62,8 +62,8 @@
+    When the -shared link option is used a final link is not being
+    done.  */
+ 
+-#define GLIBC_DYNAMIC_LINKER32 "/lib/ld-linux.so.2"
+-#define GLIBC_DYNAMIC_LINKER64 "/lib64/ld-linux-x86-64.so.2"
++#define GLIBC_DYNAMIC_LINKER32 "/usr/lib32/ld-linux.so.2"
++#define GLIBC_DYNAMIC_LINKER64 "/usr/lib/ld-linux-x86-64.so.2"
+ 
+ #if TARGET_64BIT_DEFAULT
+ #define SPEC_32 "m32"
+--- gcc-4.6.3.o/gcc/config/i386/t-linux64
++++ gcc-4.6.3/gcc/config/i386/t-linux64
+@@ -25,7 +25,7 @@
+ 
+ MULTILIB_OPTIONS = m64/m32
+ MULTILIB_DIRNAMES = 64 32 
+-MULTILIB_OSDIRNAMES = ../lib64 $(if $(wildcard $(shell echo $(SYSTEM_HEADER_DIR))/../../usr/lib32),../lib32,../lib)
++MULTILIB_OSDIRNAMES = ../lib 
+ 
+ LIBGCC = stmp-multilib
+ INSTALL_LIBGCC = install-multilib

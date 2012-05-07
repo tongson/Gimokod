@@ -1,0 +1,57 @@
+pkgname=busybox-static
+_pkgname=busybox
+pkgver=1.19.4
+pkgrel=4
+pkgdesc='Utilities for rescue, embedded and minimal systems'
+arch=('x86_64')
+url='http://busybox.net'
+license=('GPL')
+install=busybox.install
+options=('emptydirs')
+makedepends=('musl')
+groups=('base')
+
+build() {
+  cd "${srcdir}/${_pkgname}-${pkgver}"
+  export LDFLAGS="${LDFLAGS}  -Wl,-z,noexecstack"
+  cp "${srcdir}"/config .config
+
+  Patch busybox-1.19.2-bb.patch
+  Patch busybox-1.19.2-musl.patch
+
+  sed -i -r \
+    -e 's:[[:space:]]?-(Werror|Os|falign-(functions|jumps|loops|labels)=1|fomit-frame-pointer)\>::g' \
+    Makefile.flags
+  sed -i '/^#error Aborting compilation./d' applets/applets.c
+  sed -i 's:-Wl,--gc-sections::' Makefile
+  sed -i 's:LDLIBS += m crypt::' Makefile.flags
+#  for inc in asm/types.h; do
+#      install -D -m644 /usr/include/${inc} include/${inc}
+#  done
+  make -j1 CC="/usr/lib/musl/bin/musl-gcc -D_GNU_SOURCE -DLOGIN_NAME_MAX=256 -D__musl__ -static -Wl,-z,muldefs"
+}
+
+package() {
+  cd "${srcdir}/${_pkgname}-${pkgver}"
+  install -D -m0755 busybox "${pkgdir}"/usr/bin/busybox.static
+  install -d -m0755 "${pkgdir}/etc/alternatives"
+}
+
+source=(${url}/downloads/busybox-${pkgver}.tar.bz2)
+sha256sums=('9b853406da61ffb59eb488495fe99cbb7fb3dd29a31307fcfa9cf070543710ee')
+
+source=(${source[@]-}
+        ash
+        busybox-1.19.2-bb.patch
+        busybox-1.19.2-man.patch
+        busybox-1.19.2-musl.patch
+        config
+        sh)
+
+sha256sums=(${sha256sums[@]-}
+            'b86dbe888eb84ea18783ce9cbdf5baea9c6c7133dffcc9e8683cf0057ab5cf1e'
+            '8a3853f73da6c4b9d19a79ccbaf935ab4228d4b695320b63aeb54180f8f4957d'
+            '733e23d851e68ecd27ed8bb8f4c4b8ea27b0d143069ec49aadb04deeb65dd9f5'
+            'b7a6af92ffb1879d0d947b6290a0b3109a02a71c5586bbcd19e8820aa024a0dc'
+            'b124879e1d9239fe9dd4132121fa031c40cad443f2ff3646c5e584b4ac72cad8'
+            '601ea9a5a0c6e8bace0bbf77a89c42f4534608170fdcf47f6d8a7c014b6aa470')

@@ -1,0 +1,134 @@
+# DP: Link using --hash-style=both (alpha, amd64, armel, armhf, ia64, i386, powerpc, ppc64, s390, sparc)
+
+2006-07-11  Jakub Jelinek  <jakub@redhat.com>
+
+	* config/i386/linux.h (LINK_SPEC): Add --hash-style=both.
+	* config/i386/linux64.h (LINK_SPEC): Likewise.
+	* config/rs6000/sysv4.h (LINK_OS_LINUX_SPEC): Likewise.
+	* config/rs6000/linux64.h (LINK_OS_LINUX_SPEC32,
+	LINK_OS_LINUX_SPEC64): Likewise.
+	* config/s390/linux.h (LINK_SPEC): Likewise.
+	* config/ia64/linux.h (LINK_SPEC): Likewise.
+	* config/sparc/linux.h (LINK_SPEC): Likewise.
+	* config/sparc/linux64.h (LINK_SPEC, LINK_ARCH32_SPEC,
+	LINK_ARCH64_SPEC): Likewise.
+	* config/alpha/linux-elf.h (LINK_SPEC): Likewise.
+
+2009-12-21  Matthias Klose  <doko@ubuntu.com>
+
+	* config/arm/linux-elf.h (LINK_SPEC): Add --hash-style=both.
+	
+---
+ gcc/config/alpha/linux-elf.h |    2 +-
+ gcc/config/i386/linux.h      |    2 +-
+ gcc/config/i386/linux64.h    |    2 +-
+ gcc/config/ia64/linux.h      |    2 +-
+ gcc/config/rs6000/linux64.h  |    4 ++--
+ gcc/config/rs6000/sysv4.h    |    2 +-
+ gcc/config/s390/linux.h      |    2 +-
+ gcc/config/sparc/linux.h     |    2 +-
+ 8 files changed, 9 insertions(+), 9 deletions(-)
+
+--- a/src/gcc/config/alpha/linux-elf.h
++++ b/src/gcc/config/alpha/linux-elf.h
+@@ -41,7 +41,7 @@
+ 
+ #define ELF_DYNAMIC_LINKER	LINUX_DYNAMIC_LINKER
+ 
+-#define LINK_SPEC "-m elf64alpha %{G*} %{relax:-relax}		\
++#define LINK_SPEC "-m elf64alpha --hash-style=both %{G*} %{relax:-relax}	\
+   %{O*:-O3} %{!O*:-O1}						\
+   %{shared:-shared}						\
+   %{!shared:							\
+--- a/src/gcc/config/i386/linux.h
++++ b/src/gcc/config/i386/linux.h
+@@ -104,7 +104,7 @@
+   { "dynamic_linker", LINUX_DYNAMIC_LINKER }
+ 
+ #undef	LINK_SPEC
+-#define LINK_SPEC "-m %(link_emulation) %{shared:-shared} \
++#define LINK_SPEC "-m %(link_emulation) --hash-style=both %{shared:-shared} \
+   %{!shared: \
+     %{!static: \
+       %{rdynamic:-export-dynamic} \
+--- a/src/gcc/config/i386/linux64.h
++++ b/src/gcc/config/i386/linux64.h
+@@ -78,7 +78,7 @@
+  %{!mno-sse2avx:%{mavx:-msse2avx}} %{msse2avx:%{!mavx:-msse2avx}}"
+ 
+ #undef	LINK_SPEC
+-#define LINK_SPEC "%{" SPEC_64 ":-m elf_x86_64} %{" SPEC_32 ":-m elf_i386} \
++#define LINK_SPEC "%{" SPEC_64 ":-m elf_x86_64} %{" SPEC_32 ":-m elf_i386} --hash-style=both \
+   %{shared:-shared} \
+   %{!shared: \
+     %{!static: \
+--- a/src/gcc/config/ia64/linux.h
++++ b/src/gcc/config/ia64/linux.h
+@@ -64,7 +64,7 @@
+ #define GLIBC_DYNAMIC_LINKER "/lib/ld-linux-ia64.so.2"
+ 
+ #undef LINK_SPEC
+-#define LINK_SPEC "\
++#define LINK_SPEC " --hash-style=both \
+   %{shared:-shared} \
+   %{!shared: \
+     %{!static: \
+--- a/src/gcc/config/rs6000/linux64.h
++++ b/src/gcc/config/rs6000/linux64.h
+@@ -389,11 +389,11 @@
+   CHOOSE_DYNAMIC_LINKER (GLIBC_DYNAMIC_LINKER64, UCLIBC_DYNAMIC_LINKER64)
+ 
+ 
+-#define LINK_OS_LINUX_SPEC32 "-m elf32ppclinux %{!shared: %{!static: \
++#define LINK_OS_LINUX_SPEC32 "-m elf32ppclinux --hash-style=both %{!shared: %{!static: \
+   %{rdynamic:-export-dynamic} \
+   -dynamic-linker " LINUX_DYNAMIC_LINKER32 "}}"
+ 
+-#define LINK_OS_LINUX_SPEC64 "-m elf64ppc %{!shared: %{!static: \
++#define LINK_OS_LINUX_SPEC64 "-m elf64ppc --hash-style=both %{!shared: %{!static: \
+   %{rdynamic:-export-dynamic} \
+   -dynamic-linker " LINUX_DYNAMIC_LINKER64 "}}"
+ 
+--- a/src/gcc/config/rs6000/sysv4.h
++++ b/src/gcc/config/rs6000/sysv4.h
+@@ -830,7 +830,7 @@
+ #define LINUX_DYNAMIC_LINKER \
+   CHOOSE_DYNAMIC_LINKER (GLIBC_DYNAMIC_LINKER, UCLIBC_DYNAMIC_LINKER)
+ 
+-#define LINK_OS_LINUX_SPEC "-m elf32ppclinux %{!shared: %{!static: \
++#define LINK_OS_LINUX_SPEC "-m elf32ppclinux --hash-style=both %{!shared: %{!static: \
+   %{rdynamic:-export-dynamic} \
+   -dynamic-linker " LINUX_DYNAMIC_LINKER "}}"
+ 
+--- a/src/gcc/config/s390/linux.h
++++ b/src/gcc/config/s390/linux.h
+@@ -77,7 +77,7 @@
+ 
+ #undef  LINK_SPEC
+ #define LINK_SPEC \
+-  "%{m31:-m elf_s390}%{m64:-m elf64_s390} \
++  "%{m31:-m elf_s390}%{m64:-m elf64_s390} --hash-style=both \
+    %{shared:-shared} \
+    %{!shared: \
+       %{static:-static} \
+--- a/src/gcc/config/sparc/linux.h
++++ b/src/gcc/config/sparc/linux.h
+@@ -74,7 +74,7 @@
+ #define GLIBC_DYNAMIC_LINKER "/lib/ld-linux.so.2"
+ 
+ #undef  LINK_SPEC
+-#define LINK_SPEC "-m elf32_sparc -Y P,/usr/lib %{shared:-shared} \
++#define LINK_SPEC "-m elf32_sparc --hash-style=both -Y P,/usr/lib %{shared:-shared} \
+   %{!mno-relax:%{!r:-relax}} \
+   %{!shared: \
+     %{!static: \
+--- a/src/gcc/config/arm/linux-elf.h
++++ b/src/gcc/config/arm/linux-elf.h
+@@ -71,6 +71,7 @@
+    %{rdynamic:-export-dynamic} \
+    -dynamic-linker " LINUX_DYNAMIC_LINKER " \
+    -X \
++   --hash-style=both \
+    %{mbig-endian:-EB} %{mlittle-endian:-EL}" \
+    SUBTARGET_EXTRA_LINK_SPEC
+ 
