@@ -1,21 +1,15 @@
 pkgname=fsl
 _pkgname=fossil
 pkgver=20120317175325
-pkgrel=7
+pkgrel=8
 pkgdesc="Simple, high-reliability, distributed SCM (installed as fsl)"
 arch=('x86_64')
 license=('BSD')
 groups=('base')
 url="http://www.fossil-scm.org/"
 makedepends=('musl' 'zlib')
-source=("http://www.fossil-scm.org/download/fossil-src-${pkgver}.tar.gz"
-        fossil
-        fossil.service
-        symlinks-fix.diff)
-sha256sums=('8ea3462a29e645fe0bd062d5742de4e1921a38acced5107d08465821d95aa9b0'
-            'ed8c95bf53e073261d7f0d0c5722041a3152d137932c875ad65e97b75d46c4ba'
-            '0891613b1568db17ed50cfccefa9b0cd992cd1721af3cc5bf0f7ed12ac96fd1b'
-            'a38c79964401e5b6696357c83733ddece8acd6ea030d81ab93b832120bf3a7c2')
+source=("http://www.fossil-scm.org/download/fossil-src-${pkgver}.tar.gz")
+sha256sums=('8ea3462a29e645fe0bd062d5742de4e1921a38acced5107d08465821d95aa9b0')
 
 build() {
   cd "${_pkgname}-src-${pkgver}"
@@ -41,3 +35,14 @@ package() {
   install -Dm644 "${srcdir}/fossil.service" "${pkgdir}/usr/lib/systemd/system/fossil.service"
   install -Dm644 COPYRIGHT-BSD2.txt "${pkgdir}/usr/share/licenses/${_pkgname}/LICENSE"
 }
+
+
+source=(${source[@]-}
+        fossil
+        fossil.service
+        symlinks-fix.diff)
+
+sha256sums=(${sha256sums[@]-}
+            'ed8c95bf53e073261d7f0d0c5722041a3152d137932c875ad65e97b75d46c4ba'
+            '1000d07ff760213dc82e415c180190fc3f0dd0ba9d921e089e1b100678e6f1c1'
+            'a38c79964401e5b6696357c83733ddece8acd6ea030d81ab93b832120bf3a7c2')
