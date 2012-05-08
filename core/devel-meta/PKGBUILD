@@ -1,6 +1,6 @@
 pkgname=devel-meta
-pkgver=2012.04
-pkgrel=1
+pkgver=2012.05
+pkgrel=2
 pkgdesc="base-devel meta package"
 arch=('any')
 url="http://gimokod.org"
@@ -13,6 +13,7 @@ depends=(
   bison
   bc
   dejagnu
+  diffutils
   expect
   fakeroot
   file
@@ -25,7 +26,6 @@ depends=(
   gnuconfig
   gperf
   guile
-  jansson
   kmod
   libffi
   libltdl
