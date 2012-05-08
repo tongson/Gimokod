@@ -1,26 +1,21 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=ggrep
 _pkgname=grep
-pkgver=2.11
+pkgver=2.12
 pkgrel=1
 pkgdesc="A string search utility"
 arch=('x86_64')
 license=('GPL3')
 url="http://www.gnu.org/software/grep/grep.html"
 groups=('base-devel')
+checkdepends=('diffutils')
 install=ggrep.install
-source=(ftp://ftp.gnu.org/gnu/"${_pkgname}"/"${_pkgname}"-"${pkgver}".tar.xz{,.sig}
-        grep-2.11-exclude-dir-crash.patch)
-md5sums=('ad9c6dbdeab93e50d2bc380f10ed3643'
-         'e4fea5e355973c951f93f48bc86f92fa'
-         'e882644cf8c1a4e37da7ba8c0867e70b')
+source=(ftp://ftp.gnu.org/gnu/$_pkgname/$_pkgname-$pkgver.tar.xz{,.sig})
+md5sums=('8d2f0346d08b13c18afb81f0e8aa1e2f'
+         '7a25f2ece647b8637f4ae1de474712e7')
 
 build() {
   cd "${srcdir}/${_pkgname}-${pkgver}"
-  patch -p1 -i "${srcdir}"/grep-2.11-exclude-dir-crash.patch
-  pushd gnulib-tests
-    sed -i 's:\$ERR:0:' test-version-etc.sh # minimal diff
-  popd
   ./configure --prefix=/usr \
               --program-prefix=g \
               --build=${CBUILD} \
