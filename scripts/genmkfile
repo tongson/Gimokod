@@ -95,12 +95,17 @@ function getpkgbin(pkg)                     -- STRING
     local bins = {}
     local binrepo = os.getenv('BINREPO')
     local repo = os.getenv('REPO')
+    local f = io.input(os.getenv('REPOFILES'))
+    local repofiles=io.read('*all')
     local dir = binrepo.."/"..repo.."/"
     local carch = { "any", "x86_64" }
-    for _,pkgname in pairs(getpkgdata(pkg, "fullname")) do
+    f:close()
+    for _,pkgname in pairs(getpkgdata(pkg, "pkgname")) do
         for _,arch in ipairs(carch) do
-            if isfile(dir..pkgname.."-"..arch..".pkg.tar.xz") then
-                bins[#bins+1] = dir..pkgname.."-"..arch..".pkg.tar.xz"
+            local pkgname = string.gsub(pkgname, "-", "%%-")
+            local pattern = dir..pkgname.."%-[%w%.%_]*%-[%d]*%-"..arch..".pkg.tar.xz"
+            if string.find(repofiles, pattern) then
+                bins[#bins+1] = string.match (repofiles, pattern)
             end
         end
     end
@@ -142,15 +147,15 @@ do
             printf("    rm -rf %s/* \n", builddir)
             printf("    cd %s \n", pkg)
             printf("    echo Started: $(date -uR)\n")
-            printf("    makepkg --noconfirm -mci || $(echo Build failed: %s | /usr/bin/bti && exit 1)\n", pkg)
+            printf("    makepkg --noconfirm -mci || $(echo Build failed: %s >> /tmp/log && exit 1)\n", pkg)
             printf("    echo Stopped: $(date -uR)\n")
             for _,oldpkg in pairs(getpkgdata(pkg, "pkgname")) do
                 printf("    find %s -type f -regex '.*\\/%s-[0-9a-z\\_\\.]*-[0-9]*-[0-9a-z\\_]*.pkg.tar.xz[\\.sig]*' -exec mv {} %s../backup \\;\n", binrepo, oldpkg, binrepo)
             end
             for _,newpkg in pairs(getpkgdata(pkg, "fullname")) do
                 printf("    pushd %s\n", outputdir)
-                printf("    echo Build finished: %s $(sha256sum %s-*.pkg.tar.??) | /usr/bin/bti\n", newpkg, newpkg)
-                printf("    mv %s-*.pkg.tar.??{,.sig} %s\n", newpkg, binrepo)
+                printf("      echo Build finished: $(sha256sum %s-*.pkg.tar.??) >> /tmp/log\n", newpkg)
+                printf("      mv %s-*.pkg.tar.??{,.sig} %s\n", newpkg, binrepo)
                 printf("    popd\n")
             end
         else
@@ -158,12 +163,12 @@ do
             printf("    rm -rf %s/* \n", builddir)
             printf("    cd %s \n", pkg)
             printf("    echo Started: $(date -uR)\n")
-            printf("    makepkg --noconfirm -mci || $(echo Build failed: %s | /usr/bin/bti && exit 1)\n", pkg)
+            printf("    makepkg --noconfirm -mci || $(echo Build failed: %s >> /tmp/log && exit 1)\n", pkg)
             printf("    echo Stopped: $(date -uR)\n")
             for _,newpkg in pairs(getpkgdata(pkg, "fullname")) do
                 printf("    pushd %s\n", outputdir)
-                printf("    echo Build finished: %s $(sha256sum %s-*.pkg.tar.??) | /usr/bin/bti\n", newpkg, newpkg)
-                printf("    mv %s-*.pkg.tar.??{,.sig} %s\n", newpkg, binrepo)
+                printf("      echo Build finished: $(sha256sum %s-*.pkg.tar.??) >> /tmp/log\n", newpkg)
+                printf("      mv %s-*.pkg.tar.??{,.sig} %s\n", newpkg, binrepo)
                 printf("    popd\n")
             end
         end
