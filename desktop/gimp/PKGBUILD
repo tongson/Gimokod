@@ -1,20 +1,20 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=gimp
-pkgver=2.6.12
+pkgver=2.8.0
 pkgrel=1
 pkgdesc="GNU Image Manipulation Program"
-arch=('i686' 'x86_64')
+arch=('x86_64')
 url="http://www.gimp.org/"
 license=('GPL' 'LGPL')
 depends=('aalib' 'poppler-glib' 'lcms' 'libxpm' 'libxmu' 'librsvg' 'dbus-glib'
-         'libexif' 'gegl' 'hicolor-icon-theme')
+         'libexif' 'gegl' 'hicolor-icon-theme' 'babl')
 makedepends=('intltool' 'gettext')
 options=('!libtool' '!makeflags')
 install=gimp.install
 source=(ftp://ftp.gimp.org/pub/gimp/v${pkgver%.*}/${pkgname}-${pkgver}.tar.bz2
         linux.gpl)
-sha1sums=('82964e3d4eb003239f3443a1bccac53f5d780e15'
-          '110ce9798173b19a662d086ed7b882b4729f06cf')
+md5sums=('28997d14055f15db063eb92e1c8a7ebb'
+         'bb27bc214261d36484093e857f015f38')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
