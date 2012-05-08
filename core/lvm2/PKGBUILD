@@ -31,7 +31,7 @@ build() {
               --with-usrlibdir=/usr/lib \
               --enable-pkgconfig \
               --enable-static_link \
-              --enable-lvmetad \
+              --disable-lvmetad \
               --with-thin=internal \
               --disable-readline \
               --disable-nls \
@@ -45,7 +45,8 @@ build() {
               --with-udevdir=/usr/lib/udev/rules.d/ \
               --with-default-locking-dir=/run \
               --enable-udev_sync \
-              --enable-udev_rules
+              --enable-udev_rules \
+              CLDFLAGS="${LDFLAGS}"
   make
 }
 
