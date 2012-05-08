@@ -2,15 +2,17 @@
 pkgname=autogen
 pkgver=5.12
 pkgrel=1
-pkgdesc="A tool designed to simplify the creation and maintenance of programs that contain large amounts of repetitious text"
-arch=('i686' 'x86_64')
+pkgdesc="Tool for the creation and maintenance of programs that contain large amounts of repetitious text"
+arch=('x86_64')
 url="http://www.gnu.org/software/autogen/"
 license=('GPL3')
 groups=('base-devel')
 depends=('guile')
 options=('!libtool')
-source=(ftp://ftp.gnu.org/gnu/${pkgname}/rel${pkgver}/${pkgname}-${pkgver}.tar.bz2)
-md5sums=('126e56be629cda747390e8ba9be71e4b')
+source=(http://ftp.gnu.org/gnu/${pkgname}/rel${pkgver}/${pkgname}-${pkgver}.tar.xz{,.sig})
+md5sums=('5fba3c0e1ec0965061f27e8e79bd6da2'
+         'ed74e586ade1a61f753d391f3849c25b')
+
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
