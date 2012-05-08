@@ -1,33 +1,33 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=librsvg
-pkgver=2.34.2
-pkgrel=2
+pkgver=2.36.1
+pkgrel=1
 pkgdesc="SAX-based renderer for SVG files into a GdkPixbuf"
-arch=(i686 x86_64)
+arch=('x86_64')
 license=('LGPL')
-depends=('gdk-pixbuf' 'pango' 'libcroco' 'gtk2')
+depends=('gdk-pixbuf' 'pango' 'libcroco')
+makedepends=('gtk2')
 options=('!libtool' '!emptydirs')
 url="http://librsvg.sourceforge.net/"
 install=librsvg.install
-source=(http://ftp.gnome.org/pub/gnome/sources/${pkgname}/2.34/${pkgname}-${pkgver}.tar.xz)
-sha256sums=('5de701325b84c0a15ab6892f49ffd6471722044bfe0b350725bf420642ee4464')
+source=(http://ftp.gnome.org/pub/gnome/sources/$pkgname/${pkgver%.*}/$pkgname-$pkgver.tar.xz)
+sha256sums=('786b95e1a091375c5ef2997a21c69ff24d7077afeff18197355f54d9dcbcd8c5')
 
 build() {
-  cd "${srcdir}/${pkgname}-${pkgver}"
+  cd "${pkgname}-${pkgver}"
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
               --libexecdir=/usr/lib/${pkgname} \
-              --with-croco \
               --disable-tools \
               --enable-pixbuf-loader \
               --enable-gtk-theme \
+              --enable-introspection=no \
               --disable-static \
-              --with-svgz
   make
 }
 
 package() {
-  cd "${srcdir}/${pkgname}-${pkgver}"
+  cd "${pkgname}-${pkgver}"
   make DESTDIR="${pkgdir}" install
 }
