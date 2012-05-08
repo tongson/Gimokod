@@ -77,6 +77,11 @@ failures:
     pacman
     sudo
     util-linux
+    automake
+    grep
+    libffi
+    yasm
+    openssh
 
 ## MISCELLANEOUS FEATURES (to be documented)
 
