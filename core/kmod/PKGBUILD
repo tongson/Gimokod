@@ -1,16 +1,16 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=kmod
-pkgver=7
+pkgver=8
 pkgrel=1
 pkgdesc="Linux kernel module handling"
-arch=('i686' 'x86_64')
+arch=('x86_64')
 url='http://git.kernel.org/?p=utils/kernel/kmod/kmod.git;a=summary'
 license=('GPL2')
 depends=('zlib')
 groups=('base')
 options=('!libtool')
 source=("ftp://ftp.kernel.org/pub/linux/utils/kernel/$pkgname/$pkgname-$pkgver.tar.xz")
-md5sums=('7bd916ae1c8a38e7697fdd8118bc98eb')
+md5sums=('d4e3d038b5370b1e8ff237c55666aa64')
 
 build() {
   cd "${pkgname}-${pkgver}"
