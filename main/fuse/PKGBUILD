@@ -1,26 +1,27 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=fuse
-pkgver=2.8.7
+pkgver=2.9.0
 pkgrel=1
-pkgdesc="A library that makes it possible to implement a filesystem in a userspace program."
-arch=('i686' 'x86_64')
+pkgdesc="Library that makes it possible to implement a filesystem in userspace"
+arch=('x86_64')
 url="http://fuse.sourceforge.net/"
-license="GPL2"
+license=('GPL2')
 makedepends=('pkg-config')
 backup=(etc/fuse.conf)
 source=(http://downloads.sourceforge.net/${pkgname}/${pkgname}-${pkgver}.tar.gz
         'fuse.conf')
 options=('!libtool')
-sha1sums=('284f22401131ec148bd04362dc86f7b0e94fb5f4'
+sha1sums=('e64396d516cca55995e0a8f8dd75456fd9d9d21d'
           '3b42e37a741d4651099225987dc40e7f02a716ad')
 
 build() {
-  cd "${srcdir}/${pkgname}-${pkgver}"
+  cd "${pkgname}-${pkgver}"
   sed -i '1i#define _GNU_SOURCE' util/fusermount.c
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
               --enable-lib \
+              --libdir=/usr/lib \
               --enable-util \
               --bindir=/usr/bin \
               --disable-example
@@ -28,13 +29,10 @@ build() {
 }
 
 package() {
-  cd "${srcdir}/${pkgname}-${pkgver}"
+  cd "${pkgname}-${pkgver}"
   make DESTDIR="${pkgdir}" install
   mv "${pkgdir}"/sbin/* "${pkgdir}/usr/bin"
   rmdir "${pkgdir}/sbin"
-
-  # static device nodes will cause collision.
-  rm -rf "${pkgdir}"/dev
 
   # Remove init script in wrong path
   # Don't add our own for now, as fusectl fs oopses on 2.6.18
@@ -43,4 +41,7 @@ package() {
   # install sample config file
   install -Dm644 "${srcdir}"/fuse.conf "${pkgdir}"/etc/fuse.conf
   rm -rf "${pkgdir}/etc/udev"
+
+  # remove udev rules (is in the udev package}
+  rm -rf ${pkgdir}/etc/udev
 }
