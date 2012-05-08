@@ -1,8 +1,8 @@
 # Significant parts from Gentoo's "openssl-1.0.0e.ebuild"
 pkgname=openssl
-_ver=1.0.0h
-pkgver=1.0.0.h
-pkgrel=2
+_ver=1.0.0i
+pkgver=1.0.0.i
+pkgrel=1
 pkgdesc='The Open Source toolkit for Secure Sockets Layer and Transport Layer Security'
 arch=('x86_64')
 url='https://www.openssl.org'
@@ -86,6 +86,6 @@ source=(https://www.openssl.org/source/${pkgname}-${_ver}.tar.gz
         openssl-1.0.0h-pkg-config.patch
         c_rehash)
 
-sha256sums=('7e3dfc21aa57ed33ea673170053d1921322803b8a6a624a4f0d2e4c308bd418d'
+sha256sums=('548262d15777c504be1ab9bb8fabef1e14a3de54837a6593c8f403dd843d5e57'
             '542dea12747b1cb667707250e3eb3803cbdd396bd0d8e836e48a8018417dc1b8'
             '4999ee79892f52bd6a4a7baba9fac62262454d573bbffd72685d3aae9e48cee0')
