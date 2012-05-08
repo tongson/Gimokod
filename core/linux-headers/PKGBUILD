@@ -1,17 +1,18 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=linux-headers
-pkgver=3.1
-_basever=3.1
+pkgver=3.3.2
+_basever=3.3
 pkgrel=1
 pkgdesc="Kernel headers sanitized for use in userspace"
-arch=('i686' 'x86_64')
+arch=('x86_64')
 url="http://www.gnu.org/software/libc"
 makedepends=('perl')
 license=('GPL2')
 groups=('base-devel')
-source=(http://www.kernel.org/pub/linux/kernel/v3.x/linux-${_basever}.tar.{xz,sign})
-sha256sums=('6f220258f3ce9f11d0e53860ccc2d9fe746117056212099876dbe5ee1de80af3'
-            'c9a3e442b26b898c686496f3bd130880409138e25916584243ae612a8eb2cc3f')
+source=(http://www.kernel.org/pub/linux/kernel/v3.x/linux-${_basever}.tar.xz
+        http://www.kernel.org/pub/linux/kernel/v3.x/patch-${pkgver}.xz)
+md5sums=('7133f5a2086a7d7ef97abac610c094f5'
+         '68907107b0f62a19608588bdb6b29e20')
 
 build() {
   cd "${srcdir}"/linux-${_basever}
@@ -29,5 +30,5 @@ package() {
   rm -rf "${pkgdir}"/usr/include/drm
 
   # clean-up unnecessary files generated during install
-  find ${pkgdir} -name .install -or -name ..install.cmd | xargs rm -f
+  find ${pkgdir} -name .install -or -name ..install.cmd -print0 | xargs -0 rm -f
 }
