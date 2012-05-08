@@ -1,18 +1,21 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=unrar
-pkgver=4.1.4
+pkgver=4.2.1
 pkgrel=1
 pkgdesc="The RAR uncompression program"
-arch=('i686' 'x86_64')
+arch=('x86_64')
 url="http://www.rarlab.com/"
 license=('custom')
 depends=('gcc-libs')
-source=("http://www.rarlab.com/rar/unrarsrc-${pkgver}.tar.gz")
-md5sums=('808c92a661820a637ca1330cf40c18e4')
+source=("http://www.rarlab.com/rar/unrarsrc-${pkgver}.tar.gz"
+        'unrar-4.2.1-soname.patch')
+md5sums=('759b3c6787864126050838153b768baa'
+         'b9ec767da9a36f5ac38034c974e77758')
 
 build() {
   cd "${srcdir}/${pkgname}"
-  make -f makefile.unix
+  Patch unrar-4.2.1-soname.patch
+  make -f makefile.unix CXXFLAGS="-fPIC ${CXXFLAGS}" STRIP="true"
 }
 
 package() {
