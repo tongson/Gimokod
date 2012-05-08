@@ -1,30 +1,19 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=conky
-pkgver=1.8.1
-pkgrel=2
+pkgver=1.9.0
+pkgrel=1
 pkgdesc='An advanced, highly configurable system monitor for X based on torsmo'
-arch=('i686' 'x86_64')
+arch=('x86_64')
 url='http://conky.sourceforge.net/'
 license=('custom')
 makedepends=('pkg-config')
-depends=('alsa-lib' 'libxml2' 'curl' 'wireless_tools' 'libxft' 'glib' 'libxdamage' 'imlib2')
-source=("http://downloads.sourceforge.net/project/${pkgname}/${pkgname}/${pkgver}/${pkgname}-${pkgver}.tar.gz"
-        'conky-1.8.1-acpitemp.patch'
-        'conky-1.8.1-curl-headers.patch'
-        'current-power.patch')
-
-sha1sums=('06bbe9b7eed8603fa7a971b27c5c61f38424ac6f'
-          'd5000bfdddb134c4cd61e90e8bcc3bce5866c33c'
-          '0cb58b354bbd91a44af183e4ac7022246843552d'
-          '2eeef0cc5a0b612826b2a7f0b43b7a3b7e10bf0b')
+depends=('alsa-lib' 'libxml2' 'curl' 'wireless_tools'
+         'libxft' 'glib' 'libxdamage' 'imlib2')
+source=("http://downloads.sourceforge.net/project/${pkgname}/${pkgname}/${pkgver}/${pkgname}-${pkgver}.tar.gz")
+sha1sums=('a8d26d002370c9b877ae77ad3a3bbd2566b38e5d')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-
-  patch -p1 < ../current-power.patch # See FS#21984
-  patch -Np1 -i ../conky-1.8.1-curl-headers.patch
-  patch -Np1 -i ../conky-1.8.1-acpitemp.patch
-
   ./configure \
     --prefix=/usr \
     --build=${CBUILD} \
