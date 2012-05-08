@@ -1,31 +1,55 @@
 # Based upon the PKGBUILD from Arch Linux
-pkgname=gtk-xfce-engine
-pkgver=2.99.2
+pkgbase=gtk-xfce-engine
+pkgname=('gtk2-xfce-engine' 'gtk3-xfce-engine')
+pkgver=3.0.0
 pkgrel=1
-pkgdesc="Xfce Gtk+-2.0 and Gtk+-3.0 engines"
 arch=('x86_64')
-license=('GPL2')
 url="http://www.xfce.org/"
-depends=('gtk2' 'gtk3')
-makedepends=('pkg-config')
+license=('GPL2')
+groups=('xfce4')
+makedepends=('gtk2' 'gtk3')
 options=('!libtool')
-source=(http://archive.xfce.org/src/xfce/${pkgname}/2.99/${pkgname}-${pkgver}.tar.bz2)
-sha256sums=('81301df31b2bd8b345b40331fa9f1d5deeb6e3e18fa1a60cd23c0fa9b44de2ee')
+source=(http://archive.xfce.org/src/xfce/$pkgbase/3.0/$pkgbase-"${pkgver}".tar.bz2)
+sha256sums=('90e08fce8cce452656c4090f94afb7aa35a0a92597412f319526b7899d54838d')
 
 build() {
-  cd "${srcdir}/${pkgname}-${pkgver}"
-  ./configure --prefix=/usr \
-              --host=${CHOST} \
-              --build=${CBUILD} \
-              --sysconfdir=/etc \
-              --libexecdir=/usr/lib \
-              --localstatedir=/var \
-              --disable-static \
-              --disable-debug
+  cd "${srcdir}/$pkgbase-${pkgver}"
+
+  ./configure \
+    --prefix=/usr \
+    --build=${CBUILD} \
+    --host=${CHOST} \
+    --sysconfdir=/etc \
+    --libexecdir=/usr/lib \
+    --localstatedir=/var \
+    --disable-static \
+    --disable-debug
   make
 }
 
-package() {
-  cd "${srcdir}/${pkgname}-${pkgver}"
+package_gtk2-xfce-engine() {
+  pkgdesc="Xfce Gtk+-2.0 engine"
+  depends=('gtk2')
+  provides=("gtk-xfce-engine=${pkgver}-$pkgrel")
+  conflicts=('gtk-xfce-engine')
+  replaces=('gtk-xfce-engine')
+
+  cd "${srcdir}/$pkgbase-${pkgver}"
   make DESTDIR="${pkgdir}" install
+
+  # Remove gtk3 engine and themes
+  find "${pkgdir}" -name gtk-3.0 -exec rm -r {} + || true
 }
+
+package_gtk3-xfce-engine() {
+  pkgdesc="Xfce Gtk+-3.0 engine"
+  depends=('gtk3')
+  conflicts=('gtk-xfce-engine<=2.99.0-1')
+
+  cd "${srcdir}/$pkgbase-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+
+  # Remove gtk2 engine and themes
+  find "${pkgdir}" -name gtk-2.0 -exec rm -r {} + || true
+}
+
