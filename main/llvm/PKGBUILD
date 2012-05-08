@@ -2,8 +2,8 @@
 pkgbase=llvm
 pkgname=('llvm' 'clang')
 pkgver=3.0
-pkgrel=1
-arch=('i686' 'x86_64')
+pkgrel=2
+arch=('x86_64')
 url="http://llvm.org/"
 license=('custom:University of Illinois/NCSA Open Source License')
 makedepends=('gcc-libs' 'libffi' "gcc" 'make' 'bison' 'flex')
@@ -20,6 +20,8 @@ sha256sums=('519eb11d3499ce99c6ffdb8718651fc91425ed7690eac91c8d6853474f7c0477'
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}.src"
+  CFLAGS+=' -fno-tree-pre'
+  CXXFLAGS+=' -fno-tree-pre'
 
   # At the present, clang must reside inside the LLVM source code tree to build
   # See http://llvm.org/bugs/show_bug.cgi?id=4840
