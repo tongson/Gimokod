@@ -1,9 +1,9 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=openssh
-pkgver=5.9p1
-pkgrel=4
+pkgver=6.0p1
+pkgrel=2
 pkgdesc='The OpenSSH implementation of SSH protocol versions 1 and 2'
-arch=('i686' 'x86_64')
+arch=('x86_64')
 license=('custom:BSD')
 groups=('base')
 url='http://www.openssh.org/portable.html'
@@ -11,8 +11,8 @@ depends=('openssl' 'pam' 'pam_userpass' 'pam_mktemp')
 install=openssh.install
 source=("ftp://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/${pkgname}-${pkgver}.tar.gz"
         'sshd.pam')
-sha1sums=('ac4e0055421e9543f0af5da607a72cf5922dcc56'
-          '41468c1e9d0764eaaf4b2336a84fb8672c664b7b')
+sha1sums=('f691e53ef83417031a2854b8b1b661c9c08e4422'
+          '9880aa6089ff6e35bf603883f01783c647b5e09d')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
@@ -30,8 +30,17 @@ build() {
               --with-xauth=/usr/bin/xauth \
               --with-ssl-engine \
               --without-tcp-wrappers \
-              --disable-strip
+              --disable-strip \
+              --without-ldns \
+              --without-libedit
   make
+}
+
+check() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  # The connect.sh test must be run by a user with a decent login shell;
+  # chroot builds use nobody with /bin/false.
+  make tests || true
 }
 
 package() {
@@ -58,4 +67,6 @@ package() {
     -i "${pkgdir}"/etc/ssh/sshd_config
   mv "${pkgdir}"/usr/sbin/* "${pkgdir}"/usr/bin
   rmdir "${pkgdir}"/usr/sbin
+  echo "AcceptEnv LANG LC_*" >> "${pkgdir}/etc/ssh/sshd_config"
+  echo "SendEnv LANG LC_*" >> "${pkgdir}/etc/ssh/ssh_config"
 }

@@ -9,4 +9,5 @@ account		required	pam_mktemp.so
 password	required	pam_unix.so
 session		required	pam_unix_session.so
 session		required	pam_limits.so
+session    	optional	pam_loginuid.so
 session		required	pam_systemd.so
