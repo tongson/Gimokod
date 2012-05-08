@@ -1,26 +1,26 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=gdk-pixbuf
-pkgver=2.24.1
-pkgrel=2
+pkgver=2.26.1
+pkgrel=1
 pkgdesc="An image loading library"
-arch=('i686' 'x86_64')
+arch=('x86_64')
 url="http://www.gtk.org/"
 license=('GPL2')
 depends=('glib' 'libpng' 'libtiff' 'libjpeg' 'libx11')
 options=('!libtool')
 install=gdk-pixbuf2.install
-source=(http://download.gnome.org/sources/gdk-pixbuf/2.24/gdk-pixbuf-${pkgver}.tar.xz)
-sha256sums=('da7a3f00db360913716368e19e336402755cafa93769f3cfa28a969303e4bee1')
+source=(http://download.gnome.org/sources/gdk-pixbuf/${pkgver%.*}/gdk-pixbuf-$pkgver.tar.xz)
+sha256sums=('a60af12b58d9cc15ba4c680c6730ce5d38e8d664af1d575a379385b94b4ec7ba')
 
 build() {
   cd "${srcdir}/gdk-pixbuf-${pkgver}"
   sed -i 's:po docs tests::' Makefile.{in,am}
   ./configure --prefix=/usr \
+              --disable-dependency-tracking \
               --build=${CBUILD} \
               --host=${CHOST} \
               --with-x11 \
               --without-libjasper \
-              --with-included-loaders=png \
               --disable-gtk-doc \
               --disable-introspection
   make
@@ -28,7 +28,6 @@ build() {
 
 package() {
   cd "${srcdir}/gdk-pixbuf-${pkgver}"
-
   make DESTDIR="${pkgdir}" install
 }
 
