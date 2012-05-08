@@ -1,11 +1,11 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=systemd
 pkgver=44
-pkgrel=2
+pkgrel=3
 pkgdesc="Session and Startup manager"
 arch=('x86_64')
 url="http://www.freedesktop.org/wiki/Software/systemd"
-license=('GPL2')
+license=('GPL2' 'LGPL2.1' 'MIT')
 makedepends=('gperf' 'intltool' 'gettext' 'linux-headers' 'dbus-core' 'kbd' 'libcap'
              'cryptsetup' 'udev' 'kmod' 'xz')
 groups=('base')
@@ -54,6 +54,7 @@ build() {
               --enable-pam \
               --disable-timedated \
               --disable-hostnamed \
+              --disable-ima \
               --disable-localed \
               --disable-quotacheck \
               --disable-manpages \
