@@ -1,9 +1,9 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=libcap
 pkgver=2.22
-pkgrel=1
+pkgrel=2
 pkgdesc="POSIX 1003.1e capabilities"
-arch=('i686' 'x86_64')
+arch=('x86_64')
 url="http://sites.google.com/site/fullycapable/"
 license=('GPL2')
 groups=('base')
@@ -23,6 +23,8 @@ build() {
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   make prefix=/usr SBINDIR=${pkgdir}/usr/bin DESTDIR="${pkgdir}" LIBDIR="${pkgdir}"/usr/lib RAISE_SETFCAP=no install
-  rm "${pkgdir}"/usr/lib/*.a
   chmod 755 "${pkgdir}"/usr/lib/libcap.so.${pkgver}
+  rm "${pkgdir}"/usr/lib/libcap.a
+  install -Dm644 pam_cap/capability.conf \
+     ${pkgdir}/usr/share/doc/${pkgname}/capability.conf.example
 }
