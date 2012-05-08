@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=autoconf
-pkgver=2.68
+pkgver=2.69
 pkgrel=1
 pkgdesc="A GNU tool for automatically configuring source code"
 arch=('any')
@@ -10,7 +10,7 @@ groups=('base-devel')
 depends=('m4')
 install=autoconf.install
 source=(ftp://ftp.gnu.org/pub/gnu/${pkgname}/${pkgname}-${pkgver}.tar.xz)
-md5sums=('723677f7727542d273112e7feb870a7a')
+md5sums=('50f97f4159805e374639a73e2636f22e')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
