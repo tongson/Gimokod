@@ -40,3 +40,7 @@ qemu
 fuse.conf
 libnl
 trusted-key.key
+conf.d
+systemd
+pacman.conf
+makepkg.conf
