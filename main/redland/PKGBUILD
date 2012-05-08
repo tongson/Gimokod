@@ -1,10 +1,10 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=redland
 pkgver=1.0.15
-pkgrel=2
+pkgrel=3
 url="http://librdf.org/"
 license=("GPL")
-arch=('i686' 'x86_64')
+arch=('x86_64')
 depends=('libltdl' 'libxml2' 'openssl' 'rasqal' 'raptor')
 makedepends=('rasqal' 'raptor')
 options=('!libtool')

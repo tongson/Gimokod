@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=raptor
 pkgver=2.0.7
-pkgrel=1
+pkgrel=2
 pkgdesc="A C library that parses RDF/XML/N-Triples into RDF triples"
 arch=('x86_64')
 url="http://librdf.org/raptor"
