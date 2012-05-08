@@ -1,21 +1,20 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=pango
-pkgver=1.29.4
-pkgrel=2
+pkgver=1.30.0
+pkgrel=1
 pkgdesc="A library for layout and rendering of text"
-arch=('i686' 'x86_64')
+arch=('x86_64')
 license=('LGPL')
 depends=('glib' 'cairo' 'libxft' 'freetype')
 makedepends=('libxt')
 options=('!libtool' '!emptydirs')
 install=pango.install
-source=(http://ftp.gnome.org/pub/gnome/sources/${pkgname}/1.29/${pkgname}-${pkgver}.tar.bz2)
 url="http://www.pango.org/"
-sha256sums=('f15deecaecf1e9dcb7db0e4947d12b5bcff112586434f8d30a5afd750747ff2b')
+source=(http://ftp.gnome.org/pub/gnome/sources/${pkgname}/${pkgver:0:4}/${pkgname}-${pkgver}.tar.xz)
+sha256sums=('7c6d2ab024affaed0e942f9279b818235f9c6a36d9fc50688f48d387f4102dff')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
@@ -24,7 +23,6 @@ build() {
               --x-libraries=/usr/lib \
               --sysconfdir=/etc \
               --localstatedir=/var \
-              --with-included-modules=basic-fc \
               --disable-gtk-doc-html \
               --enable-introspection=no \
               --enable-debug=no
