@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=xf86-input-synaptics
-pkgver=1.5.99.902
+pkgver=1.5.99.904
 pkgrel=1
 pkgdesc="Synaptics driver for notebook touchpads"
 arch=('x86_64')
@@ -10,7 +10,7 @@ depends=('libxtst' 'mtdev')
 makedepends=('xorg-server-devel' 'libxi' 'libx11')
 options=('!libtool')
 source=(http://xorg.freedesktop.org/releases/individual/driver/${pkgname}-${pkgver}.tar.bz2)
-sha1sums=('2170854823caf39f15f47329514fdbe620e31e96')
+sha1sums=('4853bd933fa41b83ff513262cdf6e5b89f22d64b')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
