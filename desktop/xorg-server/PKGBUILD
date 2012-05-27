@@ -2,7 +2,7 @@
 pkgbase=xorg-server
 pkgname=('xorg-server' 'xorg-server-xvfb' 'xorg-server-common'
          'xorg-server-devel')
-pkgver=1.12.1
+pkgver=1.12.1.902
 pkgrel=1
 arch=('x86_64')
 license=('custom')
@@ -19,11 +19,11 @@ source=(${url}/releases/individual/xserver/${pkgbase}-${pkgver}.tar.bz2
         xvfb-run
         xvfb-run.1
         10-quirks.conf)
-sha1sums=('922b963901f4711449b53fb32ce3e14f5b642766'
-          '63836e5cfb4ae7353fb2e31239a544409c7ead32'
-          'c94f742d3f9cabf958ae58e4015d9dd185aabedc'
-          '6838fc00ef4618c924a77e0fb03c05346080908a'
-          '993798f3d22ad672d769dae5f48d1fa068d5578f')
+sha256sums=('052efb01c47348b4138c89ad5654be022a4d952acc6129b2ad2659bc1ff4d509'
+            '66e25f76a7496c429e0aff4b0670f168719bb0ceaeb88c6f2272f2bf3ed21162'
+            'ff0156309470fc1d378fd2e104338020a884295e285972cc88e250e031cc35b9'
+            '2460adccd3362fefd4cdc5f1c70f332d7b578091fb9167bf88b5f91265bbd776'
+            '94612f5c0d34a3b7152915c2e285c7b462e9d8e38d3539bd551a339498eac166')
 
 build() {
   cd "${srcdir}/${pkgbase}-${pkgver}"
