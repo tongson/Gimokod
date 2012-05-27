@@ -1,12 +1,12 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=newsbeuter
 pkgver=2.5
-pkgrel=1
+pkgrel=2
 pkgdesc="A RSS feed reader for the text console with special Podcast support"
 arch=('i686' 'x86_64')
 url="http://www.newsbeuter.org/"
 license=('custom: MIT')
-depends=('json-c' 'curl' 'libxml2' 'sqlite' 'stfl')
+depends=('json-c' 'curl' 'libxml2' 'sqlite' 'stfl' 'gcc-libs')
 makedepends=('gettext' 'pkg-config')
 options=('!libtool')
 source=(http://www.newsbeuter.org/downloads/$pkgname-$pkgver.tar.gz)
