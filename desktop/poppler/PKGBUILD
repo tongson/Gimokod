@@ -1,8 +1,8 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgbase=poppler
 pkgname=('poppler' 'poppler-glib')
-pkgver=0.18.4
-pkgrel=2
+pkgver=0.20.0
+pkgrel=1
 arch=('x86_64')
 license=('GPL')
 makedepends=('glib' 'cairo' 'libjpeg' 'libpng' 'gcc-libs' 'fontconfig' 'openjpeg' 'pkg-config' 'lcms')
@@ -11,7 +11,7 @@ url="http://poppler.freedesktop.org/"
 _testtag=0d2bfd4af4c76a3bac27ccaff793d9129df7b57a
 source=(http://poppler.freedesktop.org/${pkgbase}-${pkgver}.tar.gz
         http://cgit.freedesktop.org/poppler/test/snapshot/test-${_testtag}.tar.bz2)
-md5sums=('12658f3308597e57f3faff538cc73baf'
+md5sums=('5bca54b9561bf5b14d9344efce2cd4f3'
          '9dc64c254a31e570507bdd4ad4ba629a')
 
 build() {
