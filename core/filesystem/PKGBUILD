@@ -1,6 +1,6 @@
 pkgname=filesystem
 pkgver=2012.04
-pkgrel=4
+pkgrel=5
 pkgdesc='Filesystem hier'
 arch=('any')
 url='http://gimokod.org'
@@ -16,7 +16,7 @@ package() {
     done
 
     for f in host.conf hosts hostname issue inputrc ld.so.conf locale.conf motd \
-    nsswitch.conf securetty shells profile vconsole.conf os-release; do
+    nsswitch.conf securetty shells profile vconsole.conf os-release services; do
       install -m0644 "${srcdir}"/${f} "${pkgdir}"/etc/
     done
 
