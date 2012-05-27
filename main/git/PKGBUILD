@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch and ebuild from Gentoo Linux
 pkgname=git
-pkgver=1.7.10.1
+pkgver=1.7.10.2
 pkgrel=1
 pkgdesc="the fast distributed version control system"
 arch=('x86_64')
@@ -9,12 +9,12 @@ license=('GPL2')
 depends=('zlib')
 source=("http://git-core.googlecode.com/files/git-"${pkgver}".tar.gz"
         "http://git-core.googlecode.com/files/git-manpages-"${pkgver}".tar.gz"
-        git-1.7.3.5-optional-cvs.patch)
+        git-1.7.10.2-optional-cvs.patch)
 
 build() {
   export PYTHON_PATH=""
   cd "${srcdir}"/"${pkgname}"-"${pkgver}"
-  Patch git-1.7.3.5-optional-cvs.patch
+  Patch git-1.7.10.2-optional-cvs.patch
   sed -i -e '/\/usr\/local/s/BASIC_/#BASIC_/' Makefile
   sed -i -e '/private-Error.pm/s,^,#,' perl/Makefile.PL
   make prefix=/usr gitexecdir=/usr/lib/git-core \
@@ -86,6 +86,6 @@ package() {
         "${pkgdir}"/usr/share/man/man1/git-svn.1*
 }
 
-sha1sums=('870361f93fad7999f121bc7bc91a743feda68bdb'
-          '5bff761bc40a6b3cfe35ba824357dcf611dbd5d2'
-          '58832c8141a0fd3681c6e9c98600526d290aa637')
+sha1sums=('e4b7f746ff4e356baaddcad0b2911376efde031b'
+          '6cc3f80185bdd1a608cf373b05313b2adc82b898'
+          '366d6b7aa9252c3f2b937c81c51f6f2e92673593')

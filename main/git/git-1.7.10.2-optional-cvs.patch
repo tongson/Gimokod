@@ -356,10 +356,10 @@ diff -Nuarp git-1.7.3.5.orig/t/t9603-cvsimport-patchsets.sh git-1.7.3.5/t/t9603-
 diff -Nuarp git-1.7.3.5.orig/t/test-lib.sh git-1.7.3.5/t/test-lib.sh
 --- git-1.7.3.5.orig/t/test-lib.sh	2011-01-06 00:08:33.000000000 +0000
 +++ git-1.7.3.5/t/test-lib.sh	2011-01-07 08:40:05.006179654 +0000
-@@ -1015,6 +1015,7 @@ case $(uname -s) in
- 	;;
+@@ -616,6 +616,7 @@
  esac
- 
+  
+ ( COLUMNS=1 && test $COLUMNS = 1 ) && test_set_prereq COLUMNS_CAN_BE_1
 +test -z "$NO_CVS" && test_set_prereq CVS
  test -z "$NO_PERL" && test_set_prereq PERL
  test -z "$NO_PYTHON" && test_set_prereq PYTHON
