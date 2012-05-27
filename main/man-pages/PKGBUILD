@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=man-pages
-pkgver=3.39
+pkgver=3.41
 _posixver=2003-a
 pkgrel=1
 pkgdesc="Linux man pages"
@@ -9,7 +9,7 @@ license=('GPL')
 url="http://man7.org/linux/man-pages/index.html"
 source=(http://www.kernel.org/pub/linux/docs/man-pages/$pkgname-$pkgver.tar.xz
         http://www.kernel.org/pub/linux/docs/man-pages/man-pages-posix/"${pkgname}"-posix-${_posixver}.tar.bz2)
-md5sums=('7d660682e2cf56c9d2195529eb2418d3'
+md5sums=('7395d284fa1b9e112006d736865781b0'
          '7c78aff03c0a6767ba483d34f19e4b09')
 
 build() {
