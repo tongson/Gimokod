@@ -1,18 +1,18 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=vim
 _topver=7.3
-_patchlevel=495
-__hgrev=a104dae7f903
+_patchlevel=515
+__hgrev=8201108e9cf0
 _versiondir="vim${_topver//./}"
-pkgver=7.3.495
-pkgrel=1
+pkgver=7.3.515
+pkgrel=2
 arch=('x86_64')
 license=('custom:vim')
 url="http://www.vim.org"
 source=(ftp://ftp.archlinux.org/other/vim/${pkgname}-${pkgver}.tar.xz)
 depends=('ncurses')
 install=vim.install
-sha1sums=('4181e211d0150cda9b3dbd815ec4aa14a6d28196')
+sha1sums=('10d7642d5062effdb51f53952622f9338003bbbf')
 
 build() {
   cd "${srcdir}"
@@ -24,6 +24,7 @@ build() {
     vim-build/src/feature.h
   sed -i 's|^.*\(#define VIMRC_FILE.*"\) .*$|\1|' \
     vim-build/src/feature.h
+  sed -i -e '/# define FEAT_CSCOPE/d' vim-build/src/feature.h
 
   (cd vim-build/src && autoconf)
 
@@ -38,7 +39,8 @@ build() {
               --disable-acl \
               --with-x=no \
               --disable-gui \
-              --disable-multibyte \
+              --with-features=huge \
+              --enable-multibyte \
               --disable-cscope \
               --disable-netbeans \
               --disable-perlinterp \
