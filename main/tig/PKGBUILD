@@ -1,0 +1,28 @@
+# Based upon the PKGBUILD from Arch Linux
+pkgname=tig
+pkgver=1.0
+pkgrel=1
+pkgdesc='Text-mode interface for Git.'
+depends=('git' 'ncurses')
+url='http://jonas.nitro.dk/tig/'
+license=('GPL')
+arch=('x86_64')
+source=("http://jonas.nitro.dk/${pkgname}/releases/${pkgname}-${pkgver}.tar.gz")
+md5sums=('a2d414d1cebbc9cd4f3d545bc6f225c6')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+
+  ./configure --prefix=/usr \
+              --build=${CBUILD} \
+              --host=${CHOST}
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+
+  make DESTDIR="${pkgdir}" install install-doc-man
+  install -Dm0644 contrib/tigrc "${pkgdir}/etc/tigrc"
+  install -Dm0644 contrib/tig-completion.bash "${pkgdir}/etc/bash_completion.d/tig"
+}
