@@ -1,14 +1,14 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=udev
 pkgver=182
-pkgrel=2
+pkgrel=3
 arch=('x86_64')
 url="http://git.kernel.org/?p=linux/hotplug/udev.git;a=summary"
 license=('GPL')
 groups=('base')
 options=('!makeflags' '!libtool')
 install=udev.install
-depends=('util-linux' 'kmod')
+depends=('util-linux' 'kmod' 'hwids')
 makedepends=('gperf' 'libxslt' 'usbutils')
 source=(ftp://ftp.kernel.org/pub/linux/utils/kernel/hotplug/$pkgname-$pkgver.tar.xz
         0001-reinstate-TIMEOUT-handling.patch)
@@ -38,6 +38,9 @@ build() {
               --disable-udev_acl \
               --enable-logging \
               --enable-static \
+              --with-firmware-path=/usr/lib/firmware/updates:/lib/firmware/updates:/usr/lib/firmware:/lib/firmware \
+              --with-usb-ids-path=/usr/share/hwdata/usb.ids \
+              --with-pci-ids-path=/usr/share/hwdata/pci.ids \
               --disable-gudev \
               --disable-introspection \
               --disable-keymap \
