@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=chromium
-pkgver=18.0.1025.168
+pkgver=19.0.1084.52
 pkgrel=1
 pkgdesc="The open-source project behind Google Chrome browser"
 arch=('x86_64')
@@ -11,7 +11,7 @@ depends=('zlib' 'gtk2' 'dbus-glib' 'nss' 'nss-freebl' 'alsa-lib' 'xdg-utils' 'bz
          'hicolor-icon-theme' 'libpng' 'speex' 'libxslt')
 makedepends=('python' 'perl' 'gperf' 'yasm' 'mesa')
 source=(http://commondatastorage.googleapis.com/chromium-browser-official/$pkgname-$pkgver.tar.bz2)
-sha256sums=('1f1fc7bd8066835844a465f9d60c49c21173ff559c40e5d113fe9c4627fc18b9')
+sha256sums=('e725d4aa7608c9975b8989188d85d38846956db2f480a1a217bcab06419dab72')
 
 build() {
   cd "${srcdir}/chromium-${pkgver}"
@@ -19,15 +19,15 @@ build() {
   # NaCL disabled
   cp "${srcdir}/nacl.gypi" chrome/
 
-  Patch chromium-media-no-sse-r0.patch
-  Patch chromium-revert-jpeg-swizzle-r2.patch
-  Patch issue9360031_6002_7003.diff
+  patch -i "$srcdir/sqlite-3.7.6.3-fix-out-of-scope-memory-reference.patch" \
+    third_party/sqlite/amalgamation/sqlite3.c
 
   # We need to disable system_ssl until "next protocol negotiation" support is
   # available in our nss package.
   # (See https://bugzilla.mozilla.org/show_bug.cgi?id=547312)
 
   find third_party -type f \! -iname '*.gyp*' \
+    \! -path 'third_party/adobe/*' \
     \! -path 'third_party/WebKit/*' \
     \! -path 'third_party/angle/*' \
     \! -path 'third_party/cacheinvalidation/*' \
@@ -57,6 +57,7 @@ build() {
     \! -path 'third_party/npapi/*' \
     \! -path 'third_party/openmax/*' \
     \! -path 'third_party/ots/*' \
+    \! -path 'third_party/ply/*' \
     \! -path 'third_party/protobuf/*' \
     \! -path 'third_party/scons-2.0.1/*' \
     \! -path 'third_party/sfntly/*' \
@@ -81,6 +82,7 @@ build() {
     -delete
   export CXXFLAGS="${CXXFLAGS/-Os/-O2}"
   export CFLAGS="${CFLAGS/-Os/-O2}"
+  export CFLAGS+=' -Wno-c++0x-compat'
   export CXX="/usr/bin/x86_64-pc-linux-gnu-g++"
   export CC="/usr/bin/x86_64-pc-linux-gnu-gcc"
   build/gyp_chromium --depth=. \
@@ -110,12 +112,16 @@ build() {
     -Duse_kerberos=0 \
     -Duse_pulseaudio=0 \
     -Denable_webrtc=1 \
+    -Ddisable_remoting=1 \
+    -Ddisable_input_speech=1 \
     -Duse_system_libwebp=0 \
     -Duse_system_vpx=0 \
     -Duse_system_libpng=1 \
     -Duse_system_libjpeg=1 \
     -Ddisable_sse2=1 \
     -Duse_system_flac=0 \
+    -Dlinux_use_gold_binary=0 \
+    -Dlinux_use_gold_flags=0 \
     -Dtarget_arch=x64
 
   make chrome chrome_sandbox BUILDTYPE=Release V=1
@@ -156,15 +162,11 @@ package() {
 }
 
 source=(${source[@]-}
-        chromium-media-no-sse-r0.patch
-        chromium-revert-jpeg-swizzle-r2.patch
         chromium.sh
-        issue9360031_6002_7003.diff
-        nacl.gypi)
+        nacl.gypi
+        sqlite-3.7.6.3-fix-out-of-scope-memory-reference.patch)
 
 sha256sums=(${sha256sums[@]-}
-            '71751bf5913da1eec3c88c433044224c869b0abd5a29172cf239bddbb4eff761'
-            'd99162aa6bae562f116a42347254bbec3752464f0a3e4d8675e2b287b2a838a2'
             '10edbd6d0d961f12fde37aec9b2e1508c44309080409f0a0708d493ef941e25e'
-            '5e7e3fbd7efbf4b88c9684c9cda53c2f981d770d401f01deaddddbe5aaa0018c'
-            '25bddd2eee7821e18ddda06f6e69552c359e1c04a10971ac3985556c3d8ef059')
+            '25bddd2eee7821e18ddda06f6e69552c359e1c04a10971ac3985556c3d8ef059'
+            'a700aa054800d1b21d84eaba27c38a703dfa023e9226d11a942690c2a0630aff')
