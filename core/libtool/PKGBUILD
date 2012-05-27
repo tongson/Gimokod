@@ -1,9 +1,9 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=('libtool' 'libltdl')
 pkgver=2.4.2
-pkgrel=1
+pkgrel=2
 pkgdesc="A generic library support script"
-arch=('i686' 'x86_64')
+arch=('x86_64')
 url="http://www.gnu.org/software/libtool"
 license=('GPL')
 options=('!libtool')
@@ -21,7 +21,7 @@ build() {
 }
 
 package_libtool() {
-  depends=("libltdl=${pkgver}" 'gcc=4.6.2')
+  depends=("libltdl=${pkgver}" 'gcc=4.6.3')
   groups=('base-devel')
 
   cd "${srcdir}"/${pkgbase}-${pkgver}
