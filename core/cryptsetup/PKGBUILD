@@ -1,8 +1,8 @@
 pkgname=cryptsetup
-pkgver=1.4.1
+pkgver=1.4.2
 pkgrel=1
 pkgdesc='Userspace setup tool for transparent encryption of block devices'
-arch=(i686 x86_64)
+arch=('x86_64')
 url='http://code.google.com/p/cryptsetup/'
 license=('GPL')
 groups=('base')
@@ -32,6 +32,6 @@ package() {
 
 source=(http://cryptsetup.googlecode.com/files/${pkgname}-${pkgver}.tar.bz2
         http://cryptsetup.googlecode.com/files/${pkgname}-${pkgver}.tar.bz2.asc)
+sha256sums=('1fe80d7b19d24b3f65d2e446decfed859e2c4d17fdf7c19289d82dc7cd60dfe7'
+            '4e6dbece8d1baad861479aca70d0cf30887420da9b5eab45d65d064c656893ed')
 
-sha256sums=('82b143328c2b427ef2b89fb76c701d311c95b54093c21bbf22342f7b393bddcb'
-            '71c6506d4b6d0b22b9b6c2a68e604959e4c072af04680ed6acc0126c97bdbc88')
