@@ -147,7 +147,7 @@ do
             printf("    rm -rf %s/* \n", builddir)
             printf("    cd %s \n", pkg)
             printf("    echo Started: $(date -uR)\n")
-            printf("    makepkg --noconfirm -mci || $(echo Build failed: %s >> /tmp/log && exit 1)\n", pkg)
+            printf("    makepkg --noconfirm -Lmi || $(echo Build failed: %s >> /tmp/log && exit 1)\n", pkg)
             printf("    echo Stopped: $(date -uR)\n")
             for _,oldpkg in pairs(getpkgdata(pkg, "pkgname")) do
                 printf("    find %s -type f -regex '.*\\/%s-[0-9a-z\\_\\.]*-[0-9]*-[0-9a-z\\_]*.pkg.tar.xz[\\.sig]*' -exec mv {} %s../backup \\;\n", binrepo, oldpkg, binrepo)
@@ -163,7 +163,7 @@ do
             printf("    rm -rf %s/* \n", builddir)
             printf("    cd %s \n", pkg)
             printf("    echo Started: $(date -uR)\n")
-            printf("    makepkg --noconfirm -mci || $(echo Build failed: %s >> /tmp/log && exit 1)\n", pkg)
+            printf("    makepkg --noconfirm -Lmi || $(echo Build failed: %s >> /tmp/log && exit 1)\n", pkg)
             printf("    echo Stopped: $(date -uR)\n")
             for _,newpkg in pairs(getpkgdata(pkg, "fullname")) do
                 printf("    pushd %s\n", outputdir)
