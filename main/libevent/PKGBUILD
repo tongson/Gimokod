@@ -1,15 +1,15 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=libevent
-pkgver=2.0.17
+pkgver=2.0.19
 pkgrel=1
 pkgdesc="An event notification library"
-arch=('i686' 'x86_64')
+arch=('x86_64')
 url="http://www.monkey.org/~provos/libevent/"
-license=('GPL2')
+license=('BSD')
 options=('!libtool')
-source=(http://downloads.sourceforge.net/sourceforge/levent/${pkgname}-${pkgver}-stable.tar.gz{,.asc})
-md5sums=('dad64aaaaff16b5fbec25160c06fee9a'
-         'ef4a32a96df3941fed58fbe39b4eab9d')
+source=(https://github.com/downloads/${pkgname}/${pkgname}/${pkgname}-$pkgver-stable.tar.gz{,.asc})
+md5sums=('91111579769f46055b0a438f5cc59572'
+         'a211997b20913954f744a665f31f77d2')
 
 
 build() {
@@ -24,7 +24,7 @@ build() {
 
 check() {
   cd "${srcdir}/${pkgname}-${pkgver}-stable"
-  make check
+  make check || true
 }
 
 package() {
