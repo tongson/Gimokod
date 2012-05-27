@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=autoconf21
 pkgver=2.13
-pkgrel=1
+pkgrel=2
 pkgdesc="A GNU tool for automatically configuring source code (Legacy 2.1x version)"
 arch=(any)
 url="http://www.gnu.org/software/autoconf/"
