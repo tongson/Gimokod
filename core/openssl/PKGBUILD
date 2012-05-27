@@ -1,7 +1,7 @@
 # Significant parts from Gentoo's "openssl-1.0.0e.ebuild"
 pkgname=openssl
-_ver=1.0.0i
-pkgver=1.0.0.i
+_ver=1.0.0j
+pkgver=1.0.0.j
 pkgrel=1
 pkgdesc='The Open Source toolkit for Secure Sockets Layer and Transport Layer Security'
 arch=('x86_64')
@@ -16,11 +16,7 @@ makedepends=('perl' 'zlib' 'gmp' 'bc')
 build() {
   cd "${srcdir}/${pkgname}-$_ver"
 
-  if [ "${CARCH}" == 'x86_64' ]; then
-    openssltarget='linux-x86_64'
-  elif [ "${CARCH}" == 'i686' ]; then
-    openssltarget='linux-elf'
-  fi
+  openssltarget='linux-x86_64'
 
   rm -f Makefile
   sed -i -e '/DIRS/s: fips : :g' \
@@ -86,6 +82,6 @@ source=(https://www.openssl.org/source/${pkgname}-${_ver}.tar.gz
         openssl-1.0.0h-pkg-config.patch
         c_rehash)
 
-sha256sums=('548262d15777c504be1ab9bb8fabef1e14a3de54837a6593c8f403dd843d5e57'
+sha256sums=('626fb8fcb3eb7e966edbe71553ff993d137f6e8a87b05051a3695e621098b8af'
             '542dea12747b1cb667707250e3eb3803cbdd396bd0d8e836e48a8018417dc1b8'
             '4999ee79892f52bd6a4a7baba9fac62262454d573bbffd72685d3aae9e48cee0')
