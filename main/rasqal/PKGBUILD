@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=rasqal
-pkgver=0.9.28
-pkgrel=2
+pkgver=0.9.29
+pkgrel=1
 pkgdesc="library that handles RDF query syntaxes/construction/execution"
 url="http://librdf.org/rasqal"
 license=('GPL' 'LGPL')
@@ -9,7 +9,7 @@ arch=('x86_64')
 depends=('raptor' 'mpfr')
 options=('!libtool')
 source=(http://download.librdf.org/source/${pkgname}-${pkgver}.tar.gz)
-md5sums=('a3662b8d9efef9d8ef0a3c182450fba2')
+md5sums=('49e4b75a0c67465edf55dd20606715fa')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
@@ -27,7 +27,7 @@ build() {
 
 check() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  make -k check || true 
+  make -k check || true
 }
 
 package() {
