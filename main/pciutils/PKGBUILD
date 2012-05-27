@@ -1,19 +1,18 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=pciutils
-pkgver=3.1.8
-pkgrel=1
+pkgver=3.1.9
+pkgrel=2
 pkgdesc="PCI bus configuration space access library and tools"
-arch=(i686 x86_64)
+arch=('x86_64')
 license=('GPL2')
-url="http://mj.ucw.cz/pciutils.html"
+url="http://mj.ucw.cz/sw/pciutils/"
+depends=('hwids')
 source=(ftp://atrey.karlin.mff.cuni.cz/pub/linux/pci/${pkgname}-${pkgver}.tar.gz)
-md5sums=('79312f138311d29291c7d44d624cd37e')
+md5sums=('e958f5ffb93b12972964381c38f27eb3')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
 
-  sed -i 's:wget --no-timestamping:wget:' ./update-pciids.sh
-  ./update-pciids.sh
   make OPT="${CFLAGS} -fPIC -DPIC" \
        ZLIB=no \
        SHARED=no \
@@ -41,5 +40,6 @@ package() {
   install -m644 "${srcdir}/libpci.a" "${pkgdir}/usr/lib/"
   install -d -m755 "${pkgdir}/usr/bin"
   mv "${pkgdir}"/usr/sbin/* "${pkgdir}"/usr/bin
+  rm -rf $pkgdir/usr/{bin/update-pciids,share/{man/man8/update-pciids.8.gz,hwdata}}
   rmdir "${pkgdir}"/usr/sbin
 }
