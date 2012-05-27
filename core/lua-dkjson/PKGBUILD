@@ -1,0 +1,19 @@
+pkgname=lua-dkjson
+pkgver=2.2
+luaver=5.2
+pkgrel=2
+pkgdesc="JSON module for Lua"
+arch=('any')
+url="http://chiselapp.com/user/dhkolf/repository/dkjson/home"
+license=('MIT')
+depends=('lua')
+groups=('base')
+source=("dkjson.lua::http://chiselapp.com/user/dhkolf/repository/dkjson/raw/dkjson.lua?name=2e0832b4027614d5d5c708a971d4f1c6ec04affb"
+        LICENSE)
+sha256sums=('31b1340395d24d9a494f136b9b38c7efb124f3e28f6557397a560143eefc7ff0'
+            'ea2faf9f5e22ed13e86b0e1777ef5c6a7805814f414e468c88219ff0fec5d40c')
+
+package() {
+  install -Dm0644 dkjson.lua "${pkgdir}/usr/lib/lua/${luaver}/dkjson.lua"
+  install -Dm0644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
