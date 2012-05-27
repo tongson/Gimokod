@@ -1,12 +1,12 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=usbutils
 pkgver=005
-pkgrel=1
+pkgrel=2
 pkgdesc="USB Device Utilities"
 arch=('x86_64')
 license=('GPL')
 groups=('base-devel')
-depends=('libusb')
+depends=('libusb' 'hwids')
 url="http://linux-usb.sourceforge.net/"
 source=("ftp://ftp.archlinux.org/other/${pkgname}/${pkgname}-${pkgver}.tar.bz2")
 md5sums=('6a21f7b6c02b76df5e8a7c208d746654')
@@ -25,4 +25,5 @@ build() {
 package() {
   cd "${srcdir}"/"${pkgname}"-"${pkgver}"
   make DESTDIR="${pkgdir}" install
+  rm -rf $pkgdir/usr/{share/hwdata,bin}
 }
