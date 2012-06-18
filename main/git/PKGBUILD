@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch and ebuild from Gentoo Linux
 pkgname=git
-pkgver=1.7.10.2
+pkgver=1.7.10.4
 pkgrel=1
 pkgdesc="the fast distributed version control system"
 arch=('x86_64')
@@ -86,6 +86,6 @@ package() {
         "${pkgdir}"/usr/share/man/man1/git-svn.1*
 }
 
-sha1sums=('e4b7f746ff4e356baaddcad0b2911376efde031b'
-          '6cc3f80185bdd1a608cf373b05313b2adc82b898'
+sha1sums=('ddc305ab520246790faa72bbaab4b9bf5bcf23fa'
+          '0769f6ff48d89df908cfe2af85fb4072b4178746'
           '366d6b7aa9252c3f2b937c81c51f6f2e92673593')
