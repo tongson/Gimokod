@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=linux-headers
-pkgver=3.3.2
+pkgver=3.3.8
 _basever=3.3
 pkgrel=1
 pkgdesc="Kernel headers sanitized for use in userspace"
@@ -12,7 +12,7 @@ groups=('base-devel')
 source=(http://www.kernel.org/pub/linux/kernel/v3.x/linux-${_basever}.tar.xz
         http://www.kernel.org/pub/linux/kernel/v3.x/patch-${pkgver}.xz)
 md5sums=('7133f5a2086a7d7ef97abac610c094f5'
-         '68907107b0f62a19608588bdb6b29e20')
+         'e1714b5136a7f4dab1b5d2d7f98e2891')
 
 build() {
   cd "${srcdir}"/linux-${_basever}
