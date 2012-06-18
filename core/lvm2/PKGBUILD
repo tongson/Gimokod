@@ -1,7 +1,7 @@
 pkgbase=lvm2
 pkgname=('lvm2' 'device-mapper')
 pkgver=2.02.95
-pkgrel=2
+pkgrel=3
 arch=('x86_64')
 url="http://sourceware.org/lvm2/"
 license=('GPL2' 'LGPL2')
@@ -15,6 +15,9 @@ build() {
   Patch lvm2-2.02.92-locale-muck.patch
   Patch lvm2-2.02.92-dynamic-static-ldflags.patch
   Patch lvm2-2.02.95-lvmpath.patch
+  sed -i 's,udev_get_dev_path([^)]\+),"/dev",' \
+        tools/dmsetup.c \
+        lib/misc/lvm-wrappers.c
   cd udev
   sed -i -e 's:/usr/sbin:/usr/bin:g' -e 's:/sbin:/usr/bin:g' * >/dev/null 2>&1
   cd ..
