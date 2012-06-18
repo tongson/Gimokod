@@ -1,6 +1,6 @@
 pkgname=firefox-bin
-pkgver=12.0
-pkgrel=5
+pkgver=13.0.1
+pkgrel=1
 pkgdesc="Standalone web browser from Mozilla (official binary)"
 arch=('x86_64')
 license=('MPL' 'GPL' 'LGPL')
@@ -8,7 +8,7 @@ depends=('dbus-glib' 'alsa-lib' 'libxrender' 'libxt' 'libxmu' 'gtk2')
 options=('!binchecks')
 url="http://www.mozilla.org/projects/firefox"
 source=("ftp://ftp.mozilla.org/pub/mozilla.org/firefox/releases/${pkgver}/linux-x86_64/firefox-${pkgver}.tar.bz2")
-sha256sums=('443e6c56256432f816da941cbd372d5037a7872cd8b427c026cb8fcb981710b9')
+sha256sums=('45bd1152b10faf9a3127385ba17092590cef3210681296e745c19d535f47e2cd')
 noextract=("firefox-${pkgver}.tar.bz2")
 
 package() {
