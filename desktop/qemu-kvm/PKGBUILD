@@ -1,26 +1,33 @@
-# Based upon the PKGBUILD from Arch Linux
+# Based upon the PKGBUILD from Arch Linux and the ebuild from Gentoo Linux
 pkgname=qemu-kvm
-pkgver=0.15.1
+pkgver=1.0.1
 pkgrel=1
 pkgdesc="a fast open source processor emulator"
-arch=('i686' 'x86_64')
-license=('GPL2' 'LGPL2.1')
+arch=('x86_64')
+license=('GPL2')
 url="http://www.linux-kvm.org"
-depends=('glib' 'libaio' 'alsa-lib' 'zlib' 'ncurses' 'sdl'
-         'libx11' 'util-linux' 'libxau' 'libxcb' 'libxdmcp')
-makedepends=('python' 'pciutils')
+depends=('glib' 'libaio' 'alsa-lib' 'zlib' 'ncurses' 'sdl' 'libjpeg-turbo' 'libpng'
+         'libx11' 'util-linux' 'libxau' 'libxcb' 'libxdmcp' 'pciutils' 'seabios')
+makedepends=('python' 'pkg-config')
 install=qemu-kvm.install
 source=(http://downloads.sourceforge.net/kvm/${pkgname}-${pkgver}.tar.gz)
+sha256sums=('57bcd26342af2303663028db9e9956a8b487babfcf2a432ac3351c88b8e2bf4f')
 options=('!strip' '!binchecks')
 
 build()
 {
     cd "${srcdir}/${pkgname}-${pkgver}"
+    sed -i '/$(DESTDIR)$(docdir)/d' Makefile
+    sed -i 's/^\(C\|OP_C\|HELPER_C\)FLAGS=/\1FLAGS+=/' Makefile Makefile.target
+    sed -i 's/$(LDFLAGS)/$(QEMU_CFLAGS) $(CFLAGS) $(LDFLAGS)/' rules.mak
+    sed -e 's~NAME="%k", ~~' -i kvm/scripts/65-kvm.rules
+    sed -e 's/CFLAGS="-g $CFLAGS"/CFLAGS="$CFLAGS"/g' -i configure
     ./configure --prefix=/usr \
               --sysconfdir=/etc \
               --cc=/usr/bin/gcc \
               --host-cc=/usr/bin/gcc \
               --python=/usr/bin/python \
+              --smbd=/usr/bin/smbd \
               --sysconfdir=/etc \
               --audio-drv-list=alsa \
               --audio-card-list=es1370 \
@@ -29,38 +36,42 @@ build()
               --disable-brlapi \
               --disable-curl \
               --disable-fdt \
-              --disable-user-pie \
-              --disable-vnc-jpeg \
               --enable-curses \
               --disable-smartcard-nss \
-              --disable-vnc-png \
               --disable-rbd \
               --disable-vnc-sasl \
               --enable-sdl \
               --disable-spice \
               --disable-vnc-tls \
-              --disable-vnc-thread \
+              --enable-vnc-thread \
               --disable-vde \
               --disable-xen \
               --disable-attr \
               --disable-darwin-user \
               --disable-bsd-user \
+              --disable-libiscsi \
               --disable-vhost-net \
               --disable-strip \
               --disable-werror \
               --enable-kvm \
+              --enable-kvm-device-assignment \
+              --enable-kvm-pit \
+              --enable-pie \
+              --enable-tcg-interpreter \
+              --enable-vnc-jpeg \
+              --enable-vnc-png \
               --enable-nptl \
               --enable-uuid \
+              --disable-check-utests \
               --extra-ldflags="-Wl,-z,execheap" \
               --disable-docs
     make
 }
+
 package()
 {
     cd "${srcdir}/${pkgname}-${pkgver}"
     make DESTDIR="${pkgdir}" install
-    # symbolic link for backwards compatibility
-    ln -s qemu-system-x86_64 "${pkgdir}"/usr/bin/qemu-kvm
     # strip scripts directory
     find "${pkgdir}"/usr/bin  -type f -perm -u+w 2>/dev/null | while read binary ; do
       case "$(file -bi "$binary")" in
@@ -68,5 +79,27 @@ package()
         /usr/bin/strip $STRIP_BINARIES "$binary";;
       esac
     done
+    rm "${pkgdir}"/usr/share/qemu/bios.bin
+    ln -s ../seabios/bios.bin "${pkgdir}"/usr/share/qemu/bios.bin
+
+    rm "${pkgdir}"/usr/share/qemu/vgabios*
+    pushd "${srcdir}"
+    for x in vgabios*; do
+      install -D -m0644 $x "${pkgdir}"/usr/share/qemu/$x
+    done
+    popd
 }
-md5sums=('8800a7d6b3aa4a168ea7f78dc66c0320')
+
+source=(${source[@]-}
+        vgabios-cirrus.bin
+        vgabios-qxl.bin
+        vgabios-stdvga.bin
+        vgabios-vmware.bin
+        vgabios.bin)
+
+sha256sums=(${sha256sums[@]-}
+            '173890dd20c94883fd5205b6976b32e15b19e7aae5dbafc8968b95bdb9953a6f'
+            '908cfc297e2ca928ba4d542aacfdbbfe1a35b7cad9219abc3ed3568dec525ed9'
+            '49d86a3ccb385038ee23d037dc3613ff8f93d2cd5ef9c911dfae62660bcad3ac'
+            'ef9e92b21e6be8bc0f99fe3a3d873cd3a125d3773617d9feb92062faa9a4cc99'
+            '47a90015165ee27f7a65bd42680f9cfdf5619596711d4da62c4d6d27a030e68e')
