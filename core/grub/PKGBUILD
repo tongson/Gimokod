@@ -1,6 +1,6 @@
 pkgname=grub
 pkgver=1.99
-pkgrel=1
+pkgrel=2
 url="http://www.gnu.org/software/grub/"
 arch=('i686' 'x86_64')
 license=('GPL3')
