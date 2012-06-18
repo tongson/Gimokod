@@ -1,29 +1,31 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgbase=mesa
-pkgname=('mesa' 'libgl' 'libglapi' 'libgles' 'libegl' 'ati-dri' 'intel-dri' 'nouveau-dri'
+pkgname=('mesa' 'libgl' 'libglapi' 'libgles' 'libegl' 'ati-dri' 'intel-dri'
          'khrplatform-devel' 'osmesa' 'svga-dri')
-pkgver=8.0.2
-pkgrel=1
+pkgver=8.0.3
+pkgrel=2
 arch=('x86_64')
 makedepends=('glproto' 'libdrm' 'libxxf86vm' 'libxdamage' 'expat' 'libx11' 'libxt'
              'gcc-libs' 'dri2proto' 'python' 'libxml2' 'imake' 'llvm' 'udev')
 url="http://mesa3d.sourceforge.net"
 license=('custom')
 source=(LICENSE
+        mesa-8.0.3-llvm-3.1-fixes.patch
         "ftp://ftp.freedesktop.org/pub/mesa/${pkgver}/MesaLib-${pkgver}.tar.bz2")
 md5sums=('5c65a0fe315dd347e09b1f2826a1df5a'
-         'a368104e5700707048dc3e8691a9a7a1')
+         'c452ed3392468170726c004c2f4e02ca'
+         'cc5ee15e306b8c15da6a478923797171')
 
 build() {
     cd "${srcdir}"/?esa-*
-
+    patch -Np1 -i "${srcdir}/mesa-8.0.3-llvm-3.1-fixes.patch"
     autoreconf -vfi
     ./configure --prefix=/usr --build=${CBUILD} --host=${CHOST} \
     --with-dri-driverdir=/usr/lib/xorg/modules/dri \
-    --with-gallium-drivers=r300,r600,nouveau,svga,swrast \
+    --with-gallium-drivers=r300,r600,svga,swrast \
     --disable-gallium-gbm \
     --disable-gbm \
-    --with-dri-drivers=nouveau,i915,i965,r200,radeon \
+    --with-dri-drivers=i915,i965,r200,radeon,swrast \
     --enable-gallium-llvm \
     --enable-gallium-egl \
     --enable-glx-tls \
@@ -163,16 +165,6 @@ package_intel-dri() {
 
   make -C "${srcdir}"/?esa-*/src/mesa/drivers/dri/i915 DESTDIR="${pkgdir}" install
   make -C "${srcdir}"/?esa-*/src/mesa/drivers/dri/i965 DESTDIR="${pkgdir}" install
-}
-
-package_nouveau-dri() {
-  depends=("libgl=${pkgver}")
-  pkgdesc="Mesa classic DRI + Gallium3D drivers for Nouveau"
-
-  # classic mesa driver for nv10 , nv20 nouveau_vieux_dri.so
-  make -C "${srcdir}"/?esa-*/src/mesa/drivers/dri/nouveau DESTDIR="${pkgdir}" install
-  # gallium3D driver for nv30 - nv40 - nv50 nouveau_dri.so
-  make -C "${srcdir}"/?esa-*/src/gallium/targets/dri-nouveau DESTDIR="${pkgdir}" install
 }
 
 package_svga-dri() {
