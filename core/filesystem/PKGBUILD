@@ -1,6 +1,6 @@
 pkgname=filesystem
 pkgver=2012.04
-pkgrel=5
+pkgrel=6
 pkgdesc='Filesystem hier'
 arch=('any')
 url='http://gimokod.org'
@@ -80,7 +80,9 @@ package() {
     ln -s /run/.root/var/log "${pkgdir}"/var/log
     ln -s /run/.root/var/spool/mail "${pkgdir}"/var/spool/mail
     ln -s /run/.root/var/spool/mail "${pkgdir}"/var/mail
+    ln -s /run "${pkgdir}"/var/run
     ln -s /run/.root/etc/resolv.conf "${pkgdir}"/etc/resolv.conf
+
 
     install -D -m0644 layout.conf "${pkgdir}"/etc/tmpfiles.d/layout.conf
     install -D -m0644 net "${pkgdir}"/etc/conf.d/net

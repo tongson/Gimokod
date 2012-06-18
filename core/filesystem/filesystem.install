@@ -1,11 +1,12 @@
 post_install() {
-for d in dev etc home usr var opt sys run media srv; do
+for d in dev etc home usr var opt run media srv; do
   install -d -m0755 ${d}
 done
 
 install -d -m0555 proc
 install -d -m0750 root
 install -d -m0700 boot
+install -d -m0555 sys
 
 cd /etc
 /usr/bin/fsl init .fossil
