@@ -1,15 +1,15 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=db
-pkgver=5.3.15
+pkgver=5.3.21
 pkgrel=1
 pkgdesc="The Berkeley DB embedded database system"
-arch=('i686' 'x86_64')
+arch=('x86_64')
 url='http://www.oracle.com/technology/software/products/berkeley-db/index.html'
 license=('custom')
 groups=('base-devel')
 options=('!libtool')
 source=(http://download.oracle.com/berkeley-db/db-${pkgver}.tar.gz)
-sha1sums=('7683b632a01ff3543c379a120809a942ec457738')
+sha1sums=('32e43c4898c8996750c958a90c174bd116fcba83')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}/build_unix"
