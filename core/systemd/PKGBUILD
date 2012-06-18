@@ -1,36 +1,34 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=systemd
-pkgver=44
-pkgrel=3
-pkgdesc="Session and Startup manager"
+pkgver=185
+pkgrel=1
 arch=('x86_64')
 url="http://www.freedesktop.org/wiki/Software/systemd"
 license=('GPL2' 'LGPL2.1' 'MIT')
-makedepends=('gperf' 'intltool' 'gettext' 'linux-headers' 'dbus-core' 'kbd' 'libcap'
-             'cryptsetup' 'udev' 'kmod' 'xz')
-groups=('base')
-replaces=('libsystemd')
-options=('!libtool' '!strip')
-source=("http://www.freedesktop.org/software/$pkgname/$pkgname-$pkgver.tar.xz"
-         0001-util-never-follow-symlinks-in-rm_rf_children.patch
-         0001-logind-close-FIFO-before-ending-sessions-cleanly.patch
-         0001-check-for-proper-return-from-dirent_ensure_type.patch)
-md5sums=('11f44ff74c87850064e4351518bcff17'
-         'b5863d6d4b47e2b5bda8eb57bde0d327'
-         'd37833358ef6c23fad622ea4a0941d1f'
-         '11f930fd0a3966abc794bf9127a7dde0')
+makedepends=('acl' 'cryptsetup' 'dbus-core' 'gperf'
+             'intltool' 'kmod' 'libcap' 'libxslt' 'linux-headers' 'pam' 'xz')
+options=('!libtool')
+provides=('udev')
+replaces=('udev')
+conflicts=('udev')
+source=(http://www.freedesktop.org/software/$pkgname/$pkgname-"${pkgver}".tar.xz)
+md5sums=('a7dbbf05986eb0d2c164ec8e570eb78f')
+depends=('acl' 'dbus-core' 'kmod' 'libcap' 'pam'
+         'util-linux' 'xz' 'glib' 'hwids' 'kbd')
 
 build() {
-  cd "${srcdir}/${pkgname}-${pkgver}"
-
+  cd "${pkgname}-${pkgver}"
   pushd src
-  for f in $(grep -lF '/sbin/' *);do
-    sed -i 's:\/sbin\/:\/usr\/bin\/:g' $f
-  done
+    for f in $(grep -lF '/sbin/' *);do
+      sed -i 's:\/sbin\/:\/usr\/bin\/:g' $f
+    done
   popd
-  Patch 0001-util-never-follow-symlinks-in-rm_rf_children.patch
-  Patch 0001-logind-close-FIFO-before-ending-sessions-cleanly.patch
-  Patch 0001-check-for-proper-return-from-dirent_ensure_type.patch
+  pushd rules
+    sed -i 's:/sbin:/usr/bin:g' * >/dev/null 2>&1
+    sed -i '5s:modprobe -bv:echo:' 80-drivers.rules
+    grep -v floppy 50-udev-default.rules > 50-udev-default.rules.tmp
+    mv 50-udev-default.rules.tmp 50-udev-default.rules
+  popd
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
@@ -39,6 +37,7 @@ build() {
               --with-pamlibdir=/usr/lib/security \
               --libexecdir=/usr/lib \
               --libdir=/usr/lib \
+              --sbindir=/usr/bin \
               --localstatedir=/var \
               --with-rootlibdir=/usr/lib \
               --disable-audit \
@@ -58,27 +57,54 @@ build() {
               --disable-localed \
               --disable-quotacheck \
               --disable-manpages \
-              --disable-nls
+              --disable-nls \
+              --enable-gtk-doc-html=no \
+              --disable-rule-generator \
+              --disable-udev_acl \
+              --enable-logging \
+              --disable-gudev \
+              --disable-introspection \
+              --disable-keymap \
+              --disable-floppy \
+              --disable-edd \
+              --with-usb-ids-path=/usr/share/hwdata/usb.ids \
+              --with-pci-ids-path=/usr/share/hwdata/pci.ids \
+              --with-firmware-path=/usr/lib/firmware/updates:/lib/firmware/updates:/usr/lib/firmware:/lib/firmware
 
   make
 }
 
-
 package() {
-  pkgdesc="system and service manager"
-  depends=('dbus-core' 'kbd' 'libcap' 'cryptsetup' 'udev' 'kmod' 'xz')
-  install=systemd.install
-  cd "${srcdir}/${pkgname}-${pkgver}"
-  make DESTDIR="${pkgdir}" install
-  install -dm755 "${pkgdir}/var/lib/systemd"
-  printf "d /run/console 755 root root\n" > "${pkgdir}/usr/lib/tmpfiles.d/console.conf"
-  chmod 644 "$pkgdir/usr/lib/tmpfiles.d/console.conf"
+  make -C "${pkgname}-${pkgver}" DESTDIR="${pkgdir}" install
+
+  printf "d /run/console 0755 root root\n" > "${pkgdir}/usr/lib/tmpfiles.d/console.conf"
+
+  # move bash-completion and symlink for loginctl
+  install -Dm644 "${pkgdir}/etc/bash_completion.d/systemd-bash-completion.sh" \
+    "${pkgdir}/usr/share/bash-completion/completions/systemctl"
+  ln -s systemctl "${pkgdir}/usr/share/bash-completion/completions/loginctl"
+  rm -rf "${pkgdir}/etc/bash_completion.d"
+
+  # don't write units to /etc by default -- we'll enable this on post_install
+  # as a sane default
+  rm "${pkgdir}/etc/systemd/system/getty.target.wants/getty@tty1.service"
+  rmdir "${pkgdir}/etc/systemd/system/getty.target.wants"
+
   pushd "${pkgdir}/usr/lib/systemd/system"
     sed -i 's:/sbin:/usr/bin:g' *.service >/dev/null 2>&1
   popd
 
-  # --disable-manpages
-  # rm -rf "${pkgdir}/usr/share/man"
-}
+  # udevd is no longer udevd because systemd. why isn't udevadm now udevctl?
+  ln -s ../lib/systemd/systemd-udevd "${pkgdir}/usr/bin/udevd"
+  ln -s ../systemd/systemd-udevd  "${pkgdir}/usr/lib/udev/udevd"
 
+  # Replace dialout/tape/cdrom group in rules with uucp/storage/optical group
+  sed -i 's#GROUP="dialout"#GROUP="uucp"#g;
+          s#GROUP="tape"#GROUP="storage"#g;
+          s#GROUP="cdrom"#GROUP="optical"#g' "${pkgdir}"/usr/lib/udev/rules.d/*.rules
+
+  # XXX: kill off coredump rule until the journal can recover coredumps
+  # this file needs to come back as part of systemd, not systemd-tools
+  rm "${pkgdir}/usr/lib/sysctl.d/coredump.conf"
+}
 
