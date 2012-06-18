@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=openbox
 pkgver=3.5.0
-pkgrel=4
+pkgrel=5
 pkgdesc="A window manager for the X11 windowing system"
 arch=('x86_64')
 url="http://openbox.org"
