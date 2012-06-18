@@ -1,7 +1,0 @@
-post_install() {
-  . /usr/share/pacman/scm_install
-}
-
-post_upgrade() {
-  . /usr/share/pacman/scm_upgrade
-}
