@@ -1,18 +1,18 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=vim
 _topver=7.3
-_patchlevel=515
-__hgrev=8201108e9cf0
+_patchlevel=547
+__hgrev=6f2497d0c277
 _versiondir="vim${_topver//./}"
-pkgver=7.3.515
-pkgrel=2
+pkgver=7.3.547
+pkgrel=1
 arch=('x86_64')
 license=('custom:vim')
 url="http://www.vim.org"
 source=(ftp://ftp.archlinux.org/other/vim/${pkgname}-${pkgver}.tar.xz)
 depends=('ncurses')
 install=vim.install
-sha1sums=('10d7642d5062effdb51f53952622f9338003bbbf')
+sha1sums=('2c4f78a66b6ad7a759122d1f66c74079b678f39c')
 
 build() {
   cd "${srcdir}"
