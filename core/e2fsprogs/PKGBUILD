@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=e2fsprogs
-pkgver=1.42.2
-pkgrel=2
+pkgver=1.42.3
+pkgrel=1
 pkgdesc="Ext2/3/4 filesystem utilities"
 arch=('x86_64')
 license=('GPL' 'LGPL' 'MIT')
@@ -12,7 +12,7 @@ source=("http://downloads.sourceforge.net/sourceforge/${pkgname}/${pkgname}-${pk
         'e2fsprogs-1.42-no-docs-test-translations.patch'
         'MIT-LICENSE')
 install=e2fsprogs.install
-sha1sums=('bfba3716b78310cf2a288909f13214a718d91e25'
+sha1sums=('0da8c787604876fe23b0f608389c3854ae1a2420'
           '2091efd26400b444bc771652574eff37fdf6029d'
           'f4a0d5b0cdb980e3fedd6f5e7dde0b0ffb7bbdfb')
 
