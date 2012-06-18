@@ -3,20 +3,21 @@ pkgname=libvpx
 pkgver=1.0.0
 pkgrel=1
 pkgdesc="The VP8 Codec SDK"
-arch=('i686' 'x86_64')
+arch=('x86_64')
 url="http://www.webmproject.org/"
 license=('BSD')
 options=('!makeflags')
 makedepends=('yasm')
-source=(http://webm.googlecode.com/files/$pkgname-v$pkgver.tar.bz2)
-sha1sums=('2919e11074fef72fc61ef1a75160050ffaad6074')
+source=(http://webm.googlecode.com/files/$pkgname-v$pkgver.tar.bz2
+        libvpx-define-config_pic.patch)
+sha1sums=('356af5f770c50cd021c60863203d8f30164f6021'
+          '19abfcfbe23a10a19a3846d87c156861819f266e')
 
 build() {
   cd "$srcdir/$pkgname-v$pkgver"
-  CC=/usr/bin/gcc
+  Patch libvpx-define-config_pic.patch
   ./configure --prefix=/usr \
               --libdir=/usr/lib \
-              --as=yasm \
               --enable-vp8 \
               --enable-runtime-cpu-detect \
               --enable-shared \
@@ -26,8 +27,6 @@ build() {
               --disable-install-srcs \
               --enable-multithread \
               --disable-debug \
-              $([[ $CARCH = i686 ]] && echo "--target=x86-linux-gcc") \
-              $([[ $CARCH = x86_64 ]] && echo "--target=x86_64-linux-gcc") \
               --disable-debug-libs
   make
 }
