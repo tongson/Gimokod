@@ -1,16 +1,16 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=fakeroot
-pkgver=1.18.3
+pkgver=1.18.4
 pkgrel=1
 pkgdesc="Gives a fake root environment, useful for building packages as a non-privileged user"
-arch=('i686' 'x86_64')
+arch=('x86_64')
 license=('GPL')
 url="http://packages.debian.org/fakeroot"
 groups=('base-devel')
 install=fakeroot.install
 options=('!libtool')
 source=(http://ftp.debian.org/debian/pool/main/f/${pkgname}/${pkgname}_${pkgver}.orig.tar.bz2)
-md5sums=('99c6ba2eb0005086144ee9f1f6fd63f4')
+md5sums=('706171d8d520b1ca1576ac73f2ceb4f3')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
