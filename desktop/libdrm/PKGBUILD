@@ -1,18 +1,18 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=libdrm
-pkgver=2.4.33
+pkgver=2.4.35
 pkgrel=1
 pkgdesc="Userspace interface to kernel DRM services"
-arch=('i686' 'x86_64')
+arch=('x86_64')
 license=('custom')
 depends=('libpciaccess')
 options=('!libtool')
 url="http://dri.freedesktop.org/"
-source=(http://dri.freedesktop.org/${pkgname}/${pkgname}-${pkgver}.tar.bz2
+source=(http://dri.freedesktop.org/$pkgname/$pkgname-$pkgver.tar.bz2
         no-pthread-stubs.patch
         COPYING)
-sha1sums=('4da2c635491724e44326871e6a49ccfec0b6b5a6'
-          '825ff5e0c4238b31bdea52f104bfec8949270e25'
+sha1sums=('a1d8d4945f782371d7855dbd693db885bd7e3d83'
+          '2a5410baa3e6e078f9378ce486a88f41d22fd838'
           'ba3dcd636997ee0d30df14b03dae05c24ae5d094')
 
 build() {
@@ -29,6 +29,7 @@ build() {
               --enable-intel \
               --enable-radeon \
               --enable-libkms \
+              --enable-vmwgfx-experimental-api \
               --enable-nouveau-experimental-api
   make
 }
