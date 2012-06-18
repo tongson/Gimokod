@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=libx11
-pkgver=1.4.99.901
+pkgver=1.5.0
 pkgrel=1
 pkgdesc="X11 client-side library"
 arch=('x86_64')
@@ -11,8 +11,8 @@ options=('!libtool')
 license=('custom')
 source=(${url}/releases/individual/lib/libX11-${pkgver}.tar.bz2
         xorg.sh)
-sha1sums=('af10b064c1c64ee9e7daae0a7f1f9719eb7e965a'
-          '4b756387426afb2a5bb7a155631ec42348abf5c1')
+sha256sums=('c382efd7e92bfc3cef39a4b7f1ecf2744ba4414a705e3bc1e697f75502bd4d86'
+            '1a1b5db0320579958fba24774bae7984a1b1b8c647ac6fbd4d8937178c48ed46')
 
 build() {
   cd "${srcdir}/libX11-${pkgver}"
