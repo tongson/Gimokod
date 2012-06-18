@@ -1,6 +1,6 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=curl
-pkgver=7.25.0
+pkgver=7.26.0
 pkgrel=1
 pkgdesc="An URL retrival utility and library"
 arch=('x86_64')
@@ -10,8 +10,8 @@ depends=('zlib' 'openssl' 'ca-certificates')
 options=('!libtool')
 source=("http://curl.haxx.se/download/"${pkgname}"-"${pkgver}".tar.gz"{,.asc}
         curlbuild.h)
-md5sums=('a56cbe2778b09769f8a5ba17d8f4d92a'
-         '0e0fd2da19bde6f7be687667e2fac02f'
+md5sums=('3fa4d5236f2a36ca5c3af6715e837691'
+         '61b594830d5acba3c99e4af0ba39a14e'
          '751bd433ede935c8fae727377625a8ae')
 
 
