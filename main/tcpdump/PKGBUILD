@@ -1,9 +1,9 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=tcpdump
-pkgver=4.2.1
+pkgver=4.3.0
 pkgrel=1
 pkgdesc="A tool for network monitoring and data acquisition"
-arch=('i686' 'x86_64')
+arch=('x86_64')
 url="http://www.tcpdump.org"
 license=('BSD')
 depends=('libpcap' 'openssl')
@@ -11,8 +11,9 @@ options=('emptydirs')
 install=tcpdump.install
 source=("http://www.tcpdump.org/release/${pkgname}-${pkgver}.tar.gz"
         'tcpdump_duplicate_executable.patch')
-md5sums=('c202878c6db054767b52651041b9e60e'
-         'b45c978dff8193ff5529d3566e7dbfa3')
+md5sums=('a3fe4d30ac85ff5467c889ff46b7e1e8'
+         '96c116e5ed51759a029bb6c236d63178')
+
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
