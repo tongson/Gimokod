@@ -1,0 +1,21 @@
+pkgname=seabios
+pkgver=1.6.3
+pkgrel=1
+pkgdesc="Open Source implementation of a 16-bit x86 BIOS"
+arch=('x86_64')
+url="http://www.seabios.org"
+license=('LGPL3' 'GPL3')
+makedepends=('python')
+source=(http://www.linuxtogo.org/~kevin/SeaBIOS/${pkgname}-${pkgver}.tar.gz)
+sha256sums=('7bca2e6a0972f16dd238d1ead2f4d12d38dc56e1801237c1205f902d5ea4c799')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  sed -e "s/VERSION=.*/VERSION=${pkgver}/" -i Makefile
+  make out/bios.bin
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  install -Dm0644 out/bios.bin "${pkgdir}"/usr/share/seabios/bios.bin
+}
