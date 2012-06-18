@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=startup-notification
 pkgver=0.12
-pkgrel=2
+pkgrel=3
 pkgdesc="Monitor and display application startup"
 arch=(i686 x86_64)
 license=('LGPL')
