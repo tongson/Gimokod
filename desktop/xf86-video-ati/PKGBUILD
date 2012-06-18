@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=xf86-video-ati
-pkgver=6.14.4
-pkgrel=2
+pkgver=6.14.5
+pkgrel=1
 pkgdesc="X.org ati video driver"
 arch=('x86_64')
 url="http://xorg.freedesktop.org/"
@@ -9,26 +9,11 @@ license=('custom')
 depends=('libpciaccess' 'libdrm' 'udev' 'pixman' 'ati-dri')
 makedepends=('xorg-server-devel' 'libdrm' 'xf86driproto' 'mesa' 'glproto')
 options=('!libtool')
-source=(${url}/releases/individual/driver/${pkgname}-${pkgver}.tar.bz2
-        git_fixes.diff
-        0000-poor-man-s-solid-picture-support-for-r300-r600.patch
-        0001-poor-man-s-solid-picture-support-for-evergreen.patch
-        0002-poor-man-s-solid-picture-support-for-r100.patch
-        0003-poor-man-s-solid-picture-support-for-r200.patch)
-sha1sums=('75ad000bc00599e1797134f2d20d3094cba6af92'
-          '8b774e2f0310075cff2b7d874b0bed38d6245769'
-          '787f88c428f56ca6e96ba5eaf043a30bddfd0e23'
-          '69359a6623fe0f2214790c8ad40cac1a680a3825'
-          'c0709ab82728e34838a8aeead7d1b79b7faf09bd'
-          '77a519e250c27a9fb94eeb52da655eed7c5f2eca')
+source=(${url}/releases/individual/driver/${pkgname}-${pkgver}.tar.bz2)
+sha256sums=('ef879d2845de50cec1aa98e37185271e1d535c0009efd6713ec88206b7197d53')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  Patch git_fixes.diff
-  Patch 0000-poor-man-s-solid-picture-support-for-r300-r600.patch
-  Patch 0001-poor-man-s-solid-picture-support-for-evergreen.patch
-  Patch 0002-poor-man-s-solid-picture-support-for-r100.patch
-  Patch 0003-poor-man-s-solid-picture-support-for-r200.patch
   ./configure --prefix=/usr \
               --build=${CBUILD} \
               --host=${CHOST} \
