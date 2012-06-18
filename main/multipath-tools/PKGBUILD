@@ -1,7 +1,7 @@
 # Based upon the PKGBUILD from Arch Linux
 pkgname=multipath-tools
 pkgver=0.4.9
-pkgrel=2
+pkgrel=3
 pkgdesc="Multipath Tools For Linux"
 arch=('i686' 'x86_64')
 url="http://christophe.varoqui.free.fr/"
