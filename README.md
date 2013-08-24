@@ -5,8 +5,8 @@ twitter.com/GimokodBot
 ## DESCRIPTION
 
 A modern distribution geared towards containers. The only requirement for a host is 
-a Linux namespace container. OpenSUSE 12.3 systemd-nspawn (systemd 195) and Gentoo LXC
-currently tested.
+a Linux namespace container. OpenSUSE 12.3 systemd-nspawn (systemd 195) and 
+Gentoo (systemd 206) currently tested.
 
 Packages are available as binaries built using Paludis (pbins). A "SDK" tarball will be 
 released and users will be locally compiling packages for generation of their own 
@@ -14,10 +14,10 @@ container images.
 
 ## NOTABLE COMPONENTS
 
-[Portage tree] (http://packages.gentoo.org) -- packages
-[Paludis] (http://paludis.exherbo.org) -- package manager
-[Systemd] (http://www.freedesktop.org/wiki/Software/systemd/) -- service manager
-[Ansible] (http://www.ansibleworks.com) -- configuration manager
+* [Portage tree] (http://packages.gentoo.org) -- packages
+* [Paludis] (http://paludis.exherbo.org) -- package manager
+* [Systemd] (http://www.freedesktop.org/wiki/Software/systemd/) -- service manager
+* [Ansible] (http://www.ansibleworks.com) -- configuration manager
 
 ## HISTORY
 
