@@ -1,9 +1,0 @@
-[Unit]
-Description=wpa_supplicant
-
-[Service]
-EnvironmentFile=/etc/conf.d/wpa_supplicant
-ExecStart=/usr/bin/wpa_supplicant $wpasupplicant
-
-[Install]
-WantedBy=multi-user.target
