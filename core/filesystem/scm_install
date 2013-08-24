@@ -1,3 +1,0 @@
-cd /etc
-/usr/bin/fsl addremove
-/usr/bin/fsl commit -m "${PKGNAME} ${1} installed"

@@ -1,8 +1,0 @@
-[Unit]
-Description=remount root rw
-DefaultDependencies=no
-Before=systemd-random-seed-save.service shutdown.target
-
-[Service]
-Type=oneshot
-ExecStart=-/usr/bin/mount -o remount,rw /

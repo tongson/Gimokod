@@ -1,9 +1,0 @@
-[Unit]
-Description=Networking for containers
-ConditionVirtualization=lxc
-
-[Service]
-Type=oneshot
-EnvironmentFile=/etc/conf.d/net
-ExecStart=/usr/bin/ip route add default via ${gateway}
-

@@ -1,9 +1,0 @@
-[Unit]
-Description=Fossil server
-
-[Service]
-Restart=always
-EnvironmentFile=/etc/conf.d/fossil
-CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_SYS_CHROOT CAP_SETUID
-ExecStart=/usr/bin/fsl $fossil
-

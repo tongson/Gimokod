@@ -1,4 +1,0 @@
-post_install() {
-  /usr/bin/alternatives --install /usr/bin/tar tar /usr/bin/bsdtar 10
-  /usr/bin/alternatives --install /usr/bin/cpio cpio /usr/bin/bsdcpio 10
-}

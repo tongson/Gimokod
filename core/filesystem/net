@@ -1,5 +1,0 @@
-eth0_address=""
-eth0_netmask=""
-eth0_gateway=""
-ntpd="-p pool.ntp.org"
-wpasupplicant="-D nl80211 -c /etc/wpa_supplicant/wpa_supplicant.conf -i wlan0"

@@ -1,6 +1,0 @@
-[Unit]
-Description=BusyBox crond
-
-[Service]
-Restart=always
-ExecStart=/usr/bin/crond -f -l 5

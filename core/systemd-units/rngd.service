@@ -1,8 +1,0 @@
-[Unit]
-Description=rng-tools rngd
-
-[Service]
-Restart=always
-CapabilityBoundingSet=CAP_SYS_ADMIN
-ExecStart=/usr/bin/rngd -f -n 1 -t 20 -s 1024 -W 3192 -r /dev/urandom
-

@@ -1,8 +1,0 @@
-post_install() {
-  . /usr/share/pacman/scm_install
-  /usr/bin/alternatives --install /usr/bin/nscd nscd /usr/bin/gnscd 5
-}
-
-post_upgrade() {
-  . /usr/share/pacman/scm_upgrade
-}
