@@ -1,5 +1,0 @@
-#!/usr/bin/sh
-unset LD_PRELOAD
-LD_LIBRARY_PATH="/opt/firefox/"
-GTK_PATH=/usr/lib/gtk-2.0/
-LD_PRELOAD="/opt/firefox/libstdc++.so.6 /opt/firefox/libgcc_s.so.1" exec /usr/lib/ld-linux-x86-64.so.2 /opt/firefox/firefox "$@"
