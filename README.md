@@ -12,6 +12,13 @@ Packages are available as binaries built using Paludis (pbins). A "SDK" tarball 
 released and users will be locally compiling packages for generation of their own 
 container images.
 
+## NOTABLE COMPONENTS
+
+[Portage tree] (http://packages.gentoo.org) -- packages
+[Paludis] (http://paludis.exherbo.org) -- package manager
+[Systemd] (http://www.freedesktop.org/wiki/Software/systemd/) -- service manager
+[Ansible] (http://www.ansibleworks.com) -- configuration manager
+
 ## HISTORY
 
 August 24, 2013 -- pivot to Gentoo/Paludis base system.
